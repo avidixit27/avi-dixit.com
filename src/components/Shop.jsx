@@ -32,8 +32,8 @@ export default function Shop() {
 
   return (
     <div className={`page-content ${isActive ? 'active' : 'exit'}`}>
-      <div className="min-h-screen bg-primary text-light">
-        <main className="max-w-7xl mx-auto px-8 pt-36">
+    <div className="min-h-screen bg-primary text-light">
+      <main className={`max-w-7xl mx-auto px-8 pt-36 ${isActive ? 'animate-fadeIn' : ''}`}>
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map(product => (
