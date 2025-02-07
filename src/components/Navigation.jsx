@@ -61,13 +61,13 @@ export default function Navigation() {
         <div className="h-20 relative">
           {shouldShowNavLinks ? (
             <div className="flex justify-between items-center h-full px-8">
-              <div className="w-[272px] flex justify-start pr-[0.1rem]">
+              <div className="w-[272px] flex justify-start pr-8">
                 <Link 
                   to="/"
                   className="flex items-center"
                   onClick={() => setPreviousPath('/')}
                 >
-                  <img src={logo} alt="Avid Photography Logo" className="h-20 w-auto" />
+                  <img src={logo} alt="Avid Photography Logo" className="h-20 w-auto mt-[5px]" />
                 </Link>
               </div>
               <div className="flex items-center gap-6">
@@ -92,10 +92,10 @@ export default function Navigation() {
               <div className="flex items-center space-x-4">
                 <Link 
                   to="/"
-                  className="flex items-center"
+                  className="flex items-center pr-8"
                   onClick={() => setPreviousPath('/')}
                 >
-                  <img src={logo} alt="Avid Photography Logo" className="h-20 w-auto" />
+                  <img src={logo} alt="Avid Photography Logo" className="h-20 w-auto mt-[5px]" />
                 </Link>
                 {isSingleColumn && (
                   <div className="relative">
