@@ -49,7 +49,7 @@ export default function Portfolio() {
     <div className={`page-content ${isActive ? 'active' : 'exit'}`}>
     <div className="min-h-screen bg-primary text-light">
       <main className={`max-w-7xl mx-auto px-8 pt-36 ${isActive ? 'animate-fadeIn' : ''}`}>
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+          <div id="portfolio-grid-top" className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
             {photos.map(photo => (
               <div key={photo.id} className="break-inside-avoid" onClick={() => handleImageClick(photo)}>
                 <div className="relative overflow-hidden rounded-xl bg-white/5 p-3 transition-all duration-300 ease-in-out transform hover:scale-[1.03] hover:shadow-2xl cursor-pointer">
