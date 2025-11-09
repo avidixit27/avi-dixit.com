@@ -127,20 +127,21 @@ export default function Navigation() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [isHidden]);
 
-  const linkBase = "text-2xl font-['Phosphate-Inline'] tracking-wide";
+  // Typography & sizing (Option B)
+  const linkBase = "text-lg tracking-wider font-['Phosphate-Inline']";
   const isShop = location.pathname === '/shop';
   const isPortfolio = location.pathname === '/portfolio';
 
   const portfolioClasses = `${linkBase} ${
     isPortfolio
-      ? 'text-black opacity-100 font-extrabold'
-      : 'text-black/50 hover:text-black/80'
+      ? 'text-black opacity-90 font-extrabold'
+      : 'text-black/45 hover:text-black/80'
   }`;
 
   const shopClasses = `${linkBase} ${
     isShop
-      ? 'text-black opacity-100 font-extrabold'
-      : 'text-black/50 hover:text-black/80'
+      ? 'text-black opacity-90 font-extrabold'
+      : 'text-black/45 hover:text-black/80'
   }`;
 
   const easingClass = isShowingFast
@@ -159,41 +160,38 @@ export default function Navigation() {
         ${isHidden ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}
       `}
     >
-      <div className="py-6">
-        <div className="h-20 relative">
+      <div className="py-2">
+        <div className="h-14 relative">
           <div className="flex justify-between items-center h-full px-8">
 
             {/* Logo */}
-            <div className="w-[272px] flex justify-start">
+            <div className="w-[180px] flex justify-start">
               <Link to="/">
-                <img className="w-[272px] h-[65px]" src={logo} alt="Avi Dixit logo" />
+                <img className="w-[160px] h-[40px]" src={logo} alt="Avi Dixit logo" />
               </Link>
             </div>
 
             {/* Desktop Links */}
             {!isSingleColumn && (
-              <div ref={linksWrapRef} className="relative flex items-center gap-12 pb-1">
-
+              <div ref={linksWrapRef} className="relative flex items-center gap-10 pb-[2px]">
                 <Link ref={portfolioRef} to="/portfolio" className={portfolioClasses}>
                   PORTFOLIO
                 </Link>
-
                 <Link ref={shopRef} to="/shop" className={shopClasses}>
                   SHOP
                 </Link>
 
-                {/* ✅ UNDERLINE HIDDEN ON LANDING PAGE */}
+                {/* underline hidden on home */}
                 {indicator.ready && location.pathname !== '/' && (
                   <span
                     aria-hidden="true"
-                    className="absolute bottom-0 h-[2px] rounded bg-black/90 transition-all duration-300 ease-[cubic-bezier(.22,.61,.36,1)]"
+                    className="absolute bottom-0 h-[1px] rounded bg-black/80 transition-all duration-250 ease-[cubic-bezier(.22,.61,.36,1)]"
                     style={{
                       width: `${indicator.w}px`,
                       transform: `translateX(${indicator.x}px)`
                     }}
                   />
                 )}
-
               </div>
             )}
 
@@ -216,14 +214,14 @@ export default function Navigation() {
                   <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg py-2 min-w-[200px]">
                     <Link
                       to="/portfolio"
-                      className="block px-4 py-2 text-right text-2xl font-['Phosphate-Inline'] text-black/80 hover:text-black"
+                      className="block px-4 py-2 text-right text-lg font-['Phosphate-Inline'] text-black/75 hover:text-black"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Portfolio
                     </Link>
                     <Link
                       to="/shop"
-                      className="block px-4 py-2 text-right text-2xl font-['Phosphate-Inline'] text-black/80 hover:text-black"
+                      className="block px-4 py-2 text-right text-lg font-['Phosphate-Inline'] text-black/75 hover:text-black"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Shop
