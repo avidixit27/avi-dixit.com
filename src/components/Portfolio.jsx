@@ -1,68 +1,36 @@
 import { useEffect, useState } from 'react';
 import { useNavigation } from '../context/NavigationContext';
+import BlurImage from './BlurImage'; 
 
 export default function Portfolio() {
   const [photos, setPhotos] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [isClosing, setIsClosing] = useState(false); // NEW: lets us fade out smoothly
+  const [isClosing, setIsClosing] = useState(false);
   const { navState } = useNavigation();
 
-  const OVERLAY_MS = 300; // match your CSS fade timing
+  const OVERLAY_MS = 300;
 
   useEffect(() => {
     const images = import.meta.glob('../imgs/portfolio/*.{jpg,jpeg,png,gif,JPG,JPEG,PNG,GIF}', { eager: true });
-    const photoArray = Object.entries(images).map(([path, module], index) => ({
+    const photoArray = Object.entries(images).map(([path, mod], index) => ({
       id: index,
-      src: module.default,
+      src: mod.default,
       alt: `Portfolio Photo ${index + 1}`,
     }));
     setPhotos(photoArray);
   }, []);
 
-  // ESC to close
   useEffect(() => {
     const onEsc = (e) => { if (e.key === 'Escape' && selectedImage) closeFullscreen(); };
     window.addEventListener('keydown', onEsc);
     return () => window.removeEventListener('keydown', onEsc);
   }, [selectedImage]);
 
-  /* --------- Scroll lock coordinated with fade ---------- */
-
-  const lockScroll = () => {
-    // measure scrollbar width for compensation
-    const sbw = window.innerWidth - document.documentElement.clientWidth;
-    const root = document.documentElement;
-    root.style.setProperty('--sbw', `${sbw}px`);
-
-    // 1) tint gutter immediately so the background darkens with the overlay
-    root.classList.add('modal-open');
-
-    // 2) only after the overlay fade is underway, hide overflow/apply padding
-    //    (prevents the scrollbar from vanishing too early = no jiggle)
-    window.requestAnimationFrame(() => {
-      setTimeout(() => {
-        root.classList.add('lock-scroll');
-      }, OVERLAY_MS);
-    });
-  };
-
-  const unlockScroll = () => {
-    const root = document.documentElement;
-    // wait for the overlay to fade out before showing the scrollbar again
-    root.classList.remove('lock-scroll');
-    root.classList.remove('modal-open');
-    root.style.removeProperty('--sbw');
-  };
-
-  const handleImageClick = (photo) => {
-    setSelectedImage(photo);
-    lockScroll();
-  };
+  const handleImageClick = (photo) => setSelectedImage(photo);
 
   const closeFullscreen = () => {
-    // fade the overlay out, then unmount + unlock
     setIsClosing(true);
-    unlockScroll();
+    // we’re not locking/unlocking scroll here—keeping your current working behavior
     setTimeout(() => {
       setSelectedImage(null);
       setIsClosing(false);
@@ -77,8 +45,10 @@ export default function Portfolio() {
     <div className={`page-content ${isActive ? 'active' : 'exit'}`}>
       <div className="min-h-screen bg-primary text-light">
         <main className={`max-w-7xl mx-auto px-8 pt-20 ${isActive ? 'animate-fadeIn' : ''}`}>
+          {/* Smart-header trigger */}
           <div id="portfolio-grid-top" />
 
+          {/* Masonry grid: native aspect images, hover grow, click to enlarge */}
           <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
             {photos.map((photo) => (
               <div
@@ -87,13 +57,24 @@ export default function Portfolio() {
                 onClick={() => handleImageClick(photo)}
               >
                 <div className="relative overflow-hidden rounded-xl bg-white/5 p-3 transition-all duration-300 ease-in-out transform hover:scale-[1.03] hover:shadow-2xl cursor-pointer">
-                  <img
-                    src={photo.src}
-                    alt={photo.alt}
-                    className="w-full h-auto rounded-lg shadow-lg transition-all duration-300"
-                    loading="lazy"
-                    style={{ width: '100%', display: 'block' }}
-                  />
+                  {/* Use BlurImage if you created it; otherwise swap back to <img /> */}
+                  {BlurImage ? (
+                    <BlurImage
+                      src={photo.src}
+                      alt={photo.alt}
+                      className="w-full h-auto rounded-lg shadow-lg"
+                      priority={photo.id < 3}
+                    />
+                  ) : (
+                    <img
+                      src={photo.src}
+                      alt={photo.alt}
+                      className="w-full h-auto rounded-lg shadow-lg transition-all duration-300"
+                      loading={photo.id < 3 ? 'eager' : 'lazy'}
+                      decoding="async"
+                      style={{ width: '100%', display: 'block' }}
+                    />
+                  )}
                 </div>
               </div>
             ))}

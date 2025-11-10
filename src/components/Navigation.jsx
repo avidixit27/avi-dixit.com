@@ -215,6 +215,7 @@ export default function Navigation() {
                   <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-lg py-2 min-w-[200px]">
                     <Link
                       to="/portfolio"
+                      onMouseEnter={() => prefetchRoute('/portfolio')}
                       className="block px-4 py-2 text-right text-lg font-['Phosphate-Inline'] text-black/75 hover:text-black"
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -222,6 +223,7 @@ export default function Navigation() {
                     </Link>
                     <Link
                       to="/shop"
+                      onMouseEnter={() => prefetchRoute('/shop')}
                       className="block px-4 py-2 text-right text-lg font-['Phosphate-Inline'] text-black/75 hover:text-black"
                       onClick={() => setIsMenuOpen(false)}
                     >

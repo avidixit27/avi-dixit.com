@@ -149,6 +149,8 @@
 @layer utilities {
   .force-scroll { min-height: 101svh; } /* just over 100vh to trigger scroll */
   .animate-fadeOut { animation: fadeOut 0.3s ease-out forwards; }
+  .gpu { will-change: transform; transform: translateZ(0); } /* use sparingly */
+  .no-gpu { will-change: auto; transform: none; }
 }
 
 @keyframes fadeOut { 
