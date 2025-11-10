@@ -107,6 +107,7 @@ export default function Navigation() {
 
   useEffect(() => {
     const onScroll = () => {
+      if (document.documentElement.classList.contains('modal-open')) return;
       const y = window.scrollY || 0;
 
       if (y <= showPxRef.current) {

@@ -31,6 +31,7 @@ export default function Shop() {
   const isActive = navState === 'shop-from-home' || navState === 'shop-from-portfolio';
 
   return (
+    <main className="force-scroll /* your other classes here */">
     <div className={`page-content ${isActive ? 'active' : 'exit'}`}>
     <div className="min-h-screen bg-primary text-light">
       <main className={`max-w-7xl mx-auto px-8 pt-36 ${isActive ? 'animate-fadeIn' : ''}`}>
@@ -82,5 +83,6 @@ export default function Shop() {
         </main>
       </div>
     </div>
+  </main>
   );
 }
