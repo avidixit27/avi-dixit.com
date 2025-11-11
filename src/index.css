@@ -2,158 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ----------------- Base (Ultra-Minimal) ----------------- */
+/* --------------------------------------------------
+   GLOBAL SCROLLBAR + LAYOUT STABILITY
+-------------------------------------------------- */
 @layer base {
-  html { 
-    font-family: theme('fontFamily.sans');
-    scrollbar-gutter: stable both-edges; 
-    overflow-y: scroll; /* also reserve space on browsers without overlay scrollbars */
-    transition: background-color 300ms ease;
+  html {
+    /* Always allocate vertical scroll so width never changes */
+    overflow-y: scroll !important;
+    scrollbar-gutter: stable both-edges;
+    overflow-x: hidden;
+    font-family: theme("fontFamily.sans");
   }
+
   body {
     @apply bg-primary text-ink;
     margin: 0;
-    min-width: 320px;
     min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-  }
-  
-  /* Fallback if a browser doesn't support scrollbar-gutter */
-  @supports not (scrollbar-gutter: stable) {
-    html { overflow-y: scroll; } /* always show the scrollbar track */
+    overflow-x: hidden;
   }
 
-  /* Darken the gutter + track while the fullscreen modal is open */
+  /* Keep page width stable even when modal is open */
   html.modal-open {
-    background-color: rgba(0,0,0,0.95);              /* the gutter itself */
-    scrollbar-color: rgba(255,255,255,0.4) rgba(0,0,0,0.95); /* Firefox */
-  }
-  html.modal-open ::-webkit-scrollbar-track {         /* Chrome/Edge/Safari */
-    background: rgba(0,0,0,0.95);
-  }
-  html.modal-open body {
-    background-color: transparent; /* overlay covers body; don't fight it */
-  }
-  
-}
-
-/* ----------------- Reusable minimal components ----------------- */
-@layer components {
-  .btn {
-    @apply inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm
-           text-ink/90 bg-black/5 hover:bg-black/10
-           transition-all duration-150 ease-soft;
-  }
-  .btn-ghost { @apply bg-transparent hover:bg-black/5; }
-
-  .link-minimal {
-    @apply text-ink/75 hover:text-ink transition-colors duration-150 ease-soft;
+    overflow-y: scroll !important;
   }
 
-  .card { @apply bg-white rounded-soft shadow-card; }
-
-  .field {
-    @apply w-full rounded-lg border border-black/10 bg-white
-           px-3 py-2 text-[15px]
-           placeholder:text-black/40
-           focus:outline-none focus:ring-2 focus:ring-black/10
-           transition-all duration-150 ease-soft;
+  /* WebKit scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 12px;
+    background: transparent;
   }
-}
-
-/* ----------------- Navigation  ----------------- */
-.nav-link {
-  position: relative;
-  transform-origin: center;
-  backface-visibility: hidden;
-  will-change: transform, opacity;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nav-container { perspective: 2000px; transform-style: preserve-3d; }
-
-.nav-link-wrapper {
-  position: absolute;
-  right: 2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  transform-style: preserve-3d;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nav-link.active { animation: fadeUpActive 0.5s forwards; }
-.nav-link.behind { animation: fadeUpHeader 0.5s forwards; }
-.nav-link.returning { animation: returnToPosition 0.5s forwards; }
-
-.nav-link:nth-child(2) { margin-left: 2rem; }
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  bottom: -4px;
-  left: 0;
-  background-color: theme('colors.accentWarm');
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-.nav-link:hover::after { transform: scaleX(1); }
-
-/* ----------------- Page transitions  ----------------- */
-.page-content {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.page-content.active { opacity: 1; pointer-events: auto; position: relative; }
-.page-content.exit   { opacity: 0; pointer-events: none; position: absolute; top: 0; left: 0; right: 0; }
-
-/* ----------------- Keyframes  ----------------- */
-@keyframes fadeUpActive {
-  0% { opacity: 1; transform: translateY(0); }
-  50% { opacity: 0.8; transform: translateY(-10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeUpHeader {
-  0% { opacity: 1; transform: translateY(0); }
-  50% { opacity: 0; transform: translateY(-20px); }
-  100% { opacity: 1; transform: translate(0); }
-}
-@keyframes returnToPosition {
-  0% { opacity: 0; transform: translateY(-20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn { 0% {opacity:0;} 100% {opacity:1;} }
-/* NEW: used by Portfolio modal */
-@keyframes scaleIn {
-  0% { transform: scale(.985); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@layer utilities {
-  .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
-}
-
-/* ----------------- Custom scrollbar ----------------- */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: theme('colors.primary'); }
-::-webkit-scrollbar-thumb { background: theme('colors.accent'); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: theme('colors.accentWarm'); }
-
-
-@layer utilities {
-  .force-scroll { min-height: 101svh; } /* just over 100vh to trigger scroll */
-  .animate-fadeOut { animation: fadeOut 0.3s ease-out forwards; }
-  .gpu { will-change: transform; transform: translateZ(0); } /* use sparingly */
-  .no-gpu { will-change: auto; transform: none; }
-}
-
-@keyframes fadeOut { 
-  0% { opacity: 1; } 
-  100% { opacity: 0; } 
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.30);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme("colors.accentWarm");
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background: theme("colors.accentWarm");
+  }
 }

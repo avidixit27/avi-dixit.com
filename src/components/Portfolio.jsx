@@ -1,180 +1,263 @@
-import { useEffect, useState } from 'react';
-import { useNavigation } from '../context/NavigationContext';
-import BlurImage from './BlurImage';
+import { useEffect, useMemo, useRef, useState } from "react";
+import BlurImage from "./BlurImage";
 
 export default function Portfolio() {
   const [photos, setPhotos] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(null); // index instead of object
-  const [isClosing, setIsClosing] = useState(false);
-  const { navState } = useNavigation();
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [fadeKey, setFadeKey] = useState(0);
 
-  const OVERLAY_MS = 300;
-  const selectedImage = (selectedIndex !== null && photos[selectedIndex]) ? photos[selectedIndex] : null;
-
+  // ---- Load images (your set is .JPG) ----
   useEffect(() => {
-    const images = import.meta.glob('../imgs/portfolio/*.{jpg,jpeg,png,gif,JPG,JPEG,PNG,GIF}', { eager: true });
-    const photoArray = Object.entries(images).map(([path, mod], index) => ({
-      id: index,
-      src: mod.default,
-      alt: `Portfolio Photo ${index + 1}`,
+    const files = import.meta.glob("../imgs/portfolio/*.JPG", { eager: true });
+    const arr = Object.values(files).map((m, i) => ({
+      id: i,
+      src: m.default,
+      alt: `Photo ${i + 1}`,
     }));
-    // sort stable for consistent order
-    photoArray.sort((a, b) => a.id - b.id);
-    setPhotos(photoArray);
+    arr.sort((a, b) => a.id - b.id);
+    setPhotos(arr);
   }, []);
 
-  // Keyboard: ESC to close, ← / → to navigate when modal open
+  // ---- Preload to reduce scroll/FS hitching ----
   useEffect(() => {
-    const onKey = (e) => {
-      if (selectedIndex === null) return;
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        closeFullscreen();
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        goNext();
-      } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        goPrev();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [selectedIndex, photos.length]);
+    photos.forEach((p) => {
+      const img = new Image();
+      img.src = p.src;
+    });
+  }, [photos]);
 
-  const handleImageClick = (photo) => setSelectedIndex(photo.id);
+  // ---- Hero slideshow (top of Home) ----
+  const hero = useMemo(() => photos.slice(0, 8), [photos]);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  useEffect(() => {
+    if (!hero.length) return;
+    const id = setInterval(() => setHeroIndex((i) => (i + 1) % hero.length), 5000);
+    return () => clearInterval(id);
+  }, [hero.length]);
+
+  // ---- Build a landscape-only index for carousel rotation ----
+  const [landscapeIndices, setLandscapeIndices] = useState([]);
+  const aspectCache = useRef({});
+
+  const isLandscape = (src) =>
+    new Promise((resolve) => {
+      if (src in aspectCache.current) return resolve(aspectCache.current[src]);
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        const ok = img.width > img.height * 1.2; // "rectangular enough"
+        aspectCache.current[src] = ok;
+        resolve(ok);
+      };
+    });
+
+  useEffect(() => {
+    let mounted = true;
+    const compute = async () => {
+      const indices = [];
+      for (let i = 0; i < photos.length; i++) {
+        // precompute aspect for carousel
+        const ok = await isLandscape(photos[i].src);
+        if (!mounted) return;
+        if (ok) indices.push(i);
+      }
+      if (mounted) setLandscapeIndices(indices);
+    };
+    if (photos.length) compute();
+    return () => {
+      mounted = false;
+    };
+  }, [photos]);
+
+  // ---- Open/close fullscreen (ALL images open; portrait allowed) ----
+  const openFullscreen = (idx) => {
+    document.documentElement.classList.add("modal-open");
+    setSelectedIndex(idx);
+    setFadeKey((k) => k + 1);
+  };
 
   const closeFullscreen = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setSelectedIndex(null);
-      setIsClosing(false);
-    }, OVERLAY_MS);
+    setSelectedIndex(null);
+    document.documentElement.classList.remove("modal-open");
   };
 
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) closeFullscreen();
-  };
+  // ---- Keyboard nav uses landscape-only rotation ----
+  useEffect(() => {
+    const onKey = (e) => {
+      if (selectedIndex == null) return;
 
-  const goNext = () => {
-    if (!photos.length) return;
-    setSelectedIndex((idx) => (idx + 1) % photos.length);
-  };
+      if (e.key === "Escape") closeFullscreen();
 
-  const goPrev = () => {
-    if (!photos.length) return;
-    setSelectedIndex((idx) => (idx - 1 + photos.length) % photos.length);
-  };
+      if (e.key === "ArrowRight") {
+        const cur = selectedIndex;
+        const pos = landscapeIndices.indexOf(cur);
+        const next =
+          pos === -1
+            ? landscapeIndices.find((i) => i > cur) ?? landscapeIndices[0]
+            : landscapeIndices[(pos + 1) % landscapeIndices.length];
+        if (next != null) {
+          setSelectedIndex(next);
+          setFadeKey((k) => k + 1);
+        }
+      }
 
-  const isActive = navState === 'portfolio-from-home' || navState === 'portfolio-from-shop';
+      if (e.key === "ArrowLeft") {
+        const cur = selectedIndex;
+        const pos = landscapeIndices.indexOf(cur);
+        const prev =
+          pos === -1
+            ? landscapeIndices.filter((i) => i < cur).pop() ??
+              landscapeIndices[landscapeIndices.length - 1]
+            : landscapeIndices[
+                (pos - 1 + landscapeIndices.length) % landscapeIndices.length
+              ];
+        if (prev != null) {
+          setSelectedIndex(prev);
+          setFadeKey((k) => k + 1);
+        }
+      }
+    };
 
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedIndex, landscapeIndices]);
+
+  // ---- Render ----
   return (
-    <div className={`page-content ${isActive ? 'active' : 'exit'}`}>
-      <div className="min-h-screen bg-primary text-light">
-        <main className={`max-w-7xl mx-auto px-8 pt-20 ${isActive ? 'animate-fadeIn' : ''}`}>
-          {/* Smart-header trigger */}
-          <div id="portfolio-grid-top" />
-
-          {/* Masonry grid: native aspect images, hover grow, click to enlarge */}
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-            {photos.map((photo) => (
-              <div
-                key={photo.id}
-                className="break-inside-avoid"
-                onClick={() => handleImageClick(photo)}
-              >
-                <div className="relative overflow-hidden rounded-xl bg-white/5 p-3 transition-all duration-300 ease-in-out transform hover:scale-[1.03] hover:shadow-2xl cursor-pointer">
-                  {BlurImage ? (
-                    <BlurImage
-                      src={photo.src}
-                      alt={photo.alt}
-                      className="w-full h-auto rounded-lg shadow-lg"
-                      priority={photo.id < 3}
-                    />
-                  ) : (
-                    <img
-                      src={photo.src}
-                      alt={photo.alt}
-                      className="w-full h-auto rounded-lg shadow-lg transition-all duration-300"
-                      loading={photo.id < 3 ? 'eager' : 'lazy'}
-                      decoding="async"
-                      style={{ width: '100%', display: 'block' }}
-                    />
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </main>
-      </div>
-
-      {/* Fullscreen modal */}
-      {selectedImage && (
-        <div
-          className={`fixed inset-0 bg-black/95 z-[80] flex items-center justify-center ${
-            isClosing ? 'animate-fadeOut' : 'animate-fadeIn'
-          }`}
-          onClick={handleOverlayClick}
-          role="dialog"
-          aria-modal="true"
-        >
-          {/* Close (X) */}
-          <button
-            onClick={(e) => { e.stopPropagation(); closeFullscreen(); }}
-            className="absolute top-4 right-6 text-white text-4xl font-light opacity-70 hover:opacity-100 transition-opacity duration-200 select-none z-[100]"
-            style={{ fontFamily: `'SF Pro Display','Helvetica Neue',Arial,sans-serif`, lineHeight: '1' }}
-            aria-label="Close fullscreen view"
-          >
-            ×
-          </button>
-
-          {/* Prev / Next chevrons (large, soft hit areas) */}
-          {photos.length > 1 && (
-            <>
-              <button
-                onClick={(e) => { e.stopPropagation(); goPrev(); }}
-                aria-label="Previous image"
-                className="
-                  absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-[100]
-                  flex items-center justify-center
-                  w-12 h-12 md:w-14 md:h-14
-                  rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm
-                  text-white/90 hover:text-white
-                  transition-all duration-200
-                "
-              >
-                {/* Left chevron (SVG) */}
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-
-              <button
-                onClick={(e) => { e.stopPropagation(); goNext(); }}
-                aria-label="Next image"
-                className="
-                  absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-[100]
-                  flex items-center justify-center
-                  w-12 h-12 md:w-14 md:h-14
-                  rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm
-                  text-white/90 hover:text-white
-                  transition-all duration-200
-                "
-              >
-                {/* Right chevron (SVG) */}
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </>
-          )}
-
-          {/* Image */}
-          <div className="max-w-[95vw] max-h-[95vh] relative">
+    <div className="bg-primary min-h-screen">
+      {/* HERO */}
+      {hero.length > 0 && (
+        <div className="relative h-[100svh] w-full">
+          {hero.map((p, i) => (
             <img
-              src={selectedImage.src}
-              alt={selectedImage.alt}
-              className="max-w-full max-h-[95vh] object-contain rounded-lg shadow-2xl select-none"
+              key={p.id}
+              src={p.src}
+              alt={p.alt}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+                i === heroIndex ? "opacity-100" : "opacity-0"
+              }`}
+              fetchpriority={i === 0 ? "high" : "low"}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Marker for nav behavior */}
+      <div id="portfolio-grid-top" className="h-0 w-full" />
+
+      {/* GRID */}
+      <main className="max-w-7xl mx-auto px-8 pt-12">
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+          {photos.map((p, i) => (
+            <div
+              key={p.id}
+              className="relative rounded-xl bg-white/5 p-3 transition-transform duration-200 will-change-transform contain-paint
+                         cursor-pointer hover:scale-[1.03]"
+              onClick={() => openFullscreen(i)}
+            >
+              <BlurImage
+                src={p.src}
+                alt={p.alt}
+                className="w-full h-auto rounded-lg shadow-lg"
+              />
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* FULLSCREEN */}
+      {selectedIndex != null && (
+        <div
+          className="fixed inset-0 bg-black/95 z-[100] overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeFullscreen();
+          }}
+        >
+          {/* Content wrapper:
+              - uses var(--nav-pt) set by Navigation.jsx (0 when nav hidden, nav height when shown)
+              - keeps chevrons perfectly centered within the visible area */}
+          <div
+            className="relative w-full flex items-center justify-center"
+            style={{
+              minHeight: "100vh",
+              paddingTop: "var(--nav-pt, 0px)",
+              paddingBottom: "32px",
+            }}
+          >
+            {/* Close */}
+            <button
+              onClick={closeFullscreen}
+              className="absolute top-4 right-6 text-white text-4xl font-light opacity-80 hover:opacity-100 transition-opacity z-[200]"
+              aria-label="Close"
+            >
+              ×
+            </button>
+
+            {/* Prev (landscape-only rotation) */}
+            {landscapeIndices.length > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const cur = selectedIndex;
+                  const pos = landscapeIndices.indexOf(cur);
+                  const prev =
+                    pos === -1
+                      ? landscapeIndices.filter((i) => i < cur).pop() ??
+                        landscapeIndices[landscapeIndices.length - 1]
+                      : landscapeIndices[
+                          (pos - 1 + landscapeIndices.length) %
+                            landscapeIndices.length
+                        ];
+                  if (prev != null) {
+                    setSelectedIndex(prev);
+                    setFadeKey((k) => k + 1);
+                  }
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-[200]
+                           w-12 h-12 rounded-full bg-white/10 hover:bg-white/20
+                           flex items-center justify-center"
+                aria-label="Previous image"
+              >
+                <svg width="28" height="28" stroke="white" fill="none" strokeWidth="2">
+                  <path d="M18 6l-6 6 6 6" />
+                </svg>
+              </button>
+            )}
+
+            {/* Next (landscape-only rotation) */}
+            {landscapeIndices.length > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const cur = selectedIndex;
+                  const pos = landscapeIndices.indexOf(cur);
+                  const next =
+                    pos === -1
+                      ? landscapeIndices.find((i) => i > cur) ?? landscapeIndices[0]
+                      : landscapeIndices[(pos + 1) % landscapeIndices.length];
+                  if (next != null) {
+                    setSelectedIndex(next);
+                    setFadeKey((k) => k + 1);
+                  }
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-[200]
+                           w-12 h-12 rounded-full bg-white/10 hover:bg-white/20
+                           flex items-center justify-center"
+                aria-label="Next image"
+              >
+                <svg width="28" height="28" stroke="white" fill="none" strokeWidth="2">
+                  <path d="M10 6l6 6-6 6" />
+                </svg>
+              </button>
+            )}
+
+            {/* Fullscreen image (shows any orientation) */}
+            <img
+              key={fadeKey}
+              src={photos[selectedIndex].src}
+              alt={photos[selectedIndex].alt}
+              className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
               draggable="false"
             />
           </div>

@@ -3,31 +3,33 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { NavigationProvider } from './context/NavigationContext';
 import Navigation from './components/Navigation';
 
-const LandingPage = lazy(() => import('./components/LandingPage'));
-const Portfolio   = lazy(() => import('./components/Portfolio'));
-const Shop        = lazy(() => import('./components/Shop'));
+const Portfolio = lazy(() => import('./components/Portfolio')); // now home
+const Shop = lazy(() => import('./components/Shop'));
+const Contact = lazy(() => import('./components/Contact'));     // new
 
-function App() {
+export default function App() {
   return (
     <Router>
       <NavigationProvider>
         <Navigation />
-        <Suspense
-          fallback={
-            <div className="fixed inset-0 grid place-items-center text-ink/60">
-              Loading…
-            </div>
-          }
-        >
+        <Suspense fallback={null}>
           <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/portfolio" element={<Portfolio />} />
+            <Route
+              path="/"
+              element={
+                <Portfolio
+                  setHomePageFlag={() => {
+                    document.body.dataset.page = "portfolio-home";
+                  }}
+                />
+              }
+            />
+
             <Route path="/shop" element={<Shop />} />
+            <Route path="/contact" element={<Contact />} />
           </Routes>
         </Suspense>
       </NavigationProvider>
     </Router>
   );
 }
-
-export default App;
