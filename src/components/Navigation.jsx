@@ -2,90 +2,128 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logoSmall from "../imgs/header/avi_dixit_logo.svg";
 
-/**
- * Nav behavior (Option A):
- * - On Home (/): start hidden; reveal on small scroll OR mouse near top.
- * - Once you scroll into the portfolio grid, nav hides and stays hidden while scrolling down.
- * - Shows when scrolling up or when mouse touches top edge (within 80px).
- * - Exposes two CSS vars:
- *    --nav-h  : actual nav height in px
- *    --nav-pt : 0 when hidden, --nav-h when shown (so fullscreen padding is correct)
- */
 export default function Navigation() {
   const location = useLocation();
   const isHome = location.pathname === "/";
 
   const navRef = useRef(null);
-  const [isHidden, setIsHidden] = useState(isHome); // hidden by default on Home
-  const lastY = useRef(0);
-  const pastGridRef = useRef(false); // whether the grid-top marker has crossed the top
+  const linksWrapRef = useRef(null);
+  const homeRef = useRef(null);
+  const shopRef = useRef(null);
+  const contactRef = useRef(null);
 
-  // ---- CSS vars for height + padding control ----
+  const [isHidden, setIsHidden] = useState(isHome);
+  const isHiddenRef = useRef(isHidden);
+
+  const [isPastGrid, setIsPastGrid] = useState(false);
+  const pastGridRef = useRef(false);
+  const [ioReady, setIoReady] = useState(!isHome);
+  const lastY = useRef(0);
+  const ioRef = useRef(null);
+  const inactivityTimer = useRef(null);
+
+  const navH = () => navRef.current?.offsetHeight ?? 64;
   const setNavVars = () => {
-    const h = navRef.current?.offsetHeight ?? 64;
+    const h = navH();
     document.documentElement.style.setProperty("--nav-h", `${h}px`);
-    document.documentElement.style.setProperty("--nav-pt", isHidden ? "0px" : `${h}px`);
+    document.documentElement.style.setProperty("--nav-pt", isHiddenRef.current ? "0px" : `${h}px`);
   };
 
+  useEffect(() => { isHiddenRef.current = isHidden; setNavVars(); }, [isHidden]);
   useLayoutEffect(() => { setNavVars(); }, []);
+
+  // ---- underline indicator ----
+  const [ink, setInk] = useState({ left: 0, width: 0, visible: false });
+  const activeRef = () => {
+    if (location.pathname === "/") return homeRef.current;
+    if (location.pathname === "/shop") return shopRef.current;
+    if (location.pathname === "/contact") return contactRef.current;
+    return null;
+  };
+  const positionIndicator = () => {
+    const wrap = linksWrapRef.current;
+    const el = activeRef();
+    if (!wrap || !el) return;
+    const wrapRect = wrap.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    setInk({ left: elRect.left - wrapRect.left, width: elRect.width, visible: true });
+  };
   useEffect(() => {
-    setNavVars();
-    const onResize = () => setNavVars();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [isHidden, location.pathname]);
+    const id = requestAnimationFrame(positionIndicator);
+    return () => cancelAnimationFrame(id);
+  }, [location.pathname]);
 
-  // ---- Observe #portfolio-grid-top to know when we've left the hero ----
+  // ---- inactivity timer (2 s auto-hide on first load) ----
   useEffect(() => {
-    if (!isHome) { pastGridRef.current = true; return; }
-
-    const marker = document.querySelector("#portfolio-grid-top");
-    if (!marker) { pastGridRef.current = false; return; }
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        // When the marker hits the top, it stops intersecting the viewport top edge
-        entries.forEach((e) => {
-          // We consider "past grid" when the marker's top is at/above the nav line.
-          pastGridRef.current = e.boundingClientRect.top <= (navRef.current?.offsetHeight ?? 64);
-        });
-      },
-      { rootMargin: "0px 0px 0px 0px", threshold: [0] }
-    );
-    io.observe(marker);
-    return () => io.disconnect();
+    if (!isHome) return;
+    const startTimer = () => {
+      clearTimeout(inactivityTimer.current);
+      inactivityTimer.current = setTimeout(() => setIsHidden(true), 2000);
+    };
+    startTimer();
+    const resetTimer = () => {
+      clearTimeout(inactivityTimer.current);
+      setIsHidden(false);
+      inactivityTimer.current = setTimeout(() => setIsHidden(true), 2000);
+    };
+    window.addEventListener("mousemove", resetTimer);
+    window.addEventListener("scroll", resetTimer);
+    return () => {
+      window.removeEventListener("mousemove", resetTimer);
+      window.removeEventListener("scroll", resetTimer);
+      clearTimeout(inactivityTimer.current);
+    };
   }, [isHome]);
 
-  // ---- Scroll-driven hide/show with hysteresis ----
+  // ---- IntersectionObserver for normal scroll logic ----
+  useEffect(() => {
+    if (!isHome) { setIoReady(true); return; }
+    const marker = document.querySelector("#portfolio-grid-top");
+    if (!marker) { setIoReady(true); return; }
+
+    const startObserver = () => {
+      if (ioRef.current) ioRef.current.disconnect();
+      ioRef.current = new IntersectionObserver(
+        ([entry]) => {
+          const past = entry.boundingClientRect.top <= navH();
+          setIsPastGrid(past);
+          pastGridRef.current = past;
+          if (past && window.scrollY > lastY.current) setIsHidden(true);
+          setIoReady(true);
+        },
+        { root: null, threshold: 0, rootMargin: `-${navH()}px 0px 0px 0px` }
+      );
+      ioRef.current.observe(marker);
+    };
+    startObserver();
+    window.addEventListener("resize", startObserver);
+    return () => {
+      if (ioRef.current) ioRef.current.disconnect();
+      window.removeEventListener("resize", startObserver);
+    };
+  }, [isHome]);
+
+  // ---- scroll behavior ----
   useEffect(() => {
     lastY.current = window.scrollY;
-
     const onScroll = () => {
       const y = window.scrollY;
       const delta = y - lastY.current;
-
-      // Reveal triggers (home only)
-      if (isHome) {
-        if (y > 1) setIsHidden(false); // small nudge reveals
+      if (isHome && ioReady) {
+        if (y > 1 && !pastGridRef.current) setIsHidden(false);
+        if (pastGridRef.current && delta > 6) setIsHidden(true);
+        if (delta < -40) setIsHidden(false);
+      } else if (!isHome) {
+        if (delta > 6) setIsHidden(true);
+        if (delta < -8) setIsHidden(false);
       }
-
-      // Hysteresis:
-      // - If we're past the hero (pastGridRef true) and scrolling down, stay hidden.
-      // - Show on scroll up by a decent amount.
-      if (delta > 6) {
-        if (pastGridRef.current) setIsHidden(true);
-      } else if (delta < -8) {
-        setIsHidden(false);
-      }
-
       lastY.current = y;
     };
-
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [isHome]);
+  }, [isHome, ioReady]);
 
-  // ---- Mouse near top reveals nav (home only) ----
+  // ---- mouse near top reveals ----
   useEffect(() => {
     if (!isHome) return;
     const onMove = (e) => { if (e.clientY < 80) setIsHidden(false); };
@@ -93,25 +131,7 @@ export default function Navigation() {
     return () => window.removeEventListener("mousemove", onMove);
   }, [isHome]);
 
-  // Keep CSS vars in sync whenever state flips
-  useEffect(() => { setNavVars(); }, [isHidden]);
-
-  const isActive = (path) => location.pathname === path;
-
-  const linkBase =
-    "relative pb-1 font-['Phosphate-Inline'] tracking-wide transition-colors select-none";
-  const linkClasses = (active) =>
-    `${linkBase} ${active ? "text-ink font-extrabold" : "text-ink/55 hover:text-accentWarm"}`;
-
-  const Underline = ({ active }) => (
-    <span
-      className={`absolute -bottom-0.5 left-0 h-[1px] bg-ink transition-transform duration-250 ease-out ${
-        active ? "w-full scale-x-100" : "w-full scale-x-0"
-      }`}
-      style={{ transformOrigin: "left" }}
-      aria-hidden="true"
-    />
-  );
+  const isActive = (p) => location.pathname === p;
 
   return (
     <nav
@@ -121,23 +141,16 @@ export default function Navigation() {
                   ${isHidden ? "-translate-y-full" : "translate-y-0"}`}
     >
       <div className="flex items-center justify-between h-16 px-8">
-        <Link to="/" aria-label="Home">
-          <img src={logoSmall} alt="Logo" className="h-10 w-auto" />
-        </Link>
-
-        <div className="flex gap-8 text-base">
-          <Link to="/" className={linkClasses(isActive("/"))}>
-            HOME
-            <Underline active={isActive("/")} />
-          </Link>
-          <Link to="/shop" className={linkClasses(isActive("/shop"))}>
-            SHOP
-            <Underline active={isActive("/shop")} />
-          </Link>
-          <Link to="/contact" className={linkClasses(isActive("/contact"))}>
-            CONTACT
-            <Underline active={isActive("/contact")} />
-          </Link>
+        <Link to="/" aria-label="Home"><img src={logoSmall} alt="Logo" className="h-10 w-auto" /></Link>
+        <div ref={linksWrapRef} className="relative flex gap-8 text-base">
+          <span
+            className={`absolute bottom-0 h-[1px] bg-ink transition-[transform,width] duration-250 ease-[cubic-bezier(.22,.61,.36,1)]
+                        ${ink.visible ? "opacity-100" : "opacity-0"}`}
+            style={{ transform: `translateX(${ink.left}px)`, width: `${ink.width}px` }}
+          />
+          <Link ref={homeRef} to="/" className={`pb-1 font-['Phosphate-Inline'] ${isActive("/") ? "text-ink font-extrabold" : "text-ink/55 hover:text-accentWarm"}`}>HOME</Link>
+          <Link ref={shopRef} to="/shop" className={`pb-1 font-['Phosphate-Inline'] ${isActive("/shop") ? "text-ink font-extrabold" : "text-ink/55 hover:text-accentWarm"}`}>SHOP</Link>
+          <Link ref={contactRef} to="/contact" className={`pb-1 font-['Phosphate-Inline'] ${isActive("/contact") ? "text-ink font-extrabold" : "text-ink/55 hover:text-accentWarm"}`}>CONTACT</Link>
         </div>
       </div>
     </nav>

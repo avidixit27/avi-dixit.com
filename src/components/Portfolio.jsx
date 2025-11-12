@@ -5,125 +5,75 @@ export default function Portfolio() {
   const [photos, setPhotos] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [fadeKey, setFadeKey] = useState(0);
+  const [closing, setClosing] = useState(false);
 
-  // ---- Load images (your set is .JPG) ----
+  const imgRef = useRef(null);
+  const [closePos, setClosePos] = useState({ top: 24, right: 24 });
+
+  // Load images (.JPG)
   useEffect(() => {
     const files = import.meta.glob("../imgs/portfolio/*.JPG", { eager: true });
-    const arr = Object.values(files).map((m, i) => ({
-      id: i,
-      src: m.default,
-      alt: `Photo ${i + 1}`,
-    }));
+    const arr = Object.values(files).map((m, i) => ({ id: i, src: m.default, alt: `Photo ${i + 1}` }));
     arr.sort((a, b) => a.id - b.id);
     setPhotos(arr);
   }, []);
 
-  // ---- Preload to reduce scroll/FS hitching ----
-  useEffect(() => {
-    photos.forEach((p) => {
-      const img = new Image();
-      img.src = p.src;
-    });
-  }, [photos]);
-
-  // ---- Hero slideshow (top of Home) ----
+  // Hero slideshow
   const hero = useMemo(() => photos.slice(0, 8), [photos]);
   const [heroIndex, setHeroIndex] = useState(0);
-
   useEffect(() => {
     if (!hero.length) return;
     const id = setInterval(() => setHeroIndex((i) => (i + 1) % hero.length), 5000);
     return () => clearInterval(id);
   }, [hero.length]);
 
-  // ---- Build a landscape-only index for carousel rotation ----
+  // Landscape-only for arrow rotation
   const [landscapeIndices, setLandscapeIndices] = useState([]);
-  const aspectCache = useRef({});
-
-  const isLandscape = (src) =>
-    new Promise((resolve) => {
-      if (src in aspectCache.current) return resolve(aspectCache.current[src]);
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
-        const ok = img.width > img.height * 1.2; // "rectangular enough"
-        aspectCache.current[src] = ok;
-        resolve(ok);
-      };
-    });
-
   useEffect(() => {
-    let mounted = true;
+    const aspectCache = {};
     const compute = async () => {
-      const indices = [];
+      const idxs = [];
       for (let i = 0; i < photos.length; i++) {
-        // precompute aspect for carousel
-        const ok = await isLandscape(photos[i].src);
-        if (!mounted) return;
-        if (ok) indices.push(i);
+        const img = new Image();
+        img.src = photos[i].src;
+        await img.decode().catch(() => {});
+        const ok = img.width > img.height * 1.2;
+        if (ok) idxs.push(i);
       }
-      if (mounted) setLandscapeIndices(indices);
+      setLandscapeIndices(idxs);
     };
     if (photos.length) compute();
-    return () => {
-      mounted = false;
-    };
   }, [photos]);
 
-  // ---- Open/close fullscreen (ALL images open; portrait allowed) ----
-  const openFullscreen = (idx) => {
+  const openFullscreen = (i) => {
     document.documentElement.classList.add("modal-open");
-    setSelectedIndex(idx);
+    setSelectedIndex(i);
     setFadeKey((k) => k + 1);
+    setClosing(false);
   };
 
   const closeFullscreen = () => {
-    setSelectedIndex(null);
-    document.documentElement.classList.remove("modal-open");
+    setClosing(true);
+    setTimeout(() => {
+      setSelectedIndex(null);
+      setClosing(false);
+      document.documentElement.classList.remove("modal-open");
+    }, 150); // matches fade duration
   };
 
-  // ---- Keyboard nav uses landscape-only rotation ----
+  // update × alignment
+  const updateClose = () => {
+    const el = imgRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setClosePos({ top: r.top + 12, right: window.innerWidth - r.right + 12 });
+  };
   useEffect(() => {
-    const onKey = (e) => {
-      if (selectedIndex == null) return;
+    updateClose();
+    window.addEventListener("resize", updateClose);
+    return () => window.removeEventListener("resize", updateClose);
+  }, [selectedIndex, fadeKey]);
 
-      if (e.key === "Escape") closeFullscreen();
-
-      if (e.key === "ArrowRight") {
-        const cur = selectedIndex;
-        const pos = landscapeIndices.indexOf(cur);
-        const next =
-          pos === -1
-            ? landscapeIndices.find((i) => i > cur) ?? landscapeIndices[0]
-            : landscapeIndices[(pos + 1) % landscapeIndices.length];
-        if (next != null) {
-          setSelectedIndex(next);
-          setFadeKey((k) => k + 1);
-        }
-      }
-
-      if (e.key === "ArrowLeft") {
-        const cur = selectedIndex;
-        const pos = landscapeIndices.indexOf(cur);
-        const prev =
-          pos === -1
-            ? landscapeIndices.filter((i) => i < cur).pop() ??
-              landscapeIndices[landscapeIndices.length - 1]
-            : landscapeIndices[
-                (pos - 1 + landscapeIndices.length) % landscapeIndices.length
-              ];
-        if (prev != null) {
-          setSelectedIndex(prev);
-          setFadeKey((k) => k + 1);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [selectedIndex, landscapeIndices]);
-
-  // ---- Render ----
   return (
     <div className="bg-primary min-h-screen">
       {/* HERO */}
@@ -134,16 +84,12 @@ export default function Portfolio() {
               key={p.id}
               src={p.src}
               alt={p.alt}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-                i === heroIndex ? "opacity-100" : "opacity-0"
-              }`}
-              fetchpriority={i === 0 ? "high" : "low"}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === heroIndex ? "opacity-100" : "opacity-0"}`}
             />
           ))}
         </div>
       )}
 
-      {/* Marker for nav behavior */}
       <div id="portfolio-grid-top" className="h-0 w-full" />
 
       {/* GRID */}
@@ -152,15 +98,11 @@ export default function Portfolio() {
           {photos.map((p, i) => (
             <div
               key={p.id}
-              className="relative rounded-xl bg-white/5 p-3 transition-transform duration-200 will-change-transform contain-paint
-                         cursor-pointer hover:scale-[1.03]"
+              className="relative rounded-xl bg-white/5 p-3 transform-gpu transition-transform duration-200 will-change-transform contain-paint
+                         cursor-pointer hover:scale-[1.015] shadow-md hover:shadow-lg"
               onClick={() => openFullscreen(i)}
             >
-              <BlurImage
-                src={p.src}
-                alt={p.alt}
-                className="w-full h-auto rounded-lg shadow-lg"
-              />
+              <BlurImage src={p.src} alt={p.alt} className="w-full h-auto rounded-lg" />
             </div>
           ))}
         </div>
@@ -169,98 +111,71 @@ export default function Portfolio() {
       {/* FULLSCREEN */}
       {selectedIndex != null && (
         <div
-          className="fixed inset-0 bg-black/95 z-[100] overflow-y-auto"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) closeFullscreen();
-          }}
+          className="fixed inset-0 bg-black/95 z-[100] overflow-hidden flex items-center justify-center"
+          onMouseDown={closeFullscreen}
+          onClick={closeFullscreen}
         >
-          {/* Content wrapper:
-              - uses var(--nav-pt) set by Navigation.jsx (0 when nav hidden, nav height when shown)
-              - keeps chevrons perfectly centered within the visible area */}
-          <div
-            className="relative w-full flex items-center justify-center"
-            style={{
-              minHeight: "100vh",
-              paddingTop: "var(--nav-pt, 0px)",
-              paddingBottom: "32px",
-            }}
+          <button
+            onMouseDown={(e) => { e.stopPropagation(); closeFullscreen(); }}
+            onClick={(e) => { e.stopPropagation(); closeFullscreen(); }}
+            className="fixed z-[200] text-white text-4xl font-light opacity-80 hover:opacity-100 transition-opacity"
+            style={{ top: `${closePos.top}px`, right: `${closePos.right}px` }}
           >
-            {/* Close */}
-            <button
-              onClick={closeFullscreen}
-              className="absolute top-4 right-6 text-white text-4xl font-light opacity-80 hover:opacity-100 transition-opacity z-[200]"
-              aria-label="Close"
-            >
-              ×
-            </button>
+            ×
+          </button>
 
-            {/* Prev (landscape-only rotation) */}
-            {landscapeIndices.length > 0 && (
+          {/* Arrows */}
+          {landscapeIndices.length > 0 && (
+            <>
               <button
+                onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   const cur = selectedIndex;
                   const pos = landscapeIndices.indexOf(cur);
-                  const prev =
-                    pos === -1
-                      ? landscapeIndices.filter((i) => i < cur).pop() ??
-                        landscapeIndices[landscapeIndices.length - 1]
-                      : landscapeIndices[
-                          (pos - 1 + landscapeIndices.length) %
-                            landscapeIndices.length
-                        ];
-                  if (prev != null) {
-                    setSelectedIndex(prev);
-                    setFadeKey((k) => k + 1);
-                  }
+                  const prev = pos === -1
+                    ? landscapeIndices.filter((i) => i < cur).pop() ?? landscapeIndices.at(-1)
+                    : landscapeIndices[(pos - 1 + landscapeIndices.length) % landscapeIndices.length];
+                  setSelectedIndex(prev); setFadeKey((k) => k + 1);
                 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-[200]
-                           w-12 h-12 rounded-full bg-white/10 hover:bg-white/20
-                           flex items-center justify-center"
-                aria-label="Previous image"
+                className="fixed left-4 top-1/2 -translate-y-1/2 z-[200] grid place-items-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20"
               >
-                <svg width="28" height="28" stroke="white" fill="none" strokeWidth="2">
-                  <path d="M18 6l-6 6 6 6" />
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="white" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
-            )}
-
-            {/* Next (landscape-only rotation) */}
-            {landscapeIndices.length > 0 && (
               <button
+                onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   const cur = selectedIndex;
                   const pos = landscapeIndices.indexOf(cur);
-                  const next =
-                    pos === -1
-                      ? landscapeIndices.find((i) => i > cur) ?? landscapeIndices[0]
-                      : landscapeIndices[(pos + 1) % landscapeIndices.length];
-                  if (next != null) {
-                    setSelectedIndex(next);
-                    setFadeKey((k) => k + 1);
-                  }
+                  const next = pos === -1
+                    ? landscapeIndices.find((i) => i > cur) ?? landscapeIndices[0]
+                    : landscapeIndices[(pos + 1) % landscapeIndices.length];
+                  setSelectedIndex(next); setFadeKey((k) => k + 1);
                 }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-[200]
-                           w-12 h-12 rounded-full bg-white/10 hover:bg-white/20
-                           flex items-center justify-center"
-                aria-label="Next image"
+                className="fixed right-4 top-1/2 -translate-y-1/2 z-[200] grid place-items-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20"
               >
-                <svg width="28" height="28" stroke="white" fill="none" strokeWidth="2">
-                  <path d="M10 6l6 6-6 6" />
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="white" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 6 15 12 9 18" />
                 </svg>
               </button>
-            )}
+            </>
+          )}
 
-            {/* Fullscreen image (shows any orientation) */}
-            <img
-              key={fadeKey}
-              src={photos[selectedIndex].src}
-              alt={photos[selectedIndex].alt}
-              className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
-              draggable="false"
-            />
-          </div>
+          {/* Image (stop propagation) */}
+          <img
+            key={fadeKey}
+            ref={imgRef}
+            src={photos[selectedIndex].src}
+            alt={photos[selectedIndex].alt}
+            className={`max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-opacity duration-150 ${closing ? "opacity-0" : "opacity-100"}`}
+            onLoad={updateClose}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            draggable="false"
+          />
         </div>
       )}
     </div>
