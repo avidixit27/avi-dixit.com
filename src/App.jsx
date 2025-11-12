@@ -30,6 +30,7 @@ export default function App() {
           </Routes>
         </Suspense>
       </NavigationProvider>
+      <div id="custom-scrollbar" className="custom-scrollbar"></div>
     </Router>
   );
 }

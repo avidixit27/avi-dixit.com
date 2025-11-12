@@ -30,15 +30,13 @@ export default function Portfolio() {
   // Landscape-only for arrow rotation
   const [landscapeIndices, setLandscapeIndices] = useState([]);
   useEffect(() => {
-    const aspectCache = {};
     const compute = async () => {
       const idxs = [];
       for (let i = 0; i < photos.length; i++) {
         const img = new Image();
         img.src = photos[i].src;
         await img.decode().catch(() => {});
-        const ok = img.width > img.height * 1.2;
-        if (ok) idxs.push(i);
+        if (img.width > img.height * 1.2) idxs.push(i);
       }
       setLandscapeIndices(idxs);
     };
@@ -58,10 +56,10 @@ export default function Portfolio() {
       setSelectedIndex(null);
       setClosing(false);
       document.documentElement.classList.remove("modal-open");
-    }, 150); // matches fade duration
+    }, 150); // keep this in sync with duration-150 below
   };
 
-  // update × alignment
+  // align × to image top-right
   const updateClose = () => {
     const el = imgRef.current;
     if (!el) return;
@@ -90,6 +88,7 @@ export default function Portfolio() {
         </div>
       )}
 
+      {/* Marker for nav behavior */}
       <div id="portfolio-grid-top" className="h-0 w-full" />
 
       {/* GRID */}
@@ -108,23 +107,25 @@ export default function Portfolio() {
         </div>
       </main>
 
-      {/* FULLSCREEN */}
+      {/* FULLSCREEN (click anywhere outside to close) */}
       {selectedIndex != null && (
         <div
           className="fixed inset-0 bg-black/95 z-[100] overflow-hidden flex items-center justify-center"
           onMouseDown={closeFullscreen}
           onClick={closeFullscreen}
         >
+          {/* Close */}
           <button
             onMouseDown={(e) => { e.stopPropagation(); closeFullscreen(); }}
             onClick={(e) => { e.stopPropagation(); closeFullscreen(); }}
             className="fixed z-[200] text-white text-4xl font-light opacity-80 hover:opacity-100 transition-opacity"
             style={{ top: `${closePos.top}px`, right: `${closePos.right}px` }}
+            aria-label="Close"
           >
             ×
           </button>
 
-          {/* Arrows */}
+          {/* Arrows (landscape sequence) */}
           {landscapeIndices.length > 0 && (
             <>
               <button
@@ -136,14 +137,17 @@ export default function Portfolio() {
                   const prev = pos === -1
                     ? landscapeIndices.filter((i) => i < cur).pop() ?? landscapeIndices.at(-1)
                     : landscapeIndices[(pos - 1 + landscapeIndices.length) % landscapeIndices.length];
-                  setSelectedIndex(prev); setFadeKey((k) => k + 1);
+                  setSelectedIndex(prev);
+                  setFadeKey((k) => k + 1);
                 }}
                 className="fixed left-4 top-1/2 -translate-y-1/2 z-[200] grid place-items-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20"
+                aria-label="Previous image"
               >
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="white" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
+
               <button
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
@@ -153,9 +157,11 @@ export default function Portfolio() {
                   const next = pos === -1
                     ? landscapeIndices.find((i) => i > cur) ?? landscapeIndices[0]
                     : landscapeIndices[(pos + 1) % landscapeIndices.length];
-                  setSelectedIndex(next); setFadeKey((k) => k + 1);
+                  setSelectedIndex(next);
+                  setFadeKey((k) => k + 1);
                 }}
                 className="fixed right-4 top-1/2 -translate-y-1/2 z-[200] grid place-items-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20"
+                aria-label="Next image"
               >
                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="white" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="9 6 15 12 9 18" />
@@ -164,7 +170,7 @@ export default function Portfolio() {
             </>
           )}
 
-          {/* Image (stop propagation) */}
+          {/* Center image — stop propagation so clicks don't bubble to overlay */}
           <img
             key={fadeKey}
             ref={imgRef}
