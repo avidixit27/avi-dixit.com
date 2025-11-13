@@ -82,11 +82,64 @@ export default function Portfolio() {
     return () => window.removeEventListener("resize", updateClose);
   }, [selectedIndex, fadeKey]);
 
+  // Helpers to go to previous/next image (used by buttons + keyboard)
+  const goPrev = () => {
+    if (selectedIndex == null || !landscapeIndices.length) return;
+    const cur = selectedIndex;
+    const pos = landscapeIndices.indexOf(cur);
+    const prev =
+      pos === -1
+        ? landscapeIndices.filter((i) => i < cur).pop() ??
+          landscapeIndices.at(-1)
+        : landscapeIndices[
+            (pos - 1 + landscapeIndices.length) % landscapeIndices.length
+          ];
+    setSelectedIndex(prev);
+    setFadeKey((k) => k + 1);
+  };
+
+  const goNext = () => {
+    if (selectedIndex == null || !landscapeIndices.length) return;
+    const cur = selectedIndex;
+    const pos = landscapeIndices.indexOf(cur);
+    const next =
+      pos === -1
+        ? landscapeIndices.find((i) => i > cur) ?? landscapeIndices[0]
+        : landscapeIndices[(pos + 1) % landscapeIndices.length];
+    setSelectedIndex(next);
+    setFadeKey((k) => k + 1);
+  };
+
+  // Keyboard controls: Esc to close, arrows to navigate
+  useEffect(() => {
+    if (selectedIndex == null) return;
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeFullscreen();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goPrev();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        goNext();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedIndex, landscapeIndices]); // rebind when these change
+
   return (
     <div className="bg-primary min-h-screen">
-      {/* HERO */}
+      {/* HERO – click to open current hero image in fullscreen */}
       {hero.length > 0 && (
-        <div className="relative h-[100svh] w-full">
+        <div
+          className="relative h-[100svh] w-full cursor-pointer"
+          onClick={() => openFullscreen(heroIndex)}
+          aria-label="Open hero image gallery"
+        >
           {hero.map((p, i) => (
             <img
               key={p.id}
@@ -156,23 +209,12 @@ export default function Portfolio() {
           {/* Arrows (landscape sequence) */}
           {landscapeIndices.length > 0 && (
             <>
-              {/* LEFT ARROW – stays as before */}
+              {/* LEFT ARROW */}
               <button
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
-                  const cur = selectedIndex;
-                  const pos = landscapeIndices.indexOf(cur);
-                  const prev =
-                    pos === -1
-                      ? landscapeIndices.filter((i) => i < cur).pop() ??
-                        landscapeIndices.at(-1)
-                      : landscapeIndices[
-                          (pos - 1 + landscapeIndices.length) %
-                            landscapeIndices.length
-                        ];
-                  setSelectedIndex(prev);
-                  setFadeKey((k) => k + 1);
+                  goPrev();
                 }}
                 className="fixed left-4 top-1/2 -translate-y-1/2 z-[200]
                            grid place-items-center w-12 h-12 md:w-14 md:h-14
@@ -193,22 +235,12 @@ export default function Portfolio() {
                 </svg>
               </button>
 
-              {/* RIGHT ARROW – keeps original all-the-way-right centering */}
+              {/* RIGHT ARROW */}
               <button
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
-                  const cur = selectedIndex;
-                  const pos = landscapeIndices.indexOf(cur);
-                  const next =
-                    pos === -1
-                      ? landscapeIndices.find((i) => i > cur) ??
-                        landscapeIndices[0]
-                      : landscapeIndices[
-                          (pos + 1) % landscapeIndices.length
-                        ];
-                  setSelectedIndex(next);
-                  setFadeKey((k) => k + 1);
+                  goNext();
                 }}
                 className="fixed right-4 top-1/2 -translate-y-1/2 z-[200]
                            grid place-items-center w-12 h-12 md:w-14 md:h-14
