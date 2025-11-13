@@ -73,7 +73,6 @@ export default function Portfolio() {
     const r = el.getBoundingClientRect();
     setClosePos({
       top: r.top - 12,
-      right: window.innerWidth - r.right + 12, // right value now unused but harmless
     });
   };
 
@@ -127,7 +126,10 @@ export default function Portfolio() {
       {/* FULLSCREEN (click anywhere outside to close) */}
       {selectedIndex != null && (
         <div
-          className="fixed inset-0 bg-black/95 z-[100] overflow-hidden flex items-center justify-center"
+          className={`fixed inset-0 bg-black/95 z-[100] overflow-hidden flex items-center justify-center
+                      transition-opacity duration-150 ${
+                        closing ? "opacity-0" : "opacity-100"
+                      }`}
           onMouseDown={closeFullscreen}
           onClick={closeFullscreen}
         >
@@ -141,7 +143,7 @@ export default function Portfolio() {
               e.stopPropagation();
               closeFullscreen();
             }}
-            className="fixed right-4 z-[200] text-white text-4xl font-light
+            className="fixed right-8 z-[200] text-white text-4xl font-light
                        drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]
                        opacity-90 hover:opacity-100 hover:text-accentWarm
                        transition-colors transition-opacity"
@@ -235,10 +237,7 @@ export default function Portfolio() {
             ref={imgRef}
             src={photos[selectedIndex].src}
             alt={photos[selectedIndex].alt}
-            className={`max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl
-                        transition-opacity duration-150 ${
-                          closing ? "opacity-0" : "opacity-100"
-                        }`}
+            className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
             onLoad={updateClose}
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}

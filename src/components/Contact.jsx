@@ -37,9 +37,8 @@ export default function Contact() {
   
         {/* Optional quick links */}
         <div className="mt-10 space-y-2">
-          <a href="mailto:you@example.com" className="link-minimal block">you@example.com</a>
-          <a href="https://instagram.com/yourhandle" target="_blank" rel="noreferrer" className="link-minimal block">Instagram</a>
-          <a href="https://twitter.com/yourhandle" target="_blank" rel="noreferrer" className="link-minimal block">X / Twitter</a>
+          <a href="mailto:avidphotography27@gmail.com" className="link-minimal block">avidphotography27@gmail.com</a>
+          <a href="https://instagram.com/_avid.photography_" target="_blank" rel="noreferrer" className="link-minimal block">Instagram</a>
         </div>
       </main>
     );
