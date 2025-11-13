@@ -13,7 +13,11 @@ export default function Portfolio() {
   // Load images (.JPG)
   useEffect(() => {
     const files = import.meta.glob("../imgs/portfolio/*.JPG", { eager: true });
-    const arr = Object.values(files).map((m, i) => ({ id: i, src: m.default, alt: `Photo ${i + 1}` }));
+    const arr = Object.values(files).map((m, i) => ({
+      id: i,
+      src: m.default,
+      alt: `Photo ${i + 1}`,
+    }));
     arr.sort((a, b) => a.id - b.id);
     setPhotos(arr);
   }, []);
@@ -23,7 +27,10 @@ export default function Portfolio() {
   const [heroIndex, setHeroIndex] = useState(0);
   useEffect(() => {
     if (!hero.length) return;
-    const id = setInterval(() => setHeroIndex((i) => (i + 1) % hero.length), 5000);
+    const id = setInterval(
+      () => setHeroIndex((i) => (i + 1) % hero.length),
+      5000
+    );
     return () => clearInterval(id);
   }, [hero.length]);
 
@@ -59,13 +66,17 @@ export default function Portfolio() {
     }, 150); // keep this in sync with duration-150 below
   };
 
-  // align × to image top-right
+  // Align × to image top (x is fixed all the way right)
   const updateClose = () => {
     const el = imgRef.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    setClosePos({ top: r.top + 12, right: window.innerWidth - r.right + 12 });
+    setClosePos({
+      top: r.top - 12,
+      right: window.innerWidth - r.right + 12, // right value now unused but harmless
+    });
   };
+
   useEffect(() => {
     updateClose();
     window.addEventListener("resize", updateClose);
@@ -82,7 +93,9 @@ export default function Portfolio() {
               key={p.id}
               src={p.src}
               alt={p.alt}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === heroIndex ? "opacity-100" : "opacity-0"}`}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+                i === heroIndex ? "opacity-100" : "opacity-0"
+              }`}
             />
           ))}
         </div>
@@ -101,7 +114,11 @@ export default function Portfolio() {
                          cursor-pointer hover:scale-[1.015] shadow-md hover:shadow-lg"
               onClick={() => openFullscreen(i)}
             >
-              <BlurImage src={p.src} alt={p.alt} className="w-full h-auto rounded-lg" />
+              <BlurImage
+                src={p.src}
+                alt={p.alt}
+                className="w-full h-auto rounded-lg"
+              />
             </div>
           ))}
         </div>
@@ -114,12 +131,21 @@ export default function Portfolio() {
           onMouseDown={closeFullscreen}
           onClick={closeFullscreen}
         >
-          {/* Close */}
+          {/* Close button – x fixed to right edge, y aligned with image top */}
           <button
-            onMouseDown={(e) => { e.stopPropagation(); closeFullscreen(); }}
-            onClick={(e) => { e.stopPropagation(); closeFullscreen(); }}
-            className="fixed z-[200] text-white text-4xl font-light opacity-80 hover:opacity-100 transition-opacity"
-            style={{ top: `${closePos.top}px`, right: `${closePos.right}px` }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              closeFullscreen();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              closeFullscreen();
+            }}
+            className="fixed right-4 z-[200] text-white text-4xl font-light
+                       drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]
+                       opacity-90 hover:opacity-100 hover:text-accentWarm
+                       transition-colors transition-opacity"
+            style={{ top: `${closePos.top}px` }}
             aria-label="Close"
           >
             ×
@@ -128,55 +154,91 @@ export default function Portfolio() {
           {/* Arrows (landscape sequence) */}
           {landscapeIndices.length > 0 && (
             <>
+              {/* LEFT ARROW – stays as before */}
               <button
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   const cur = selectedIndex;
                   const pos = landscapeIndices.indexOf(cur);
-                  const prev = pos === -1
-                    ? landscapeIndices.filter((i) => i < cur).pop() ?? landscapeIndices.at(-1)
-                    : landscapeIndices[(pos - 1 + landscapeIndices.length) % landscapeIndices.length];
+                  const prev =
+                    pos === -1
+                      ? landscapeIndices.filter((i) => i < cur).pop() ??
+                        landscapeIndices.at(-1)
+                      : landscapeIndices[
+                          (pos - 1 + landscapeIndices.length) %
+                            landscapeIndices.length
+                        ];
                   setSelectedIndex(prev);
                   setFadeKey((k) => k + 1);
                 }}
-                className="fixed left-4 top-1/2 -translate-y-1/2 z-[200] grid place-items-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20"
+                className="fixed left-4 top-1/2 -translate-y-1/2 z-[200]
+                           grid place-items-center w-12 h-12 md:w-14 md:h-14
+                           rounded-full bg-white/10 hover:bg-white/20"
                 aria-label="Previous image"
               >
-                <svg viewBox="0 0 24 24" width="24" height="24" stroke="white" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  stroke="white"
+                  fill="none"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
 
+              {/* RIGHT ARROW – keeps original all-the-way-right centering */}
               <button
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   const cur = selectedIndex;
                   const pos = landscapeIndices.indexOf(cur);
-                  const next = pos === -1
-                    ? landscapeIndices.find((i) => i > cur) ?? landscapeIndices[0]
-                    : landscapeIndices[(pos + 1) % landscapeIndices.length];
+                  const next =
+                    pos === -1
+                      ? landscapeIndices.find((i) => i > cur) ??
+                        landscapeIndices[0]
+                      : landscapeIndices[
+                          (pos + 1) % landscapeIndices.length
+                        ];
                   setSelectedIndex(next);
                   setFadeKey((k) => k + 1);
                 }}
-                className="fixed right-4 top-1/2 -translate-y-1/2 z-[200] grid place-items-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/10 hover:bg-white/20"
+                className="fixed right-4 top-1/2 -translate-y-1/2 z-[200]
+                           grid place-items-center w-12 h-12 md:w-14 md:h-14
+                           rounded-full bg-white/10 hover:bg-white/20"
                 aria-label="Next image"
               >
-                <svg viewBox="0 0 24 24" width="24" height="24" stroke="white" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  stroke="white"
+                  fill="none"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="9 6 15 12 9 18" />
                 </svg>
               </button>
             </>
           )}
 
-          {/* Center image — stop propagation so clicks don't bubble to overlay */}
+          {/* Center image */}
           <img
             key={fadeKey}
             ref={imgRef}
             src={photos[selectedIndex].src}
             alt={photos[selectedIndex].alt}
-            className={`max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-opacity duration-150 ${closing ? "opacity-0" : "opacity-100"}`}
+            className={`max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl
+                        transition-opacity duration-150 ${
+                          closing ? "opacity-0" : "opacity-100"
+                        }`}
             onLoad={updateClose}
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
