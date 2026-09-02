@@ -1,6 +1,6 @@
 # Architecture
 
-This document guides the long-term development of Avi Dixit's photography website. It explains ownership, dependencies, component design, verification, and the order in which the product should grow. It is a guide for both human contributors and coding agents.
+This document guides the long-term development of Avi Dixit's photography website. It explains ownership, dependencies, component design, and verification. It is a guide for both human contributors and coding agents. Implementation plans and work sequencing live in [docs/plans/README.md](docs/plans/README.md).
 
 ## 1. Decision status and scope
 
@@ -11,7 +11,7 @@ The following labels distinguish repository facts from future intentions:
 - **Planned:** work to introduce through a separately scoped implementation task.
 - **Open:** a decision that must not be treated as settled.
 
-Adding this document and `AGENTS.md` does not implement the target architecture, migrate the application, install tooling, or authorize provisioning services. Verify current facts against the code and `package.json` when starting a task.
+Architectural direction does not authorize implementation or service provisioning. Verify current facts against the code and `package.json` when starting a task.
 
 **Backend design is open.** A backend may live in a separate repository. This document does not select its language, framework, database, authentication service, hosting, deployment process, or internal structure.
 
@@ -48,17 +48,7 @@ The repository currently contains a JavaScript React application using Vite, Tai
 | Legacy code | `old_website/`, retained historical implementation |
 | Verification | A lint script exists, but no ESLint configuration or test setup is present |
 
-### Architectural weaknesses to address
-
-- Portfolio and navigation are each roughly 280 lines and own several different responsibilities. The concern is coupled behavior, rather than the line count alone.
-- Navigation queries elements owned elsewhere in the application. Global DOM classes, timers, measurements, and event listeners require clearer ownership and cleanup.
-- Navigation context and the prefetch helper still refer to `/portfolio`, although the portfolio route is `/`. Route assumptions have drifted.
-- `App` passes a `setHomePageFlag` prop that `Portfolio` does not consume.
-- Image orientation is discovered by decoding the source photographs in the browser. Dimensions and display variants should become explicit metadata rather than requiring full-image discovery.
-- Gallery accessibility, including keyboard activation, focus management, and reduced motion, needs deliberate acceptance criteria.
-- There is no automated regression baseline protecting the current interactions.
-
-These findings guide future work. They are not authorization to refactor everything at once or preserve every prototype behavior as a requirement.
+The current UI concentrates several responsibilities in portfolio and navigation, uses some cross-component DOM coordination, and has no automated regression baseline. Specific findings and corrective work belong in the implementation plans. The boundaries below describe the intended architecture.
 
 ## 4. Target frontend organization
 
@@ -190,16 +180,7 @@ Search-ready collection URLs and metadata are frontend goals. Evaluate pre-rende
 
 ## 8. Engineering tooling and verification
 
-### Current commands
-
-| Command | Current status |
-| --- | --- |
-| `npm run dev` | Defined; starts the Vite development server |
-| `npm run build` | Defined; builds the frontend |
-| `npm run preview` | Defined; serves a built frontend locally |
-| `npm run lint` | Defined, but currently blocked by the missing ESLint configuration |
-
-No unit-test, Cypress, type-checking, formatting, or aggregate verification command currently exists. Do not report these checks as passing or run invented scripts. Installing and configuring them is a separate foundation task.
+Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-commands-and-tooling-gaps) summarizes current commands and known gaps. A tool listed below is a target, not evidence that it has been configured. Setup work and proposed command names belong in the implementation plans.
 
 ### Planned tooling
 
@@ -215,8 +196,6 @@ No unit-test, Cypress, type-checking, formatting, or aggregate verification comm
 | Pull-request checks | GitHub Actions |
 
 Use compatible supported versions when implementing the foundation and commit the lockfile. The manifest remains the source of truth for installed versions. Cypress is the selected browser test system; do not add Playwright or a duplicate component test stack without a specific requirement.
-
-Planned command names are `lint`, `format:check`, `format`, `typecheck`, `test:unit`, `test:unit:watch`, `test:component`, `test:component:open`, `test:e2e`, `build`, and `check`. Define them explicitly before documenting them as runnable. The eventual `check` command should compose the frontend release checks.
 
 ### Test boundaries
 
@@ -241,7 +220,7 @@ Planned command names are `lint`, `format:check`, `format`, `typecheck`, `test:u
 
 For refactoring, first characterize the behavior that should be preserved. Confirm deliberate behavior changes separately so tests do not freeze accidental prototype behavior. For bug fixes, add a regression test that fails on the bug. For styling, use visual review and relevant interaction tests. Documentation-only changes require document and diff review, not artificial application tests.
 
-The missing test infrastructure is an explicit bootstrap dependency: establish a functioning test harness before relying on TDD for new behavior. Do not claim a red/green loop if it could not be run.
+Do not claim a red/green loop when the necessary checks could not run. Any user-approved temporary exception must be explicit in the relevant implementation plan or plan index, with a bounded scope, replacement verification, and an exit condition. The default remains test-first behavior changes and regression protection before refactoring.
 
 ### Hooks and continuous integration
 
@@ -253,34 +232,26 @@ Use lockfile-based installation, consistent runtime versions, dependency caching
 
 Do not add backend jobs to this repository until backend ownership and integration requirements are decided. Frontend PR checks should not require production credentials or live backend services.
 
-## 9. Acceptance scenarios and roadmap
+## 9. Documentation and planning
 
-Acceptance criteria must accompany each implementation task. The following scenarios guide future regression coverage:
-
-- Open a photograph from the hero or grid, navigate the intended sequence, close the lightbox, and restore focus and scrolling.
-- Navigate between routes without leaked listeners, timers, or global UI state.
-- Use navigation and galleries on small screens with keyboard, mouse, and touch.
-- Read useful content with reduced motion and while photographs load or fail.
-- Render collections in an explicit stable order and preserve the intended image aspect ratios.
-- Display honest pending, success, and failure states for inquiries and publishing once those integrations exist.
-- Show search-friendly content and metadata at public collection URLs when those routes are implemented.
-
-| Phase | Outcome and exit condition |
+| Location | Responsibility |
 | --- | --- |
-| Documentation | Architecture and agent instructions accurately distinguish current state, planned work, and open decisions |
-| Verification foundation | Working ESLint, TypeScript, formatting, hooks, Vitest, Cypress, and GitHub Actions with meaningful baseline tests |
-| Frontend structure | Responsibilities separated incrementally, dependency rules respected, and intended existing behavior protected |
-| Premium frontend | Repeatedly reviewed visual system, gallery, navigation, accessibility, responsive layouts, and image-loading behavior |
-| Integration design | Frontend/backend contracts and repository ownership agreed before implementing publishing and inquiry integrations |
-| Publishing and launch | Desired owner workflow, public collections, and inquiries verified against the selected integrations and deployment design |
-| Print commerce | Product variants, checkout, order lifecycle, and fulfillment designed before implementation |
-| Optional integrations | Instagram imports and other additions evaluated independently against a concrete product need |
+| `architecture.md` | Current system overview, enduring design direction, boundaries, and rationale |
+| `AGENTS.md` | Concise agent instructions and current verification commands |
+| [docs/plans/README.md](docs/plans/README.md) | Plan status, dependencies, branch relationships, PR links, and shared execution constraints |
+| Individual plans | Purpose, bounded scope, approach, acceptance criteria, and verification evidence for substantial changes |
 
-The premium frontend phase is substantial work, not a single styling pass. Select and review interaction references with real photographs. Do not accelerate into commerce by treating visual polish as complete without review.
+Read the plan index and only the relevant plan and necessary dependency outcomes. Do not load all plans or completed work by default. Keep branch names, task checklists, temporary exceptions, and progress out of this architecture document.
+
+Keep plan files in a flat directory with stable numeric identifiers and descriptive names. Use metadata for change type rather than overlapping feature/chore/fix directories. Substantial work merits a plan; routine small fixes can be explained in their issue or PR without creating another document.
+
+Maintain plan status in the index. Retain completed plans for reference with a link to the implementation PR and verification evidence; historical plans do not override the current architecture. Add a dedicated decision record only when a significant architectural choice needs its alternatives and consequences preserved beyond a task.
+
+The product direction is a premium frontend experience followed by publishing and inquiry integrations, with print commerce later. Detailed sequencing belongs in the plans. Visual refinement requires repeated review with real photographs and representative devices before expanding product scope.
 
 ## 10. Architectural changes and working agreements
 
-`architecture.md` owns architectural rationale, decision status, and the roadmap. [AGENTS.md](AGENTS.md) owns concise execution instructions and verification expectations. Keep them consistent without duplicating the entire guide.
+Keep architecture, agent guidance, and plans consistent without copying their contents between documents. Update the architecture when the system or an enduring decision changes, not for every implementation step.
 
 An approved task authorizes its scoped edits and checks. Seek a decision before materially expanding scope, introducing additional services, or deploying. Do not treat a roadmap item as permission to implement it immediately.
 

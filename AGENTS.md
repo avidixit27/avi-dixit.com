@@ -8,6 +8,13 @@
 - Complete the approved task with small reviewable changes. Seek a decision before material scope expansion, additional services, or deployment. Do not repeatedly ask permission for scoped edits and checks already authorized.
 - A roadmap entry is not authorization to implement that feature. Preserve unrelated user changes.
 
+## Find the relevant implementation plan
+
+- Consult [docs/plans/README.md](docs/plans/README.md) for active work, dependencies, branch bases, and any explicitly approved temporary verification exception.
+- Read the relevant plan and only the dependency outcomes needed for the task. Do not load every plan or completed plan by default.
+- Keep task scope, checklists, progress, and verification evidence in the plan and its linked PR. Keep enduring design rules in `architecture.md`.
+- Update the plan index when status or PR relationships change. A plan's existence does not authorize starting it. Apply a temporary exception only to the plans it explicitly names.
+
 ## Architecture and component design
 
 - Organize product behavior by feature; keep genuinely shared presentation and infrastructure at the top level. Create directories only when needed.
