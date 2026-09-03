@@ -8,7 +8,7 @@
 | Blocks | [002 — TypeScript overhaul](002-typescript-overhaul.md) |
 | Planned branch | `codex/code-cleanup` |
 | PR base | `react-website-overhaul` |
-| PR | Not opened |
+| PR | [#2](https://github.com/avidixit27/avi-dixit.com/pull/2) |
 
 ## Outcome
 
@@ -127,4 +127,4 @@ Started on 2026-09-03 from the clean, committed `react-website-overhaul` baselin
 - Large bundled photographs, browser-side orientation discovery, a null lazy-loading fallback, incomplete lightbox focus containment/restoration, placeholder shop behavior, and the contact form without submission remain unchanged and outside this cleanup.
 - Plan 002 should migrate the resulting ownership map directly and add strict contracts for route resources, photo records, feature props, and navigation helpers without reorganizing these responsibilities again.
 - Plan 003 should automate direct route rendering, hero timer behavior with a controlled clock, gallery open/navigation/close and scroll-lock cleanup, cart totals, repeated mount/navigation cleanup, and desktop/mobile component behavior.
-- The implementation is complete locally. Record the PR link and update the plan index status when the branch is published and reviewed.
+- Implementation and verification are complete in draft PR [#2](https://github.com/avidixit27/avi-dixit.com/pull/2), which targets `react-website-overhaul`. Keep the stacked TypeScript work based on this branch until the PR is reviewed and merged.
