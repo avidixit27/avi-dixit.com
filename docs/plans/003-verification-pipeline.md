@@ -1,12 +1,28 @@
 # 003 — Verification pipeline
 
-Type: Tooling feature. Status, branch, and PR: [plan index](README.md). Dependency: the reviewed output of [002 — TypeScript overhaul](002-typescript-overhaul.md), including the behavioral handoff from plan 001.
+| Field | Value |
+| --- | --- |
+| Type | Tooling feature |
+| Status | Tracked in the [plan index](README.md) |
+| Depends on | Reviewed output of [002 — TypeScript overhaul](002-typescript-overhaul.md), including the behavioral handoff from plan 001 |
+| Blocks | Routine feature work that relies on the full red–green–refactor workflow |
+| Planned branch | `codex/verification-pipeline` |
+| PR base | `codex/typescript-overhaul` |
+| Pull request | Not opened |
 
-## Purpose
+## Outcome
 
 Make frontend correctness repeatably verifiable through local commands, pre-commit hooks, and GitHub Actions. Establish the test harness and meaningful regression coverage so subsequent behavior changes can use red–green–refactor.
 
-## Scope and approach
+## Prerequisites and current state
+
+- Plan 002 must be complete and reviewed. Create this branch from its reviewed commit and confirm no unrelated working-tree changes are present.
+- Record the working `typecheck` and `build` commands, supported Node runtime, and behavioral handoff from plans 001 and 002 before changing tooling.
+- Inspect the package manifest, lockfile, existing configuration, hooks, and `.github/` directory before adding or replacing files. Preserve compatible configuration and unrelated workflows.
+- Run the available type check and production build to establish a baseline. Record pre-existing failures in this ticket before proceeding.
+- Tool versions and configuration syntax must be selected from mutually compatible, maintained releases at implementation time; this planning document does not pin stale version numbers.
+
+## Scope
 
 ### Linting, formatting, and local hooks
 
@@ -52,25 +68,76 @@ Do not add empty scripts that report success without performing checks. Pin comp
 - Use separate jobs for lint/format/types, unit tests, component tests, and production build with end-to-end verification. Independent jobs may run concurrently; browser journeys must run against the built frontend.
 - Use lockfile-based installation, consistent runtimes, dependency caching, cancellation of superseded runs, and useful failure artifacts such as Cypress screenshots and logs.
 - Run Cypress in headless Chrome. Do not require Cypress Cloud, production credentials, live backend services, or deployment privileges.
-- Configure required checks when the workflow is available on the protected target, following the stack guidance in the index. Review existing branch rules before changing them and preserve unrelated protections.
-- Keep deployment and backend verification outside this feature.
+- Configure required checks when the workflow is available on the protected target and repository-setting changes are authorized. Review existing branch rules first and preserve unrelated protections.
 
-## Acceptance and verification
+## Non-goals
+
+- Do not change product behavior, redesign pages, or add new application features to create convenient tests.
+- Do not add deployment, hosting, backend verification, production credentials, or live service dependencies.
+- Do not require Cypress Cloud or another paid test service.
+- Do not weaken TypeScript, lint, accessibility, or test rules merely to make the pipeline pass.
+- Do not expand a tooling finding into an unrelated refactor. Record the follow-up as a separate ticket when it falls outside this plan.
+
+## Deliverables
+
+- Package scripts for every command documented in this ticket and lockfile entries for all added tooling dependencies.
+- ESLint flat configuration, Prettier configuration and ignores, and staged-file pre-commit hooks.
+- Vitest configuration with meaningful unit regression coverage.
+- Cypress component and end-to-end configuration, support files, controlled fixtures, and meaningful browser coverage.
+- A GitHub Actions workflow that runs the complete verification set and retains useful Cypress failure artifacts.
+- Updated contributor guidance, architecture current-state text, this ticket's implementation record, and the plan index.
+
+## Implementation plan
+
+1. **Establish the runtime and baseline.** Inspect existing tools and workflows, choose a supported Node runtime shared by local development and CI, install only the required compatible packages, and preserve the lockfile.
+2. **Add deterministic commands.** Configure scripts for linting, formatting, type checking, unit tests, component tests, end-to-end tests, building, and the aggregate check. Confirm every script performs real work and propagates failures.
+3. **Configure static checks and hooks.** Add ESLint, Prettier, Husky, and lint-staged. Resolve active-source findings without blanket disables, and keep the pre-commit path fast.
+4. **Build the unit-test harness.** Configure Vitest isolation and add focused tests for stable pure behavior identified by the earlier-plan handoff. Temporarily break a representative assertion target to prove the test fails, then restore it.
+5. **Build the component-test harness.** Configure Cypress Component Testing with Vite and real styles, create the minimal mount support, and cover gallery interaction, keyboard behavior, effect cleanup, callback contracts, and implemented form state.
+6. **Add critical browser journeys.** Test home, shop, contact, and gallery behavior against the production build using local assets, controlled state, mobile coverage, and reduced-motion conditions where applicable.
+7. **Create the CI workflow.** Run independent jobs with lockfile installation, caching, superseded-run cancellation, headless Chrome, and diagnostic artifacts. Verify pull-request events work for intermediate stack branches.
+8. **Prove failure paths.** Confirm static checks, type errors, each test layer, and the aggregate command return nonzero status for a controlled temporary violation. Verify a staged violation is rejected in a disposable checkout without creating a synthetic commit.
+9. **Close the ticket.** Run the complete local check, review the CI result, update the documented current state and commands, record evidence and remaining limitations below, and update the plan index and pull-request metadata.
+
+## Acceptance criteria
 
 - All documented scripts work from the supported local environment, and `check` covers the complete frontend verification set.
 - Lint, formatting, type errors, and meaningful test failures cause nonzero exits and failing CI checks.
 - Pre-commit hooks reject a staged violation in a disposable verification checkout without adding synthetic commits or bad files to the working branch. Properly formatted source passes.
 - Regression coverage protects the intended gallery open/navigate/close sequence, event cleanup, and route behavior captured in the previous plans.
-- Component tests cover keyboard behavior, form presentation/state where implemented, and relevant callback contracts. Distinguish existing accessibility limitations from implemented guarantees.
-- Representative browser journeys cover home, shop, contact, and gallery interaction with real styling and local photo assets. Include mobile viewport coverage and both normal and reduced-motion conditions where relevant.
+- Component tests cover keyboard behavior, form presentation/state where implemented, and relevant callback contracts. Existing accessibility limitations remain distinct from implemented guarantees.
+- Representative browser journeys cover home, shop, contact, and gallery interaction with real styling and local photo assets. They include mobile viewport coverage and normal and reduced-motion conditions where relevant.
 - Tests describe actual placeholder behavior honestly; no test implies checkout, contact delivery, publishing, or authentication exists before those integrations are implemented.
 - CI failure artifacts are accessible and help diagnose a broken check. Checks remain applicable to the stack's intermediate PR bases.
 - The final implementation PR links verification evidence and records any remaining limitations.
 
-## Completion
+## Verification
 
-Update `AGENTS.md` and the architecture's current-state descriptions with the available commands and verification capabilities. Mark the plan completed in the index with the PR link. The temporary exception for plans 001 and 002 is then historical; normal red–green–refactor governs subsequent behavior changes.
+- Run each documented script independently, then run `npm run check` from a clean working tree.
+- Exercise the pre-commit hook with one valid staged file and one controlled invalid staged file in a disposable checkout; restore all temporary changes.
+- Verify representative test and lint failures with temporary changes and confirm each corresponding CI job reports failure.
+- Inspect Cypress screenshots, videos or logs from a controlled CI failure, then remove the fault and confirm the workflow passes.
+- Review the final workflow triggers and job dependencies against both the stacked PR base and `main`.
+
+## Risks and recovery
+
+| Risk | Mitigation or recovery |
+| --- | --- |
+| Local and CI environments drift | Pin and document the Node runtime, install from the lockfile, and use the same package scripts in both environments. |
+| Browser tests become flaky | Assert observable states, control clocks and network data, avoid arbitrary waits, and retain failure artifacts. |
+| Vitest and Cypress types or discovery overlap | Give each runner explicit file patterns and TypeScript environments; verify neither runner discovers the other's files. |
+| Pre-commit checks become too slow | Restrict hooks to staged lint and formatting checks; keep the complete suite in explicit commands and CI. |
+| Regression tests preserve accidental behavior | Base coverage on reviewed handoff contracts and record known limitations instead of asserting incidental implementation details. |
+| Tooling rules expose broad unrelated work | Fix findings required by this ticket, document justified configuration choices, and move unrelated product changes to separate tickets. |
+
+## Definition of done
+
+- Every deliverable exists, every acceptance criterion is met, and the full local verification command passes from a clean checkout.
+- GitHub Actions passes on the implementation PR and exposes useful failure output when a controlled fault is introduced.
+- The implemented commands are accurately listed in `AGENTS.md` and the architecture's current-state sections.
+- The plan index shows this ticket's final status and PR, and the implementation record below contains commands, CI evidence, decisions, and remaining limitations.
+- The temporary testing exception for plans 001 and 002 is historical; normal red–green–refactor governs subsequent behavior changes.
 
 ## Implementation record
 
-Not started. No tooling has been installed or verification pipeline executed for this plan. Add a concise outcome or link to PR evidence when implemented.
+Not started. No tooling has been installed or verification pipeline executed for this plan. Replace this text with a concise result, verification evidence, decisions, remaining limitations, and the pull-request link when implemented.

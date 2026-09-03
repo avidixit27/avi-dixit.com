@@ -239,11 +239,11 @@ Do not add backend jobs to this repository until backend ownership and integrati
 | `architecture.md` | Current system overview, enduring design direction, boundaries, and rationale |
 | `AGENTS.md` | Concise agent instructions and current verification commands |
 | [docs/plans/README.md](docs/plans/README.md) | Plan status, dependencies, branch relationships, PR links, and shared execution constraints |
-| Individual plans | Purpose, bounded scope, approach, acceptance criteria, and verification evidence for substantial changes |
+| Individual plans | End-to-end work tickets containing outcome, prerequisites, bounded scope, non-goals, deliverables, implementation steps, acceptance criteria, verification, risks, and completion evidence |
 
 Read the plan index and only the relevant plan and necessary dependency outcomes. Do not load all plans or completed work by default. Keep branch names, task checklists, temporary exceptions, and progress out of this architecture document.
 
-Keep plan files in a flat directory with stable numeric identifiers and descriptive names. Use metadata for change type rather than overlapping feature/chore/fix directories. Substantial work merits a plan; routine small fixes can be explained in their issue or PR without creating another document.
+Keep plan files in a flat directory with stable numeric identifiers and descriptive names. Use the [plan template](docs/plans/TEMPLATE.md) and metadata for change type rather than overlapping feature/chore/fix directories. A ticket must be actionable end to end without relying on conversation history. Substantial work merits a plan; routine small fixes can be explained in their issue or PR without creating another document.
 
 Maintain plan status in the index. Retain completed plans for reference with a link to the implementation PR and verification evidence; historical plans do not override the current architecture. Add a dedicated decision record only when a significant architectural choice needs its alternatives and consequences preserved beyond a task.
 

@@ -1,6 +1,28 @@
 # Implementation plans
 
-This index is the source of truth for plan status, dependencies, branch relationships, and PR links. Read [architecture.md](../../architecture.md) for enduring design rules and [AGENTS.md](../../AGENTS.md) for execution instructions. Read only the selected plan and the dependency outcomes needed for that task.
+Treat each plan as an end-to-end work ticket: it should contain enough repository context, decisions, steps, acceptance criteria, and verification guidance to complete one bounded change without relying on chat history. This index is the source of truth for status, dependencies, branch relationships, and PR links. Read [architecture.md](../../architecture.md) for enduring design rules and [AGENTS.md](../../AGENTS.md) for execution instructions. Read only the selected plan and the dependency outcomes needed for that task.
+
+## Ticket contract
+
+Create substantial work from [TEMPLATE.md](TEMPLATE.md). Every ticket must contain:
+
+- a stable ID and descriptive title, with type, status reference, dependency, branch, base, and PR metadata;
+- the outcome and user or engineering value;
+- prerequisites and repository facts to reconfirm before editing;
+- bounded scope, explicit non-goals, and concrete deliverables or anticipated touchpoints;
+- ordered implementation steps that resolve known design choices;
+- observable acceptance criteria and exact available verification commands;
+- risks, mitigations, recovery or rollback guidance, and a definition of done;
+- an implementation record for decisions, deviations, commands, evidence, and follow-up work.
+
+The ticket is the source of truth for execution. Keep it current when repository findings change the approach. A material scope or architectural change requires an explicit decision and a ticket update before continuing. Use the linked PR for discussion and detailed command output rather than duplicating a running transcript in Markdown.
+
+### Ticket lifecycle
+
+1. **Plan:** create the ticket from the template, resolve dependencies and material design choices, add it to the index, and leave its status `Planned`.
+2. **Start:** confirm authorization and prerequisites, create the planned branch from its recorded base, and change the index status to `In progress`.
+3. **Execute:** follow the ticket, keep acceptance criteria and the implementation record current, and mark the ticket `Blocked` in the index when a recorded dependency prevents progress.
+4. **Complete:** satisfy the definition of done, link the PR and verification evidence, change the status to `Completed`, and move the row to a completed section after merge.
 
 ## Active sequence
 
@@ -32,7 +54,7 @@ Do not claim that these checks constitute a red–green–refactor loop or that 
 
 - Use stable numeric identifiers and descriptive filenames in this flat directory. A short type field inside each plan is sufficient; do not add feature/chore/fix subdirectories now.
 - Use `Planned`, `In progress`, `Blocked`, or `Completed` in this index. Record a blocker with the affected plan when applicable.
-- Keep detailed scope and acceptance criteria in the plan. Use its linked PR for implementation discussion and execution evidence; avoid maintaining duplicate progress logs.
+- Keep the ticket independently actionable and aligned with the repository. Do not copy enduring architecture rules into every ticket; link the relevant section and state how it applies.
 - When a plan is completed, move its index row into a completed section, retain the file, and link the final PR and verification evidence. Completed plans are historical context, not mandatory reading or new instructions.
 - A routine small fix does not need a plan file. Create plans for work that benefits from explicit scope, dependencies, or acceptance criteria.
 

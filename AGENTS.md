@@ -12,8 +12,10 @@
 
 - Consult [docs/plans/README.md](docs/plans/README.md) for active work, dependencies, branch bases, and any explicitly approved temporary verification exception.
 - Read the relevant plan and only the dependency outcomes needed for the task. Do not load every plan or completed plan by default.
-- Keep task scope, checklists, progress, and verification evidence in the plan and its linked PR. Keep enduring design rules in `architecture.md`.
+- Treat the selected plan as the end-to-end work ticket. Before editing, ensure its outcome, prerequisites, scope, non-goals, deliverables, implementation steps, acceptance criteria, verification, risks, and definition of done are actionable. Resolve or record a material gap before proceeding.
+- Keep task scope, checklists, progress, decisions, and verification evidence in the plan and its linked PR. Keep enduring design rules in `architecture.md`.
 - Update the plan index when status or PR relationships change. A plan's existence does not authorize starting it. Apply a temporary exception only to the plans it explicitly names.
+- Keep the ticket accurate during implementation. At completion, record the result and evidence, link the PR, and update the index; do not leave planned language describing implemented repository state.
 
 ## Architecture and component design
 

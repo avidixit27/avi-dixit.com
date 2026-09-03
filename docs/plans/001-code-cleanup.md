@@ -1,13 +1,24 @@
 # 001 — Code cleanup
 
-Type: Refactor. Status, branch, and PR: [plan index](README.md). Dependency: the existing frontend on the stack's starting branch.
+| Field | Value |
+| --- | --- |
+| Type | Refactor |
+| Status | Tracked in the [plan index](README.md) |
+| Depends on | Existing frontend on `react-website-overhaul` |
+| Blocks | [002 — TypeScript overhaul](002-typescript-overhaul.md) |
+| Planned branch | `codex/code-cleanup` |
+| PR base | `react-website-overhaul` |
+| PR | Not opened |
 
-## Purpose
+## Outcome
 
-Make the current JavaScript frontend easier to understand and migrate without changing its visual direction. Separate responsibilities and remove confirmed stale assumptions before introducing TypeScript.
+The JavaScript frontend has explicit ownership for the application shell, portfolio, navigation, and scrollbar behavior. Stale route assumptions and unused code are removed, external effects clean up correctly, and the intended visual behavior is preserved so the result is a stable base for TypeScript migration.
 
-## Scope and starting findings
+## Prerequisites and current state
 
+- Start from the reviewed, committed `react-website-overhaul` state and confirm the working tree does not contain unrelated edits.
+- Run and record the current production build result before editing.
+- Record browser behavior for home, shop, contact, hero rotation, gallery controls, header visibility, and scrollbar behavior at desktop and mobile sizes.
 Reconfirm these findings against the checkout before editing:
 
 - `Portfolio.jsx` combines image discovery, slideshow timing, grid rendering, lightbox selection, image decoding, keyboard behavior, and DOM measurements.
@@ -16,19 +27,41 @@ Reconfirm these findings against the checkout before editing:
 - `App.jsx` passes a `setHomePageFlag` prop that `Portfolio` does not consume.
 - Event listeners, timers, global classes, and scroll locks need explicit ownership and cleanup, including the root scroll listener.
 
-Large source photographs, browser-side orientation discovery, and incomplete gallery accessibility are known limitations. Record their current behavior and avoid silently turning this cleanup into an image-delivery or interaction redesign.
+## Scope
 
-## Approach
+- Move application-shell ownership into `src/app/`, with `App.jsx` composing routing, navigation, and the custom scrollbar while `main.jsx` only initializes React and global styles.
+- Move portfolio ownership into `src/features/portfolio/`. Separate orchestration, hero presentation, grid presentation, controlled lightbox presentation, and photo/orientation loading into cohesive modules when doing so keeps each responsibility understandable.
+- Move the existing contact and shop route components into `src/features/inquiries/` and `src/features/shop/` without redesigning or extending them.
+- Keep `BlurImage` shared only if it remains feature-independent; otherwise colocate it with portfolio.
+- Remove the unused `setHomePageFlag` contract. Remove `NavigationContext` and `prefetch` only after confirming their behavior has no live consumer; preserve needed behavior locally if a consumer exists.
+- Give navigation visibility, scroll activity, scrollbar drag behavior, timers, listeners, observers, document classes, and scroll locks an explicit owner and cleanup path.
+- Update imports and the current-state file map in architecture documentation to match the final ownership.
 
-1. Inspect consumers and record the intended behavior of the existing routes and interactions before editing. Distinguish known defects from behavior to preserve.
-2. Keep JavaScript. Move portfolio-specific responsibilities into the portfolio feature and extract cohesive presentation or behavior units where justified. Keep shared components independent of routing and feature internals.
-3. Give navigation and scrollbar behavior separate owners. Replace hidden cross-component DOM dependencies with explicit composition or refs where practical within this cleanup.
-4. Reconcile route assumptions and remove confirmed unused props, imports, or helpers. Ensure effects release their listeners, observers, timers, and global state.
-5. Review each extraction for a clear responsibility; avoid forwarding-only wrappers, empty future directories, and broad formatting churn.
+## Non-goals
 
-No TypeScript migration, test infrastructure, new animation library, backend, commerce, image-hosting migration, or visual redesign belongs in this change. Preserve the historical `old_website/` implementation.
+- TypeScript, ESLint/test infrastructure, new animation dependencies, visual redesign, new product behavior, image optimization or hosting, backend integration, commerce, and legacy-site cleanup.
+- Changing the intended landscape-only lightbox navigation policy or completing the broader accessibility redesign without a separately approved behavior change.
 
-## Acceptance and verification
+Large source photographs, browser-side orientation discovery, and incomplete gallery accessibility remain known limitations unless a cleanup step must touch them to preserve behavior.
+
+## Deliverables
+
+- A feature-oriented JavaScript source layout with imports updated and obsolete modules removed only when proven unused.
+- Smaller cohesive portfolio and application-shell units with no hidden element-ID contract between unrelated components.
+- Correct cleanup for all affected global effects and a single owner for the custom scrollbar.
+- Updated current-state documentation plus recorded browser/build evidence and regression scenarios for plan 003.
+
+## Implementation plan
+
+1. Capture the prerequisite build and browser baseline, including known defects and behavior deliberately preserved.
+2. Establish `src/app/` and move shell-owned navigation and scrollbar behavior there. Move the root scroll listener out of the rendering entrypoint and ensure all listeners and timers are removed on cleanup.
+3. Establish the portfolio feature and split controlled presentation from orchestration. Pass behavior through props and refs rather than querying elements owned by another feature.
+4. Move the current contact and shop route components to feature ownership and update lazy route imports without changing their presentation.
+5. Search all consumers, reconcile `/` versus `/portfolio`, remove the ignored prop and confirmed dead context/prefetch code, and exercise direct route entry.
+6. Review the final source tree against `architecture.md`; collapse any forwarding-only wrapper and avoid unrelated formatting churn.
+7. Repeat the build and browser scenarios, document intentional fixes and remaining limitations, and prepare the handoffs to plans 002 and 003.
+
+## Acceptance criteria
 
 Apply the [temporary bootstrap verification exception](README.md#temporary-verification-exception-plans-001-and-002-only). Use `npm run build` and a local browser before and after the changes; record the commands and observations in the implementation PR.
 
@@ -40,9 +73,35 @@ Apply the [temporary bootstrap verification exception](README.md#temporary-verif
 - Corrected stale route assumptions and effect cleanup are explained as intentional fixes. No unexplained visual changes are introduced.
 - Production build passes. Missing lint and test tooling is reported accurately.
 
+## Verification
+
+- Run `npm run build` before editing and after every coherent ownership move that affects imports, routes, or assets; record the initial and final results.
+- Run `npm run dev` and manually exercise home, shop, contact, hero rotation, gallery open/navigate/close behavior, header visibility, and scrollbar behavior at representative desktop and mobile viewports.
+- Repeat route changes and gallery mount/unmount cycles while checking the browser console and visible document state for duplicated effects, stale classes, or retained scroll locks.
+- Run `git diff --check` and review the final diff and source tree for accidental churn, forwarding-only wrappers, dead imports, and changes outside this ticket.
+- Report linting and automated tests as unavailable until plan 003 configures them; do not invent substitute commands or claim the temporary checks are TDD.
+
+## Risks and recovery
+
+| Risk | Mitigation or recovery |
+| --- | --- |
+| Structural moves change lazy loading or asset resolution | Move one ownership area at a time and run the build plus affected routes after each coherent step. Revert the responsible step if resolution cannot be preserved in scope. |
+| Splitting effects duplicates listeners or leaves global state behind | Centralize each effect under one owner and verify repeated navigation, mount, and unmount behavior. |
+| Cleanup freezes or changes accidental behavior | Compare against the recorded baseline, call out intentional fixes in the PR, and defer ambiguous product changes. |
+| Excessive component extraction increases indirection | Require a sentence-level responsibility for every module and collapse forwarding-only layers before review. |
+
+## Definition of done
+
+- Every in-scope responsibility has an understandable owner and satisfies the acceptance criteria.
+- `npm run build` passes and before/after browser evidence is recorded; unavailable lint/test tooling is reported accurately.
+- The diff contains only cleanup, necessary file moves, documentation updates, and recorded evidence.
+- `architecture.md` and `AGENTS.md` reflect the resulting current source layout without describing future tooling as installed.
+- The PR targets `react-website-overhaul`; its link and final status are recorded in the index.
+- Plan 002 receives the final ownership map, and plan 003 receives regression scenarios and intentional behavior fixes.
+
 ## Handoff
 
-Provide plan 002 with the resulting component ownership and any remaining limitations. Provide plan 003 with the observed regression scenarios and intentional fixes to automate. Update the architecture's current-state description if file ownership changes, then update this plan's status and PR link in the index.
+Provide plan 002 with the resulting component ownership and any remaining limitations. Provide plan 003 with the observed regression scenarios and intentional fixes to automate.
 
 ## Implementation record
 
