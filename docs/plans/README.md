@@ -32,7 +32,7 @@ The stack starts from `react-website-overhaul`. The names below are planned; the
 
 | Plan | Status | Depends on | Planned branch | PR base | PR |
 | --- | --- | --- | --- | --- | --- |
-| [001 — Code cleanup](001-code-cleanup.md) | Planned | Existing frontend | `codex/code-cleanup` | `react-website-overhaul` | Not opened |
+| [001 — Code cleanup](001-code-cleanup.md) | Completed | Existing frontend | `codex/code-cleanup` | `react-website-overhaul` | [#2](https://github.com/avidixit27/avi-dixit.com/pull/2) |
 | [002 — TypeScript overhaul](002-typescript-overhaul.md) | Planned | 001 | `codex/typescript-overhaul` | `codex/code-cleanup` | Not opened |
 | [003 — Verification pipeline](003-verification-pipeline.md) | Planned | 002 | `codex/verification-pipeline` | `codex/typescript-overhaul` | Not opened |
 

@@ -36,19 +36,20 @@ The repository currently contains a JavaScript React application using Vite, Tai
 
 | Area | Current implementation |
 | --- | --- |
-| Entry and shell | `src/main.jsx` and `src/App.jsx` |
-| Routes | `/`, `/shop`, and `/contact`, declared in `App.jsx` |
-| Portfolio | `src/components/Portfolio.jsx`, combining local image discovery, hero slideshow, grid, and fullscreen gallery |
-| Navigation | `src/components/Navigation.jsx`, combining navigation, visibility behavior, DOM measurements, and custom scrollbar handling |
-| Shared state | `src/context/NavigationContext.jsx` |
+| Entry and shell | `src/main.jsx` initializes React; `src/app/App.jsx` composes the router, navigation, routes, and custom scrollbar |
+| Routes | `/`, `/shop`, and `/contact`, declared in `src/app/App.jsx` |
+| Portfolio | `src/features/portfolio/`, with separate orchestration, slideshow, grid, lightbox, photo catalog, navigation policy, and orientation loading modules |
+| Navigation | `src/app/Navigation.jsx`, which owns navigation visibility and receives the portfolio marker as an explicit prop |
+| Custom scrollbar | `src/app/CustomScrollbar.jsx`, which owns its listeners, timers, drag state, and cleanup |
+| Static resources | Application navigation data in `src/resources/navigation.js`; feature-specific product data in `src/features/shop/resources/products.js` |
 | Styling | `src/index.css` and `tailwind.config.js` |
 | Photographs | Twelve JPEG files under `src/imgs/portfolio`, totaling approximately 146 MB |
-| Shop | Placeholder products and a component-local cart; no integrated checkout |
-| Contact | Form presentation with no submission integration |
+| Shop | `src/features/shop/Shop.jsx`, with placeholder products and a component-local cart; no integrated checkout |
+| Contact | `src/features/inquiries/Contact.jsx`, with form presentation and no submission integration |
 | Legacy code | `old_website/`, retained historical implementation |
 | Verification | A lint script exists, but no ESLint configuration or test setup is present |
 
-The current UI concentrates several responsibilities in portfolio and navigation, uses some cross-component DOM coordination, and has no automated regression baseline. Specific findings and corrective work belong in the implementation plans. The boundaries below describe the intended architecture.
+The application shell and portfolio now have explicit feature-oriented ownership, cross-component DOM coordination uses an explicit element reference, and affected global effects have local cleanup paths. The repository still has no automated regression baseline. Browser-side orientation discovery, large source photographs, placeholder commerce, incomplete gallery accessibility, and missing lint/test configuration remain known limitations for later plans.
 
 ## 4. Target frontend organization
 
