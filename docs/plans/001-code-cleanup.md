@@ -105,4 +105,26 @@ Provide plan 002 with the resulting component ownership and any remaining limita
 
 ## Implementation record
 
-Not started. No implementation checks have been run for this plan. Add a concise outcome or link to PR evidence when implemented.
+Started on 2026-09-03 from the clean, committed `react-website-overhaul` baseline at `7d8bb80` on branch `codex/code-cleanup`.
+
+### Baseline and outcome
+
+- The baseline production build passed. Desktop and 390 × 844 mobile browser checks captured the home, shop, and contact routes; hero rotation; gallery controls; navigation visibility; and custom scrollbar behavior.
+- `src/main.jsx` now only initializes React and global styles. `src/app/` owns routing, navigation, and the custom scrollbar. `src/features/portfolio/` owns portfolio composition, slideshow, grid, controlled lightbox, photo catalog, landscape navigation policy, and orientation loading. Inquiries and shop route components now live with their features.
+- The unused `setHomePageFlag` prop, unconsumed navigation context, obsolete `/portfolio` prefetch helper, hidden portfolio element ID, root scroll listener, and DOM-owned timer property were removed after confirming no live consumers.
+- The portfolio marker is passed as an element reference, and every affected timer, listener, observer, document class, and scroll lock now has an explicit owner and cleanup path. `BlurImage` remains shared because it has no portfolio-specific behavior.
+
+### Verification evidence
+
+- `npm run build` passed before editing and after each coherent ownership move, including the final source layout.
+- Local browser checks passed for direct and client-side entry to `/`, `/shop`, and `/contact` at desktop and mobile sizes. The shop cart still increments and calculates its total.
+- Hero rotation preserved its five-second sequence. Hero and grid images opened the gallery; previous/next controls, arrow keys, Escape, close button, and backdrop close behavior worked with the existing landscape-only navigation policy.
+- Repeated route changes left one portfolio marker and one custom scrollbar. Gallery closure removed `modal-open`; scrollbar scrolling and dragging remained usable; the clean browser session reported no warning or error entries.
+- `git diff --check` passed. `npm run lint` remains unavailable in practice because the repository has no ESLint configuration; no lint or automated test pass is claimed under the temporary bootstrap exception.
+
+### Remaining limitations and handoff
+
+- Large bundled photographs, browser-side orientation discovery, a null lazy-loading fallback, incomplete lightbox focus containment/restoration, placeholder shop behavior, and the contact form without submission remain unchanged and outside this cleanup.
+- Plan 002 should migrate the resulting ownership map directly and add strict contracts for route resources, photo records, feature props, and navigation helpers without reorganizing these responsibilities again.
+- Plan 003 should automate direct route rendering, hero timer behavior with a controlled clock, gallery open/navigation/close and scroll-lock cleanup, cart totals, repeated mount/navigation cleanup, and desktop/mobile component behavior.
+- The implementation is complete locally. Record the PR link and update the plan index status when the branch is published and reviewed.
