@@ -64,11 +64,12 @@ src/
     publishing/          Future owner publishing interface
   components/            Shared presentation and photography components
   api/                   Shared HTTP transport, introduced when needed
+  resources/             App-wide static copy, metadata, and typed catalogs
   styles/                Global styles and design tokens
   assets/                Bundled branding, icons, and other static assets
 ```
 
-This is an ownership map, not a scaffolding checklist. Create a directory only when its first real implementation needs it. Keep feature-specific components, hooks, types, helpers, constants, and tests together. Do not move assets or add empty publishing modules merely to match the diagram.
+This is an ownership map, not a scaffolding checklist. Create a directory only when its first real implementation needs it. Keep feature-specific components, hooks, types, helpers, constants, resources, and tests together. Do not move assets or add empty publishing modules merely to match the diagram.
 
 ### Allowed dependency directions
 
@@ -76,8 +77,9 @@ This is an ownership map, not a scaffolding checklist. Create a directory only w
 | --- | --- |
 | Application | Compose routes, layout, and providers; coordinate workflows spanning features |
 | Routes | Connect route parameters and page metadata to feature entrypoints |
-| Features | Own business behavior; use shared components, transport, styles, and their own internal modules |
-| Shared components | Render through explicit props; use shared presentation helpers and styles |
+| Features | Own business behavior; use shared components, resources, transport, styles, and their own internal modules |
+| Shared components | Render through explicit props; use shared presentation helpers, resources, and styles |
+| Shared resources | Export immutable application-wide content and catalog data without importing React, routes, features, or transport |
 | Shared transport | Handle common HTTP mechanics without importing UI or feature behavior |
 
 - Shared components must not import routes, application providers, feature internals, or perform business API requests.
@@ -92,15 +94,23 @@ There is no assumed backend directory in this repository.
 
 ## 5. React components, state, and types
 
+**Agreed direction:** follow the official Rules of React and the guidance applicable to the repository's installed React major. Treat React's recommended Hooks lint rules as correctness rules when linting is configured. Record a deliberate exception when a product or integration constraint requires one; do not preserve a known anti-pattern merely because it currently renders.
+
 ### Component responsibilities
 
 Build components around responsibilities a maintainer can describe in a sentence. A gallery layout, photo presentation component, and lightbox can be separate even if each initially has one caller. Reuse count is one reason to extract code, not a prerequisite.
 
+- Treat components and Hooks as pure, idempotent calculations of their inputs. Never mutate props, state, Hook arguments, catalog data, or non-local values during render.
 - Prefer explicit props, callbacks, children, and composition.
 - Use a small set of meaningful variants for supported presentation differences. Avoid accumulating unrelated boolean flags or one universal component for every page.
 - Keep page composition in routes and features; keep generic components independent of the current URL and backend storage representation.
 - Reuse established components before introducing another implementation of the same responsibility.
+- Declare components and Hooks at module scope so their identity remains stable across renders. Use stable domain IDs or slugs for list keys; do not use array positions when items can be inserted, removed, filtered, or reordered.
+- Extract a custom Hook when a specific stateful behavior needs reuse or isolation. A Hook shares logic, not state; lift shared state to the nearest common owner.
+- Preserve a component's controlled or uncontrolled contract over its lifetime. Model required callbacks and supported variants explicitly rather than inferring behavior from DOM state.
 - Do not wrap a component simply to rename or forward all its props. Wrappers should own a meaningful adaptation or behavior.
+- Add memoization only for a measured rendering cost or a required stable reference. Do not scatter `memo`, `useMemo`, or `useCallback` as default ceremony.
+- Use route or feature error boundaries where a localized render failure needs recoverable fallback UI. Pair lazy-loaded boundaries with meaningful loading and failure states.
 - Treat approximately 200 lines of hand-written source as a prompt to review responsibility and readability. It is not a hard limit, and it does not constrain architecture documentation or generated files.
 
 For example, a photo display component can accept source variants, dimensions, alt text, and presentation options. The portfolio feature decides which photograph is selected and how selection changes. A generic image component should not discover routes, query a database, or decide publication status.
@@ -109,11 +119,14 @@ For example, a photo display component can accept source variants, dimensions, a
 
 - Keep state local until multiple consumers require shared ownership. Lift it to the nearest common owner before introducing a global provider.
 - Use Context for a real shared concern across a subtree; ordinary component customization uses props.
-- Derive values from existing state rather than storing synchronized copies.
+- Keep state minimal and normalized: group values that change together, avoid contradictory or deeply nested shapes, and derive values from props or existing state rather than storing synchronized copies.
+- Represent mutually exclusive workflow states with one status or a discriminated union instead of combinations of booleans that permit impossible states.
 - Use URL state for navigation and shareable selections when the product requires them. Keep temporary interaction details local.
 - Effects synchronize with external systems. Do not use effects for values that can be calculated during rendering.
+- Put user-triggered work in event handlers. Keep every Effect dependency complete, make setup and cleanup symmetrical, and handle stale or cancelled asynchronous work when results can arrive after inputs change or a component unmounts.
 - Give timers, listeners, observers, scroll locks, and DOM measurements an explicit owner and cleanup path.
-- Use refs for DOM integration; avoid hidden contracts based on another component's element IDs or body classes.
+- Use refs for DOM integration and non-rendering mutable values. Do not read or write refs during render, and avoid hidden contracts based on another component's element IDs or body classes.
+- Enable React Strict Mode in development after the bootstrap cleanup makes effects safe to set up, clean up, and repeat. Fix the effect when Strict Mode exposes a lifecycle problem; do not disable the check to hide it.
 - Introduce a reducer or state library only when an actual workflow demonstrates the need.
 
 ### TypeScript direction
@@ -122,7 +135,21 @@ For example, a photo display component can accept source variants, dimensions, a
 
 TypeScript improves component contracts and refactoring feedback. It does not prove that behavior is correct or validate incoming JSON. Validate external data at the integration boundary. Avoid routine use of `any`, unchecked assertions, and suppression comments to bypass a design problem.
 
-Keep types near their owners. A type declaration does not require a new file. Do not build elaborate generic abstractions for hypothetical future variants.
+Keep types near their owners. A type declaration does not require a new file. Use descriptive domain names such as `Photo`, `Collection`, or `NavigationItem`; do not add `I` prefixes or vague containers such as `Data` when the domain supplies a clearer name.
+
+Use interfaces for stable object-shaped contracts such as component props and domain records when declaration extension is useful. Use type aliases for unions, tuples, mapped or conditional types, and finite workflow states. Prefer inference for local implementation details, literal unions or `as const` data over runtime enums when no enum behavior is needed, and `readonly` contracts for data that consumers must not mutate. Choose the construct that communicates the real shape; do not create parallel interface and type layers for the same value.
+
+### Static resources and catalog data
+
+**Agreed direction:** introduce `src/resources/` with the first application-wide catalog migration. It owns static text, site metadata, shared navigation definitions, and other immutable structured content used across features. Binary images, fonts, and icons remain in `assets/`; editable or server-provided content does not belong in the static resource catalog.
+
+- Organize resources by domain in focused files such as `site.ts`, `navigation.ts`, or `metadata.ts`. Do not create a single miscellaneous copy or constants file.
+- Keep feature-specific text and catalogs inside the owning feature, for example `src/features/portfolio/resources/`. A one-off label that is clearer beside its component may remain local; centralize content when it is shared, structured, independently maintained, or needs a stable identifier.
+- Keep catalog modules data-only. They must not contain JSX, Hooks, browser effects, API calls, or imports from routes and feature internals.
+- Represent each catalog entry as a typed datum with a stable `id` or slug separate from its display text. Store collections as immutable arrays or records so UI components can map them with stable keys.
+- When TypeScript is available, validate catalogs without widening their useful literals, for example with `as const satisfies readonly NavigationItem[]`. Derive types from the source data when that prevents a second schema from drifting; declare an interface when consumers need an explicit durable contract.
+- Do not duplicate user-editable or backend-owned data into resources. Map validated external data into feature-owned models at the integration boundary.
+- Do not introduce an internationalization framework until localization is approved. Resource ownership should make a later migration possible without inventing translation keys prematurely.
 
 ## 6. Visual system and external components
 
@@ -261,7 +288,13 @@ Do not introduce new layers merely to imitate an architecture pattern. A new mod
 
 ### Tooling references
 
+- [React: Components and Hooks must be pure](https://react.dev/reference/rules/components-and-hooks-must-be-pure)
+- [React: Choosing the state structure](https://react.dev/learn/choosing-the-state-structure)
+- [React: Reusing logic with custom Hooks](https://react.dev/learn/reusing-logic-with-custom-hooks)
+- [React Hooks ESLint rules](https://react.dev/reference/eslint-plugin-react-hooks)
 - [TypeScript overview](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
+- [TypeScript everyday types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html)
+- [TypeScript `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator)
 - [ESLint configuration](https://eslint.org/docs/latest/use/configure/configuration-files)
 - [Type-aware linting](https://typescript-eslint.io/getting-started/typed-linting/)
 - [Vitest guide](https://vitest.dev/guide/)
