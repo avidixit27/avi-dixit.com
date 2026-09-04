@@ -32,7 +32,7 @@ The first product milestone is the portfolio and inquiries experience. Publishin
 
 ## 3. Current repository
 
-The repository currently contains a strict TypeScript React application using Vite, Tailwind, and React Router. The manifest specifies React 18, Vite 5, Tailwind 3, React Router 7, and TypeScript 5 version ranges; these are existing dependencies, not permanent version requirements.
+The repository currently contains a strict TypeScript React application using Vite, Tailwind, and React Router. The manifest specifies React 18, Vite 8, Tailwind 3, React Router 7, and TypeScript 5 version ranges; these are existing dependencies, not permanent version requirements.
 
 | Area             | Current implementation                                                                                                                               |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -235,7 +235,7 @@ Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-c
 | Pull-request checks           | Four independent GitHub Actions jobs                                                       |
 | Security                      | Dependabot, dependency review, production npm audit, CodeQL, and secret scanning           |
 
-The manifest and lockfile are the source of truth for installed versions. The verification stack intentionally stays compatible with Vite 5: Vitest 2, Cypress 14, and ESLint 9 are pinned through the lockfile. Cypress is the selected browser test system; do not add Playwright or a duplicate component test stack without a specific requirement.
+The manifest and lockfile are the source of truth for installed versions. The maintained verification baseline uses Vite 8 with Rolldown, Vitest 5, Cypress 16, and ESLint 9. ESLint remains on version 9 until the installed React and JSX accessibility plugins declare ESLint 10 support; do not override incompatible peer ranges. Tailwind 4 migration belongs to Plan 006 because its configuration and design-token changes require visual review. Cypress is the selected browser test system; do not add Playwright or a duplicate component test stack without a specific requirement.
 
 ### Test boundaries
 

@@ -6,11 +6,13 @@ export default defineConfig({
   assetsInclude: ["**/*.JPG"],
   build: {
     sourcemap: false,
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          react: ["react", "react-dom"],
-          router: ["react-router-dom"],
+        codeSplitting: {
+          groups: [
+            { name: "react", test: /node_modules\/react(?:-dom)?\// },
+            { name: "router", test: /node_modules\/react-router(?:-dom)?\// },
+          ],
         },
       },
     },

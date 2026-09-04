@@ -1,14 +1,14 @@
 # 004 — Modernize the frontend toolchain
 
-| Field          | Value                                  |
-| -------------- | -------------------------------------- |
-| Type           | Tooling                                |
-| Status         | Tracked in the [plan index](README.md) |
-| Depends on     | Plans 001–003 merged into `main`       |
-| Blocks         | 005 and subsequent feature work        |
-| Planned branch | `chore/toolchain-modernization`        |
-| PR base        | `main`                                 |
-| PR             | Not opened                             |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| Type           | Tooling                                                    |
+| Status         | Tracked in the [plan index](README.md)                     |
+| Depends on     | Plans 001–003 merged into `main`                           |
+| Blocks         | 005 and subsequent feature work                            |
+| Planned branch | `chore/toolchain-modernization`                            |
+| PR base        | `main`                                                     |
+| PR             | [#14](https://github.com/avidixit27/avi-dixit.com/pull/14) |
 
 ## Outcome
 
@@ -98,4 +98,18 @@ The development and CI toolchain runs on mutually supported releases, installs u
 
 ## Implementation record
 
-Not started. Record version groups, migration decisions, Tailwind/ESLint ownership, audit changes, baseline/final commands, visual review, CI evidence, remaining upstream blockers, and PR link.
+Started on `chore/toolchain-modernization` from merged `main` at `aba77c6`.
+
+- The baseline ran on Node `22.23.2`, the available supported Node 22 patch release; `.nvmrc` and CI remain pinned to `22.22.2`. `npm run check` passed 3 unit tests, 7 component tests, and 4 production E2E journeys. Focused photo-navigation coverage remained 91.66% statements. The build completed in 1.21 seconds. `npm run security:audit` found zero production vulnerabilities, while the full audit found 19 development findings: 2 critical, 10 high, 5 moderate, and 2 low.
+- The engine range is `^22.22.2 || ^24.0.0`, which admits the two tested toolchain release lines and rejects odd Node 23/25 releases. Future Node release lines require an intentional compatibility update.
+- Vite `8.2.2` and `@vitejs/plugin-react` `6.1.1` moved atomically with Vitest and coverage `5.0.0` because their peer ranges cannot be migrated independently. Vite's removed object-form `manualChunks` configuration became Rolldown `codeSplitting` groups while preserving the React and router chunks.
+- Cypress moved from `14.5.4` to `16.0.0`; `@cypress/react` remains at its current `10.0.0` release. The component and E2E spec patterns, test counts, screenshots, real styles, and Chrome execution remain intact.
+- PostCSS `8.5.28`, Autoprefixer `10.5.5`, and eslint-plugin-react `7.37.5` are explicit maintained ranges. A clean lockfile refresh also updates patched Browserslist and transitive releases.
+- ESLint remains at `9.39.5`. The current `eslint-plugin-react` and `eslint-plugin-jsx-a11y` peer ranges accept ESLint 9 but reject ESLint 10, so forcing core 10 would create an invalid graph. Upgrade ESLint when both plugins publish compatible releases. This leaves an install-time deprecation notice but no audit finding.
+- Tailwind 4 is assigned to Plan 006. Its CSS-first configuration and design-token migration belong with the protected visual-system change rather than being performed twice.
+
+- A final clean `npm ci --no-audit` on Node `22.23.2` completed without `EBADENGINE`; its only warning is the recorded ESLint 9 deprecation. An offline Node `23.6.1` dry run emits `EBADENGINE` for the root project and incompatible tools, proving the manifest no longer claims Node 23 support.
+- Final `npm run check` passes lint, formatting, strict application/Cypress types, 3 unit tests, 7 component tests, the Vite 8 production build, and 4 E2E journeys in Chrome 152. `npm run test:unit:coverage` passes; Vitest 5 reports 100% statement/line coverage for `photoNavigation.ts` and 20% statements across the deliberately broad configured source include.
+- Final `npm audit` and `npm run security:audit` both report zero vulnerabilities. The production build completes in 0.78 seconds with explicit React/router chunks; the existing approximately 146 MB source-photo payload remains for Plan 005.
+- Browser review of the built `/`, `/shop`, and `/contact` routes confirmed the expected navigation, portfolio controls, product/cart presentation, and inquiry form. Cypress separately passed the 390-by-844 mobile journey and reduced-motion rendering scenario.
+- Implementation is published in [PR #14](https://github.com/avidixit27/avi-dixit.com/pull/14); final GitHub Actions evidence is recorded after the latest revision completes.
