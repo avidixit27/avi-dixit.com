@@ -8,7 +8,7 @@
 | Status         | Tracked in the [plan index](README.md) |
 | Depends on     | Plan ID or repository state            |
 | Blocks         | Plan IDs or `None`                     |
-| Planned branch | `codex/descriptive-name`               |
+| Planned branch | `feat/descriptive-name`                |
 | PR base        | Immediate parent branch                |
 | PR             | Not opened                             |
 
