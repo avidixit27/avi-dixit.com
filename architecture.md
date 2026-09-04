@@ -38,18 +38,18 @@ The repository currently contains a strict TypeScript React application using Vi
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Entry and shell  | `src/main.tsx` initializes React; `src/app/App.tsx` composes the router, navigation, routes, and custom scrollbar                                    |
 | Routes           | `/`, `/shop`, and `/contact`, declared in `src/app/App.tsx`                                                                                          |
-| Portfolio        | `src/features/portfolio/`, with separate orchestration, slideshow, grid, lightbox, photo catalog, navigation policy, and orientation loading modules |
+| Portfolio        | `src/features/portfolio/`, with separate orchestration, slideshow, grid, lightbox, typed photo catalog, and navigation policy modules                |
 | Navigation       | `src/app/Navigation.tsx`, which owns navigation visibility and receives the portfolio marker as an explicit prop                                     |
 | Custom scrollbar | `src/app/CustomScrollbar.tsx`, which owns its listeners, timers, drag state, and cleanup                                                             |
 | Static resources | Typed application navigation data in `src/resources/navigation.ts`; typed feature-specific product data in `src/features/shop/resources/products.ts` |
 | Styling          | `src/index.css` and `tailwind.config.js`                                                                                                             |
-| Photographs      | Twelve JPEG files under `src/imgs/portfolio`, totaling approximately 146 MB                                                                          |
+| Photographs      | Twelve approximately 146 MB JPEG editing sources under `src/imgs/portfolio`; Vite produces delivery-sized JPEG/WebP variants during builds           |
 | Shop             | `src/features/shop/Shop.tsx`, with placeholder products and a component-local cart; no integrated checkout                                           |
 | Contact          | `src/features/inquiries/Contact.tsx`, with form presentation and no submission integration                                                           |
 | Legacy code      | `old_website/`, retained historical implementation                                                                                                   |
 | Verification     | ESLint, Prettier, strict TypeScript, Vitest, Cypress component and E2E tests, Husky/lint-staged, and pull-request CI are configured                  |
 
-The application shell and portfolio now have explicit feature-oriented ownership, cross-component DOM coordination uses an explicit element reference, and affected global effects have local cleanup paths. Automated regression coverage protects photo navigation, gallery timers and listeners, route links, contact-form presentation, shop cart behavior, and core desktop/mobile gallery journeys. Browser-side orientation discovery, large source photographs, placeholder commerce, and incomplete gallery focus management remain known limitations for later plans.
+The application shell and portfolio now have explicit feature-oriented ownership, cross-component DOM coordination uses an explicit element reference, and affected global effects have local cleanup paths. Automated regression coverage protects photo navigation, gallery timers and listeners, route links, contact-form presentation, shop cart behavior, and core desktop/mobile gallery journeys. The responsive catalog supplies intrinsic dimensions and generated sources without exposing original photographs to browsers. Large editing sources remain in Git, while placeholder commerce and incomplete gallery focus management remain known limitations for later plans.
 
 ## 4. Target frontend organization
 
@@ -189,11 +189,19 @@ Adapt adopted components to the project's TypeScript contracts, tokens, accessib
 - Lightboxes need clear controls, focus containment and restoration, and predictable scroll recovery.
 - Essential content and controls must remain available when animation is reduced or disabled.
 - Check both normal motion and reduced motion; do not use the reduced-motion case to hide animation defects.
-- Preserve image aspect ratios and known dimensions to limit layout movement. Plan responsive image variants and deliberate eager/lazy loading.
+- Preserve image aspect ratios and known dimensions to limit layout movement.
+- Keep editing originals out of browser imports. Generate responsive delivery assets through the configured Vite image pipeline, and expose them through the typed photo catalog rather than constructing URLs in presentation components.
+- Give only the first-view hero image high fetch priority. Prepare the next slideshow image without mounting the entire sequence, and lazy load gallery images below the fold.
 - Review real photographs at representative portrait and landscape sizes, including slow loading and failed images.
 - Assess bundle size and rendering cost before adopting heavy effects. Avoid unrelated global listeners, permanent animation loops, and unnecessary offscreen work.
 
 Use [Motion's accessibility guidance](https://motion.dev/docs/react-accessibility) when implementing animation behavior. Review selected components with actual site content before treating them as reusable standards.
+
+### Responsive media pipeline
+
+**Current:** `vite-imagetools` transforms portfolio editing sources during `npm run build`. `vite.config.mts` owns the responsive widths, fallback width, and quality setting. The portfolio catalog maps generated, hashed JPEG and WebP URLs into a provider-neutral `Photo` contract with stable IDs, meaningful alternative text, intrinsic dimensions, aspect ratios, and source sets. Shared image presentation consumes that contract through explicit props.
+
+Keep media transformation and URL ownership at the build/catalog boundary. Components must not import an original portfolio photograph directly or know whether a source came from Vite, a future CDN, or another media service. A future hosting migration should replace the catalog adapter while retaining the component contract. Preserve originals as editing inputs unless an approved source-management plan moves them elsewhere. Validate production output size and representative photographic quality whenever widths, formats, or compression settings change.
 
 ## 7. Backend integration — work in progress
 

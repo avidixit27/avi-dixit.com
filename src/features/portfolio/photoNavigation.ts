@@ -1,5 +1,20 @@
 export type PhotoDirection = -1 | 1;
 
+const LANDSCAPE_ASPECT_RATIO = 1.2;
+
+interface IntrinsicImageSize {
+  readonly width: number;
+  readonly height: number;
+}
+
+export function getLandscapePhotoIndices(
+  photos: readonly IntrinsicImageSize[],
+): readonly number[] {
+  return photos.flatMap((photo, index) =>
+    photo.width > photo.height * LANDSCAPE_ASPECT_RATIO ? [index] : [],
+  );
+}
+
 export function getAdjacentPhotoIndex(
   currentIndex: number | null,
   eligibleIndices: readonly number[],

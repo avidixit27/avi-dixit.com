@@ -7,8 +7,8 @@
 | Depends on     | 004                                    |
 | Blocks         | 006, 007, and media-heavy feature work |
 | Planned branch | `feat/responsive-media-foundation`     |
-| PR base        | `chore/toolchain-modernization`        |
-| PR             | Not opened                             |
+| PR base        | `fix/dependabot-compatibility-guards`  |
+| PR             | Pending                                |
 
 ## Outcome
 
@@ -100,4 +100,26 @@ The current portfolio no longer serves full-resolution originals for every brows
 
 ## Implementation record
 
-Not started. Record the selected derivative approach, before/after measurements, loading decisions, visual review, commands, CI evidence, remaining limitations, and PR link.
+Implemented on `feat/responsive-media-foundation` from `fix/dependabot-compatibility-guards` at `75bd5cc`.
+
+### Baseline and approach
+
+The Plan 004 production build emitted approximately 150 MB. Its twelve 6000×4000 editing originals occupied 153,092,098 bytes, and the largest original was 14,123,008 bytes. The home route mounted eight original hero images, discovered orientation by loading photographs in the browser, and exposed no responsive source metadata.
+
+Two local derivative approaches were evaluated. A custom Sharp script would provide low-level control but would add a generator and output-management workflow that the application would own. `vite-imagetools` 12 is compatible with the installed Node 22 and Vite 8 baseline, uses Sharp internally, integrates transforms with Vite's content hashing and cache, strips metadata by default, and supports the existing eager glob catalog. The Vite plugin was selected to keep generation in the existing build command and avoid committing 96 generated binaries. The typed catalog remains the replacement boundary for a future CDN.
+
+### Implemented behavior
+
+- `vite.config.mts` centrally defines 480, 960, 1440, and 2160 pixel responsive widths, a 1440 pixel JPEG fallback, and quality 82. `npm run build` is the derivative-generation command.
+- Every catalog entry now has a stable ID, meaningful alternative text, intrinsic dimensions, aspect ratio, a JPEG `srcset`, and a WebP source. Presentation components receive URLs through this contract and do not import originals.
+- `ResponsiveImage` makes sources, sizes, dimensions, decoding, loading, and fetch priority explicit. The hero and lightbox use `100vw` and `95vw`; the grid's sizes match its one-, two-, and three-column breakpoints.
+- The hero mounts only its active and next images. Only the initial active image receives high priority, and rotation waits until the next image has loaded. Grid media is lazy and low priority; an opened lightbox image is eager and high priority.
+- Catalog dimensions replaced browser-side orientation loading, so rendering no longer decodes every original merely to identify landscape images.
+
+### Results and verification
+
+The production build emits 96 hashed derivatives: four widths in JPEG and WebP for each of twelve photographs. They total 8,673,148 bytes; the entire `dist` directory is 12,775,083 bytes, and the largest derivative is 520,052 bytes. This reduces total build output by about 91% and portfolio media by about 94%. No original 10–14 MB JPEG is emitted. A cold build after removing the image-transform cache reproduced identical filenames and SHA-256 content hashes and completed in 6.24 seconds.
+
+Component and browser tests cover responsive markup, intrinsic dimensions, loading priority, the two-image hero window, readiness-gated rotation, gallery behavior, mobile access, and reduced-motion rendering. The portrait and representative landscape derivatives were reviewed at full generated resolution; orientation, film texture, gradients, highlights, and shadow detail remain suitable at quality 82. `npm run check`, `npm run security:audit`, and the full development-dependency `npm audit --audit-level=moderate` pass locally on Node 22.23.2. Pull-request CI results are recorded with the PR.
+
+The editing originals still occupy approximately 146 MB in Git. Their long-term source storage and any CDN remain open. The current build cost is dominated by image transformation on a clean cache; subsequent plans should measure it as the catalog grows rather than increasing derivative tiers preemptively.

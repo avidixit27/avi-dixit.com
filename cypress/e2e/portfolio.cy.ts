@@ -1,4 +1,36 @@
 describe("photography portfolio", () => {
+  it("serves responsive media with bounded first-view priority", () => {
+    cy.visit("/");
+
+    cy.get('[aria-label="Open hero image gallery"] img')
+      .should("have.length", 2)
+      .first()
+      .should("have.attr", "srcset")
+      .and("match", /480w.*960w.*1440w.*2160w/);
+    cy.get('[aria-label="Open hero image gallery"] img')
+      .first()
+      .should("have.attr", "fetchpriority", "high")
+      .should(($image) => {
+        expect($image.attr("width")).to.match(/^\d+$/);
+        expect($image.attr("height")).to.match(/^\d+$/);
+      });
+    cy.get('[aria-label="Open hero image gallery"] img')
+      .eq(1)
+      .should("have.attr", "fetchpriority", "low");
+
+    cy.get('[aria-label^="Open "] img')
+      .eq(2)
+      .should("have.attr", "loading", "lazy")
+      .and("have.attr", "fetchpriority", "low")
+      .and("have.attr", "sizes")
+      .and("contain", "min-width: 1024px");
+
+    cy.get('[aria-label="Open hero image gallery"] img')
+      .first()
+      .should("have.prop", "currentSrc")
+      .and("match", /-[\w-]+\.(?:jpg|webp)$/);
+  });
+
   it("opens, navigates, and closes the gallery", () => {
     cy.visit("/");
     cy.get('[aria-label="Open hero image gallery"]')
@@ -29,7 +61,7 @@ describe("photography portfolio", () => {
     cy.visit("/");
     cy.contains("a", "SHOP").should("be.visible");
     cy.get('[aria-label="Open hero image gallery"]').should("be.visible");
-    cy.get('[aria-label^="Open Photo"]')
+    cy.get('main [aria-label^="Open "]')
       .first()
       .scrollIntoView()
       .should("be.visible");

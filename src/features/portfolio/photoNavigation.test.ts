@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getAdjacentPhotoIndex } from "./photoNavigation";
+import {
+  getAdjacentPhotoIndex,
+  getLandscapePhotoIndices,
+} from "./photoNavigation";
 
 describe("getAdjacentPhotoIndex", () => {
   const landscapeIndices = [1, 4, 7] as const;
@@ -21,5 +24,17 @@ describe("getAdjacentPhotoIndex", () => {
     expect(getAdjacentPhotoIndex(5, landscapeIndices, -1)).toBe(4);
     expect(getAdjacentPhotoIndex(9, landscapeIndices, 1)).toBe(1);
     expect(getAdjacentPhotoIndex(0, landscapeIndices, -1)).toBe(7);
+  });
+});
+
+describe("getLandscapePhotoIndices", () => {
+  it("uses intrinsic dimensions without loading browser images", () => {
+    expect(
+      getLandscapePhotoIndices([
+        { width: 6000, height: 4000 },
+        { width: 4000, height: 6000 },
+        { width: 1800, height: 1000 },
+      ]),
+    ).toEqual([0, 2]);
   });
 });

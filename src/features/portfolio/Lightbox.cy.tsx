@@ -2,10 +2,28 @@ import { mount } from "@cypress/react";
 import Lightbox from "./Lightbox";
 import type { Photo } from "./photoCatalog";
 
+function createPhoto(id: string, alt: string): Photo {
+  return {
+    id,
+    src: `/${id}.jpg`,
+    srcSet: `/${id}-480.jpg 480w, /${id}-960.jpg 960w`,
+    sources: [
+      {
+        type: "image/webp",
+        srcSet: `/${id}-480.webp 480w, /${id}-960.webp 960w`,
+      },
+    ],
+    width: 6000,
+    height: 4000,
+    aspectRatio: 1.5,
+    alt,
+  };
+}
+
 const photos = [
-  { id: "first", src: "/favicon.ico", alt: "First test photo" },
-  { id: "portrait", src: "/favicon.ico", alt: "Portrait test photo" },
-  { id: "last", src: "/favicon.ico", alt: "Last test photo" },
+  createPhoto("first", "First test photo"),
+  createPhoto("portrait", "Portrait test photo"),
+  createPhoto("last", "Last test photo"),
 ] as const satisfies readonly Photo[];
 
 function pressKey(key: string) {
@@ -27,6 +45,11 @@ describe("Lightbox", () => {
       />,
     );
 
+    cy.get('[role="dialog"] img')
+      .should("have.attr", "loading", "eager")
+      .and("have.attr", "fetchpriority", "high")
+      .and("have.attr", "decoding", "async")
+      .and("have.attr", "sizes", "95vw");
     cy.get('[aria-label="Next image"]').click();
     cy.get("@onSelect").should("have.been.calledOnceWith", 2);
     pressKey("ArrowLeft");

@@ -1,6 +1,9 @@
 import type { Ref } from "react";
-import BlurImage from "../../components/BlurImage";
+import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
+
+const GRID_IMAGE_SIZES =
+  "(min-width: 1024px) calc((100vw - 8rem) / 3), (min-width: 768px) calc((100vw - 6rem) / 2), calc(100vw - 4rem)";
 
 interface PhotoGridProps {
   photos: readonly Photo[];
@@ -27,9 +30,16 @@ export default function PhotoGrid({
               onClick={() => onOpen(index)}
               aria-label={`Open ${photo.alt}`}
             >
-              <BlurImage
+              <ResponsiveImage
                 src={photo.src}
+                srcSet={photo.srcSet}
+                sources={photo.sources}
+                sizes={GRID_IMAGE_SIZES}
+                width={photo.width}
+                height={photo.height}
                 alt={photo.alt}
+                loading="lazy"
+                fetchPriority="low"
                 className="w-full h-auto rounded-lg"
               />
             </button>

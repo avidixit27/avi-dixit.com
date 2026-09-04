@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
 
 const HERO_ROTATION_DELAY_MS = 5000;
+const HERO_IMAGE_SIZES = "100vw";
 
 interface HeroSlideshowProps {
   photos: readonly Photo[];
@@ -10,16 +12,31 @@ interface HeroSlideshowProps {
 
 export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const loadedPhotoIdsRef = useRef(new Set<string>());
+
+  const markPhotoLoaded = useCallback((photoId: string) => {
+    loadedPhotoIdsRef.current.add(photoId);
+  }, []);
 
   useEffect(() => {
     if (photos.length === 0) return undefined;
     const interval = setInterval(() => {
-      setActiveIndex((index) => (index + 1) % photos.length);
+      setActiveIndex((index) => {
+        const nextIndex = (index + 1) % photos.length;
+        const nextPhoto = photos[nextIndex];
+        return nextPhoto && loadedPhotoIdsRef.current.has(nextPhoto.id)
+          ? nextIndex
+          : index;
+      });
     }, HERO_ROTATION_DELAY_MS);
     return () => clearInterval(interval);
-  }, [photos.length]);
+  }, [photos]);
 
   if (photos.length === 0) return null;
+
+  const nextIndex = (activeIndex + 1) % photos.length;
+  const visibleIndices =
+    nextIndex === activeIndex ? [activeIndex] : [activeIndex, nextIndex];
 
   return (
     <button
@@ -28,16 +45,30 @@ export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
       onClick={() => onOpen(activeIndex)}
       aria-label="Open hero image gallery"
     >
-      {photos.map((photo, index) => (
-        <img
-          key={photo.id}
-          src={photo.src}
-          alt={photo.alt}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-            index === activeIndex ? "opacity-100" : "opacity-0"
-          }`}
-        />
-      ))}
+      {visibleIndices.map((index) => {
+        const photo = photos[index];
+        if (!photo) return null;
+        const isActive = index === activeIndex;
+        const isInitialHero = isActive && index === 0;
+        return (
+          <ResponsiveImage
+            key={photo.id}
+            src={photo.src}
+            srcSet={photo.srcSet}
+            sources={photo.sources}
+            sizes={HERO_IMAGE_SIZES}
+            width={photo.width}
+            height={photo.height}
+            alt={photo.alt}
+            loading="eager"
+            fetchPriority={isInitialHero ? "high" : "low"}
+            onLoad={() => markPhotoLoaded(photo.id)}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+              isActive ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        );
+      })}
     </button>
   );
 }

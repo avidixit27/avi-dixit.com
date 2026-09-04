@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
 import type { PhotoDirection } from "./photoNavigation";
 import { getAdjacentPhotoIndex } from "./photoNavigation";
@@ -6,6 +7,7 @@ import { getAdjacentPhotoIndex } from "./photoNavigation";
 const CLOSE_DURATION_MS = 150;
 const CLOSE_BUTTON_TOP_OFFSET_PX = 12;
 const DEFAULT_CLOSE_BUTTON_TOP_PX = 24;
+const LIGHTBOX_IMAGE_SIZES = "95vw";
 
 interface LightboxProps {
   photos: readonly Photo[];
@@ -189,14 +191,20 @@ export default function Lightbox({
         </>
       )}
 
-      <img
+      <ResponsiveImage
         key={selectedIndex}
-        ref={imageRef}
+        imageRef={imageRef}
         src={photo.src}
+        srcSet={photo.srcSet}
+        sources={photo.sources}
+        sizes={LIGHTBOX_IMAGE_SIZES}
+        width={photo.width}
+        height={photo.height}
         alt={photo.alt}
+        loading="eager"
+        fetchPriority="high"
         className="relative z-10 max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
         onLoad={updateCloseButton}
-        draggable="false"
       />
     </div>
   );
