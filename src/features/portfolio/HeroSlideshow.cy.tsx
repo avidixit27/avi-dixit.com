@@ -10,11 +10,15 @@ const photos = [
 describe("HeroSlideshow", () => {
   it("rotates predictably and opens the active photo", () => {
     cy.clock();
+    cy.window().then((window) =>
+      cy.spy(window, "setInterval").as("rotationInterval"),
+    );
     const onOpen = cy.spy().as("onOpen");
 
     mount(<HeroSlideshow photos={photos} onOpen={onOpen} />);
 
     cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.get("@rotationInterval").should("have.been.calledOnce");
     cy.tick(5001);
     cy.get('img[alt="Second test photo"]').should("have.class", "opacity-100");
     cy.get('[aria-label="Open hero image gallery"]').click();
