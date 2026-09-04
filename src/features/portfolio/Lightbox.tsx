@@ -1,0 +1,203 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { Photo } from "./photoCatalog";
+import type { PhotoDirection } from "./photoNavigation";
+import { getAdjacentPhotoIndex } from "./photoNavigation";
+
+const CLOSE_DURATION_MS = 150;
+const CLOSE_BUTTON_TOP_OFFSET_PX = 12;
+const DEFAULT_CLOSE_BUTTON_TOP_PX = 24;
+
+interface LightboxProps {
+  photos: readonly Photo[];
+  selectedIndex: number;
+  landscapeIndices: readonly number[];
+  onSelect: (index: number) => void;
+  onClosed: () => void;
+}
+
+export default function Lightbox({
+  photos,
+  selectedIndex,
+  landscapeIndices,
+  onSelect,
+  onClosed,
+}: LightboxProps) {
+  const imageRef = useRef<HTMLImageElement>(null);
+  const closeTimerRef = useRef<number | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const [closeButtonTop, setCloseButtonTop] = useState(
+    DEFAULT_CLOSE_BUTTON_TOP_PX,
+  );
+
+  const updateCloseButton = useCallback(() => {
+    if (!imageRef.current) return;
+    const imageRect = imageRef.current.getBoundingClientRect();
+    setCloseButtonTop(imageRect.top - CLOSE_BUTTON_TOP_OFFSET_PX);
+  }, []);
+
+  const requestClose = useCallback(() => {
+    if (closeTimerRef.current) return;
+    setIsClosing(true);
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
+      onClosed();
+    }, CLOSE_DURATION_MS);
+  }, [onClosed]);
+
+  const selectAdjacent = useCallback(
+    (direction: PhotoDirection) => {
+      const nextIndex = getAdjacentPhotoIndex(
+        selectedIndex,
+        landscapeIndices,
+        direction,
+      );
+      if (nextIndex != null) {
+        setIsClosing(false);
+        onSelect(nextIndex);
+      }
+    },
+    [landscapeIndices, onSelect, selectedIndex],
+  );
+
+  useEffect(() => {
+    updateCloseButton();
+  }, [selectedIndex, updateCloseButton]);
+
+  useEffect(() => {
+    window.addEventListener("resize", updateCloseButton);
+    return () => window.removeEventListener("resize", updateCloseButton);
+  }, [updateCloseButton]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        requestClose();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        selectAdjacent(-1);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        selectAdjacent(1);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [requestClose, selectAdjacent]);
+
+  useEffect(
+    () => () => {
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+    },
+    [],
+  );
+
+  const photo = photos[selectedIndex];
+  if (!photo) return null;
+
+  return (
+    <div
+      className={`fixed inset-0 bg-black/95 z-[100] overflow-hidden flex items-center justify-center
+                  transition-opacity ${isClosing ? "opacity-0" : "opacity-100"}`}
+      style={{ transitionDuration: `${CLOSE_DURATION_MS}ms` }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Photo viewer"
+    >
+      <button
+        type="button"
+        className="fixed inset-0 z-0 cursor-default"
+        onClick={requestClose}
+        aria-label="Close photo viewer"
+      />
+      <button
+        type="button"
+        onMouseDown={(event) => {
+          event.stopPropagation();
+          requestClose();
+        }}
+        onClick={(event) => {
+          event.stopPropagation();
+          requestClose();
+        }}
+        className="fixed right-8 z-[200] text-white text-4xl font-light
+                   drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]
+                   opacity-90 hover:opacity-100 hover:text-accentWarm
+                   transition-colors transition-opacity"
+        style={{ top: `${closeButtonTop}px` }}
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+      {landscapeIndices.length > 0 && (
+        <>
+          <button
+            type="button"
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              selectAdjacent(-1);
+            }}
+            className="fixed left-4 top-1/2 -translate-y-1/2 z-[200]
+                       grid place-items-center w-12 h-12 md:w-14 md:h-14
+                       rounded-full bg-white/10 hover:bg-white/20"
+            aria-label="Previous image"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              stroke="white"
+              fill="none"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            onMouseDown={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              selectAdjacent(1);
+            }}
+            className="fixed right-4 top-1/2 -translate-y-1/2 z-[200]
+                       grid place-items-center w-12 h-12 md:w-14 md:h-14
+                       rounded-full bg-white/10 hover:bg-white/20"
+            aria-label="Next image"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              stroke="white"
+              fill="none"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="9 6 15 12 9 18" />
+            </svg>
+          </button>
+        </>
+      )}
+
+      <img
+        key={selectedIndex}
+        ref={imageRef}
+        src={photo.src}
+        alt={photo.alt}
+        className="relative z-10 max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
+        onLoad={updateCloseButton}
+        draggable="false"
+      />
+    </div>
+  );
+}

@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --------------------------------------------------
+   GLOBAL SCROLLBAR (NO GUTTER) + LAYOUT
+-------------------------------------------------- */
+@layer base {
+  html {
+    /* Normal page scrolling */
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-family: theme("fontFamily.sans");
+
+    /* Hide scrollbar in Firefox */
+    scrollbar-width: none;
+  }
+
+  /* Disable page scroll while fullscreen modal is open */
+  html.modal-open {
+    overflow: hidden !important;
+  }
+
+  body {
+    @apply bg-primary text-ink;
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- Hide scrollbar completely in WebKit browsers ---- */
+  html::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  html::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
+
+  html::-webkit-scrollbar-thumb {
+    background: transparent !important;
+    border-radius: 0;
+  }
+}
+
+/* --------------------------------------------------
+   CUSTOM SCROLL INDICATOR BAR 
+-------------------------------------------------- */
+
+.custom-scrollbar {
+  position: fixed;
+  top: 0; /* will be updated via JS */
+  right: 4px;
+  width: 0.6rem; /* a bit wider for grabbing */
+  height: 10rem; /* FIXED HEIGHT THUMB */
+  background: #fd7100; /* accentWarm */
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: auto; /* allow clicking/dragging */
+  cursor: grab;
+  transition: opacity 0.35s ease;
+  z-index: 9999; /* above everything */
+}
+
+.custom-scrollbar.dragging {
+  cursor: grabbing;
+}
+
+.custom-scrollbar:hover {
+  opacity: 1 !important; /* override the inline hidden state */
+}

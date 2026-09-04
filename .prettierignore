@@ -1,0 +1,9 @@
+coverage/
+cypress/screenshots/
+cypress/videos/
+dist/
+node_modules/
+old_website/
+package-lock.json
+public/
+src/imgs/

@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "types": ["cypress", "node", "vite/client"]
+  },
+  "include": ["../cypress.config.ts", "../src/**/*.cy.tsx", "./**/*.ts"],
+  "exclude": []
+}
