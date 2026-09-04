@@ -1,14 +1,14 @@
 # 003 — Verification pipeline
 
-| Field          | Value                                                                                                                      |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Type           | Tooling feature                                                                                                            |
-| Status         | Tracked in the [plan index](README.md)                                                                                     |
-| Depends on     | Reviewed output of [002 — TypeScript overhaul](002-typescript-overhaul.md), including the behavioral handoff from plan 001 |
-| Blocks         | Routine feature work that relies on the full red–green–refactor workflow                                                   |
-| Planned branch | `test/verification-pipeline`                                                                                               |
-| PR base        | `react-website-overhaul`                                                                                                   |
-| Pull request   | [#4](https://github.com/avidixit27/avi-dixit.com/pull/4); security follow-up on `fix/security-scanning`                    |
+| Field          | Value                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Type           | Tooling feature                                                                                                                       |
+| Status         | Tracked in the [plan index](README.md)                                                                                                |
+| Depends on     | Reviewed output of [002 — TypeScript overhaul](002-typescript-overhaul.md), including the behavioral handoff from plan 001            |
+| Blocks         | Routine feature work that relies on the full red–green–refactor workflow                                                              |
+| Planned branch | `test/verification-pipeline`                                                                                                          |
+| PR base        | `react-website-overhaul`                                                                                                              |
+| Pull request   | [#4](https://github.com/avidixit27/avi-dixit.com/pull/4); security follow-up [#5](https://github.com/avidixit27/avi-dixit.com/pull/5) |
 
 ## Outcome
 
@@ -150,4 +150,4 @@ The workflow triggered when PR #4 opened. Its first component-test failure retai
 
 React Router was updated from 7.1.3 to 7.18.3 after the production audit identified advisories in the earlier lock entry. The complete local suite still passed, and `npm audit --omit=dev` reports zero production vulnerabilities. The full dependency audit still reports 19 advisories in development tooling dependencies; resolving those requires coordinated major tool upgrades and remains follow-up work. Large source photographs also continue to produce a roughly 146 MB build, and complete modal focus management remains an acknowledged accessibility improvement. No backend, deployment, publishing, contact delivery, authentication, checkout, or production commerce behavior was added.
 
-After PR #4 merged, the security follow-up remained part of Plan 003 but moved to the separate `fix/security-scanning` branch. It adds Dependabot monitoring for npm and GitHub Actions, pull-request dependency review at moderate severity, a production dependency audit, and CodeQL analysis. Security checks run for pull requests, pushes to `main`, a weekly schedule, and manual dispatch. Repository-level vulnerability alerts, automated Dependabot security updates, secret scanning, and push protection were enabled alongside the committed configuration.
+After PR #4 merged, the security follow-up remained part of Plan 003 but moved to the separate `fix/security-scanning` branch and [PR #5](https://github.com/avidixit27/avi-dixit.com/pull/5). It adds Dependabot monitoring for npm and GitHub Actions, pull-request dependency review at moderate severity, a production dependency audit, and CodeQL analysis. Security checks run for pull requests, pushes to `main`, a weekly schedule, and manual dispatch. Repository-level vulnerability alerts, automated Dependabot security updates, secret scanning, and push protection were enabled alongside the committed configuration.
