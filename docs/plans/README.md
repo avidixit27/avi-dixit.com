@@ -45,14 +45,14 @@ The stack starts from `react-website-overhaul`. Branch names use a purpose-based
 
 The next sequence first resolves the supported-tooling and security baseline exposed when the overhaul reached `main`. It then establishes delivery-sized photography before visual and motion work and introduces each motion class against a real use case. This keeps dependency migration, image decoding, design-system migration, scroll composition, and route lifecycle risk independently measurable. Plans are stacked in dependency order; rebase or retarget each child after its parent merges.
 
-| Plan                                                                                     | Status      | Depends on | Planned branch                      | PR base                             | PR         |
-| ---------------------------------------------------------------------------------------- | ----------- | ---------- | ----------------------------------- | ----------------------------------- | ---------- |
-| [004 — Toolchain security modernization](004-toolchain-security-modernization.md)        | In progress | 003        | `chore/toolchain-modernization`     | `main`                              | Not opened |
-| [005 — Responsive media and performance](005-responsive-media-performance-foundation.md) | Planned     | 004        | `feat/responsive-media-foundation`  | `chore/toolchain-modernization`     | Not opened |
-| [006 — Dark visual system and shell](006-dark-visual-system-and-shell.md)                | Planned     | 005        | `feat/dark-visual-system`           | `feat/responsive-media-foundation`  | Not opened |
-| [007 — Accessible Motion foundation](007-accessible-motion-foundation.md)                | Planned     | 006        | `feat/motion-foundation`            | `feat/dark-visual-system`           | Not opened |
-| [008 — Portfolio scroll composition](008-portfolio-scroll-composition.md)                | Planned     | 007        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened |
-| [009 — Route and layout transitions](009-route-and-layout-transitions.md)                | Planned     | 008        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened |
+| Plan                                                                                     | Status      | Depends on | Planned branch                      | PR base                             | PR                                                         |
+| ---------------------------------------------------------------------------------------- | ----------- | ---------- | ----------------------------------- | ----------------------------------- | ---------------------------------------------------------- |
+| [004 — Toolchain security modernization](004-toolchain-security-modernization.md)        | In progress | 003        | `chore/toolchain-modernization`     | `main`                              | [#14](https://github.com/avidixit27/avi-dixit.com/pull/14) |
+| [005 — Responsive media and performance](005-responsive-media-performance-foundation.md) | Planned     | 004        | `feat/responsive-media-foundation`  | `chore/toolchain-modernization`     | Not opened                                                 |
+| [006 — Dark visual system and shell](006-dark-visual-system-and-shell.md)                | Planned     | 005        | `feat/dark-visual-system`           | `feat/responsive-media-foundation`  | Not opened                                                 |
+| [007 — Accessible Motion foundation](007-accessible-motion-foundation.md)                | Planned     | 006        | `feat/motion-foundation`            | `feat/dark-visual-system`           | Not opened                                                 |
+| [008 — Portfolio scroll composition](008-portfolio-scroll-composition.md)                | Planned     | 007        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened                                                 |
+| [009 — Route and layout transitions](009-route-and-layout-transitions.md)                | Planned     | 008        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened                                                 |
 
 ### Stack management
 

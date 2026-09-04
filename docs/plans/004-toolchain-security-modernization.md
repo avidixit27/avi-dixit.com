@@ -1,14 +1,14 @@
 # 004 — Modernize the frontend toolchain
 
-| Field          | Value                                  |
-| -------------- | -------------------------------------- |
-| Type           | Tooling                                |
-| Status         | Tracked in the [plan index](README.md) |
-| Depends on     | Plans 001–003 merged into `main`       |
-| Blocks         | 005 and subsequent feature work        |
-| Planned branch | `chore/toolchain-modernization`        |
-| PR base        | `main`                                 |
-| PR             | Not opened                             |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| Type           | Tooling                                                    |
+| Status         | Tracked in the [plan index](README.md)                     |
+| Depends on     | Plans 001–003 merged into `main`                           |
+| Blocks         | 005 and subsequent feature work                            |
+| Planned branch | `chore/toolchain-modernization`                            |
+| PR base        | `main`                                                     |
+| PR             | [#14](https://github.com/avidixit27/avi-dixit.com/pull/14) |
 
 ## Outcome
 
@@ -112,4 +112,4 @@ Started on `chore/toolchain-modernization` from merged `main` at `aba77c6`.
 - Final `npm run check` passes lint, formatting, strict application/Cypress types, 3 unit tests, 7 component tests, the Vite 8 production build, and 4 E2E journeys in Chrome 152. `npm run test:unit:coverage` passes; Vitest 5 reports 100% statement/line coverage for `photoNavigation.ts` and 20% statements across the deliberately broad configured source include.
 - Final `npm audit` and `npm run security:audit` both report zero vulnerabilities. The production build completes in 0.78 seconds with explicit React/router chunks; the existing approximately 146 MB source-photo payload remains for Plan 005.
 - Browser review of the built `/`, `/shop`, and `/contact` routes confirmed the expected navigation, portfolio controls, product/cart presentation, and inquiry form. Cypress separately passed the 390-by-844 mobile journey and reduced-motion rendering scenario.
-- Pull-request CI evidence and the PR link are recorded after the branch is published.
+- Implementation is published in [PR #14](https://github.com/avidixit27/avi-dixit.com/pull/14); final GitHub Actions evidence is recorded after the latest revision completes.
