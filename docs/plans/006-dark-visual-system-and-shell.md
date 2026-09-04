@@ -1,11 +1,11 @@
-# 005 — Establish the dark visual system and application shell
+# 006 — Establish the dark visual system and application shell
 
 | Field          | Value                                  |
 | -------------- | -------------------------------------- |
 | Type           | Feature                                |
 | Status         | Tracked in the [plan index](README.md) |
-| Depends on     | 004                                    |
-| Blocks         | 006 and visual feature work            |
+| Depends on     | 005                                    |
+| Blocks         | 007 and visual feature work            |
 | Planned branch | `feat/dark-visual-system`              |
 | PR base        | `feat/responsive-media-foundation`     |
 | PR             | Not opened                             |
@@ -16,7 +16,7 @@ The application has a coherent dark-first visual language derived from the Avi D
 
 ## Prerequisites and current state
 
-- Plan 004 provides responsive real-image assets for visual review.
+- Plan 005 provides responsive real-image assets for visual review.
 - The current Tailwind theme uses presentation-oriented names such as `primary`, `accent`, and `ink`, and the application defaults to a light canvas.
 - The orange, blue, and violet logo colors are candidates; their accessible semantic uses must be derived and tested rather than copied indiscriminately.
 - Confirm the footer’s actual email, social destinations, copyright name, and required legal links before rendering them. Do not publish invented or placeholder contact details.

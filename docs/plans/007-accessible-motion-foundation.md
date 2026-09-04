@@ -1,11 +1,11 @@
-# 006 — Introduce an accessible Motion foundation
+# 007 — Introduce an accessible Motion foundation
 
 | Field          | Value                                  |
 | -------------- | -------------------------------------- |
 | Type           | Feature                                |
 | Status         | Tracked in the [plan index](README.md) |
-| Depends on     | 005                                    |
-| Blocks         | 007 and 008                            |
+| Depends on     | 006                                    |
+| Blocks         | 008 and 009                            |
 | Planned branch | `feat/motion-foundation`               |
 | PR base        | `feat/dark-visual-system`              |
 | PR             | Not opened                             |
@@ -17,7 +17,7 @@ Motion for React becomes the single general-purpose runtime animation system, wi
 ## Prerequisites and current state
 
 - React 18.2+ and Vite are compatible with Motion without special Vite configuration according to the official [installation guide](https://motion.dev/docs/react-installation).
-- Plan 005 supplies stable visual tokens; Plan 004 supplies delivery-sized images so decode cost does not distort motion profiling.
+- Plan 006 supplies stable visual tokens; Plan 005 supplies delivery-sized images so decode cost does not distort motion profiling.
 - Existing hero and lightbox transitions use CSS and timers. Tailwind remains appropriate for simple hover and focus feedback.
 - Verify the maintained `motion` release, its production audit, and bundle effect at implementation time. Follow Motion's current [bundle-size](https://motion.dev/docs/react-reduce-bundle-size) and [accessibility](https://motion.dev/docs/react-accessibility) guidance rather than copying stale API examples.
 

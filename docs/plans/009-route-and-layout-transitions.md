@@ -1,10 +1,10 @@
-# 008 — Add route and layout transitions
+# 009 — Add route and layout transitions
 
 | Field          | Value                                  |
 | -------------- | -------------------------------------- |
 | Type           | Feature                                |
 | Status         | Tracked in the [plan index](README.md) |
-| Depends on     | 007                                    |
+| Depends on     | 008                                    |
 | Blocks         | Future project-detail transitions      |
 | Planned branch | `feat/route-layout-transitions`        |
 | PR base        | `feat/portfolio-scroll-composition`    |
@@ -16,7 +16,7 @@ Route changes and existing shared layout states transition coherently without de
 
 ## Prerequisites and current state
 
-- Plan 006 owns Motion configuration; Plan 007 establishes the final home-route hierarchy.
+- Plan 007 owns Motion configuration; Plan 008 establishes the final home-route hierarchy.
 - Routes are composed in `App.tsx` with React Router and lazy-loaded route components under `Suspense`.
 - No project-detail route currently provides a legitimate source/destination pair for a shared photograph transition. That effect remains deferred until such routes exist.
 

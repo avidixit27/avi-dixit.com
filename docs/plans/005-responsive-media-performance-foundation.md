@@ -1,13 +1,13 @@
-# 004 — Establish responsive media and a performance baseline
+# 005 — Establish responsive media and a performance baseline
 
 | Field          | Value                                  |
 | -------------- | -------------------------------------- |
 | Type           | Feature                                |
 | Status         | Tracked in the [plan index](README.md) |
-| Depends on     | Plans 001–003 merged into `main`       |
-| Blocks         | 005, 006, and media-heavy feature work |
+| Depends on     | 004                                    |
+| Blocks         | 006, 007, and media-heavy feature work |
 | Planned branch | `feat/responsive-media-foundation`     |
-| PR base        | `main`                                 |
+| PR base        | `chore/toolchain-modernization`        |
 | PR             | Not opened                             |
 
 ## Outcome
@@ -20,7 +20,7 @@ The current portfolio no longer serves full-resolution originals for every brows
 - `HeroSlideshow` mounts eight full-resolution images in the viewport. `BlurImage` supports only `src`, `alt`, lazy loading, and a class name; the catalog has no dimensions or responsive variants.
 - Vite route chunks are already lazy loaded. No responsive image generator, bundle visualizer, CDN, or remote media service is configured.
 - Media hosting, CDN provider, and backend remain open decisions. This ticket must not assume AWS, S3, CloudFront, or a backend repository.
-- Use Node `22.22.2`. Record the clean starting result of `npm run check`, `npm run security:audit`, and `npm run build` before changing media behavior.
+- Plan 004 provides the supported Node and Vite baseline. Record the clean starting result of `npm run check`, `npm run security:audit`, and `npm run build` before changing media behavior.
 
 ## Scope
 
