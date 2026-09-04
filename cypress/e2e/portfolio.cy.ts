@@ -45,6 +45,27 @@ describe("photography portfolio", () => {
     cy.get("html").should("not.have.class", "modal-open");
   });
 
+  it("opens from the rendered preview and closes only from the backdrop", () => {
+    cy.visit("/");
+    cy.get('main [aria-label^="Open "]')
+      .first()
+      .find("img")
+      .then(($image) => {
+        const previewSrc = $image.prop("currentSrc") as string;
+        cy.wrap($image).click();
+        cy.get('[data-lightbox-preview="true"]').should(
+          "have.attr",
+          "src",
+          previewSrc,
+        );
+      });
+
+    cy.get('[role="dialog"] img[alt]:not([alt=""])').click();
+    cy.get('[role="dialog"]').should("exist");
+    cy.get('[aria-label="Close photo viewer"]').click("topLeft");
+    cy.get('[role="dialog"]').should("not.exist");
+  });
+
   it("supports the current shop and contact route behavior", () => {
     cy.visit("/shop");
     cy.contains("button", "Add to Cart").first().click().click();

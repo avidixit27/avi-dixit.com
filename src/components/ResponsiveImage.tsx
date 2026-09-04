@@ -15,6 +15,7 @@ interface ResponsiveImageProps {
   readonly alt: string;
   readonly loading: "eager" | "lazy";
   readonly fetchPriority: "high" | "low" | "auto";
+  readonly pictureClassName?: string;
   readonly className?: string;
   readonly imageRef?: Ref<HTMLImageElement>;
   readonly onLoad?: () => void;
@@ -30,6 +31,7 @@ export default function ResponsiveImage({
   alt,
   loading,
   fetchPriority,
+  pictureClassName = "",
   className = "",
   imageRef,
   onLoad,
@@ -37,7 +39,7 @@ export default function ResponsiveImage({
   const priorityAttribute = { fetchpriority: fetchPriority };
 
   return (
-    <picture>
+    <picture className={pictureClassName}>
       {sources.map((source) => (
         <source
           key={source.type}

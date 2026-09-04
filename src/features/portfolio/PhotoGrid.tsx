@@ -8,7 +8,7 @@ const GRID_IMAGE_SIZES =
 interface PhotoGridProps {
   photos: readonly Photo[];
   gridMarkerRef: Ref<HTMLDivElement>;
-  onOpen: (index: number) => void;
+  onOpen: (index: number, previewSrc: string) => void;
 }
 
 export default function PhotoGrid({
@@ -27,7 +27,13 @@ export default function PhotoGrid({
               key={photo.id}
               className="relative block w-full rounded-xl bg-white/5 p-3 transform-gpu transition-transform duration-200 will-change-transform contain-paint
                          cursor-pointer hover:scale-[1.015] shadow-md hover:shadow-lg"
-              onClick={() => onOpen(index)}
+              onClick={(event) =>
+                onOpen(
+                  index,
+                  event.currentTarget.querySelector("img")?.currentSrc ||
+                    photo.src,
+                )
+              }
               aria-label={`Open ${photo.alt}`}
             >
               <ResponsiveImage

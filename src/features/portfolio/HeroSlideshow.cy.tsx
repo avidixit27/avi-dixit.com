@@ -52,7 +52,11 @@ describe("HeroSlideshow", () => {
     cy.tick(5001);
     cy.get('img[alt="Second test photo"]').should("have.class", "opacity-100");
     cy.get('[aria-label="Open hero image gallery"]').click();
-    cy.get("@onOpen").should("have.been.calledOnceWith", 1);
+    cy.get("@onOpen").should(
+      "have.been.calledOnceWith",
+      1,
+      Cypress.sinon.match(/second/),
+    );
   });
 
   it("clears its timer when unmounted", () => {

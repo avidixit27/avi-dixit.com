@@ -39,21 +39,52 @@ describe("Lightbox", () => {
       <Lightbox
         photos={photos}
         selectedIndex={0}
+        previewSrc="/first-preview.jpg"
         landscapeIndices={[0, 2]}
         onSelect={onSelect}
         onClosed={cy.stub()}
       />,
     );
 
-    cy.get('[role="dialog"] img')
+    cy.get('img[alt="First test photo"]')
       .should("have.attr", "loading", "eager")
       .and("have.attr", "fetchpriority", "high")
       .and("have.attr", "decoding", "async")
       .and("have.attr", "sizes", "95vw");
     cy.get('[aria-label="Next image"]').click();
-    cy.get("@onSelect").should("have.been.calledOnceWith", 2);
+    cy.get("@onSelect").should("have.been.calledOnceWith", 2, "/last.jpg");
     pressKey("ArrowLeft");
-    cy.get("@onSelect").should("have.been.calledWith", 2);
+    cy.get("@onSelect").should("have.been.calledWith", 2, "/last.jpg");
+  });
+
+  it("shows the clicked preview immediately and closes only from the backdrop", () => {
+    cy.clock();
+    const onClosed = cy.spy().as("onClosed");
+    mount(
+      <Lightbox
+        photos={photos}
+        selectedIndex={0}
+        previewSrc="/already-visible.jpg"
+        landscapeIndices={[0, 2]}
+        onSelect={cy.stub()}
+        onClosed={onClosed}
+      />,
+    );
+
+    cy.get('[data-lightbox-preview="true"]')
+      .should("have.attr", "src", "/already-visible.jpg")
+      .and("have.class", "opacity-100");
+    cy.get('img[alt="First test photo"]')
+      .should("have.class", "opacity-0")
+      .trigger("load")
+      .should("have.class", "opacity-100")
+      .click();
+    cy.get('[data-lightbox-preview="true"]').should("have.class", "opacity-0");
+    cy.tick(150);
+    cy.get("@onClosed").should("not.have.been.called");
+    cy.get('[aria-label="Close photo viewer"]').click("topLeft");
+    cy.tick(150);
+    cy.get("@onClosed").should("have.been.calledOnce");
   });
 
   it("closes on Escape after the exit transition", () => {
@@ -63,6 +94,7 @@ describe("Lightbox", () => {
       <Lightbox
         photos={photos}
         selectedIndex={0}
+        previewSrc="/first-preview.jpg"
         landscapeIndices={[0, 2]}
         onSelect={cy.stub()}
         onClosed={onClosed}
@@ -81,6 +113,7 @@ describe("Lightbox", () => {
       <Lightbox
         photos={photos}
         selectedIndex={0}
+        previewSrc="/first-preview.jpg"
         landscapeIndices={[0, 2]}
         onSelect={onSelect}
         onClosed={cy.stub()}

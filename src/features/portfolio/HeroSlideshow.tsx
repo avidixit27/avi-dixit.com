@@ -7,11 +7,12 @@ const HERO_IMAGE_SIZES = "100vw";
 
 interface HeroSlideshowProps {
   photos: readonly Photo[];
-  onOpen: (index: number) => void;
+  onOpen: (index: number, previewSrc: string) => void;
 }
 
 export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const activeImageRef = useRef<HTMLImageElement>(null);
   const loadedPhotoIdsRef = useRef(new Set<string>());
 
   const markPhotoLoaded = useCallback((photoId: string) => {
@@ -34,6 +35,8 @@ export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
 
   if (photos.length === 0) return null;
 
+  const activePhoto = photos[activeIndex];
+  if (!activePhoto) return null;
   const nextIndex = (activeIndex + 1) % photos.length;
   const visibleIndices =
     nextIndex === activeIndex ? [activeIndex] : [activeIndex, nextIndex];
@@ -42,7 +45,12 @@ export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
     <button
       type="button"
       className="relative block h-[100svh] w-full cursor-pointer"
-      onClick={() => onOpen(activeIndex)}
+      onClick={() =>
+        onOpen(
+          activeIndex,
+          activeImageRef.current?.currentSrc || activePhoto.src,
+        )
+      }
       aria-label="Open hero image gallery"
     >
       {visibleIndices.map((index) => {
@@ -62,6 +70,7 @@ export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
             alt={photo.alt}
             loading="eager"
             fetchPriority={isInitialHero ? "high" : "low"}
+            imageRef={isActive ? activeImageRef : null}
             onLoad={() => markPhotoLoaded(photo.id)}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
               isActive ? "opacity-100" : "opacity-0"

@@ -12,14 +12,16 @@ const LIGHTBOX_IMAGE_SIZES = "95vw";
 interface LightboxProps {
   photos: readonly Photo[];
   selectedIndex: number;
+  previewSrc: string;
   landscapeIndices: readonly number[];
-  onSelect: (index: number) => void;
+  onSelect: (index: number, previewSrc: string) => void;
   onClosed: () => void;
 }
 
 export default function Lightbox({
   photos,
   selectedIndex,
+  previewSrc,
   landscapeIndices,
   onSelect,
   onClosed,
@@ -27,6 +29,7 @@ export default function Lightbox({
   const imageRef = useRef<HTMLImageElement>(null);
   const closeTimerRef = useRef<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [loadedPhotoId, setLoadedPhotoId] = useState<string | null>(null);
   const [closeButtonTop, setCloseButtonTop] = useState(
     DEFAULT_CLOSE_BUTTON_TOP_PX,
   );
@@ -53,13 +56,31 @@ export default function Lightbox({
         landscapeIndices,
         direction,
       );
-      if (nextIndex != null) {
+      const nextPhoto = nextIndex == null ? undefined : photos[nextIndex];
+      if (nextIndex != null && nextPhoto) {
         setIsClosing(false);
-        onSelect(nextIndex);
+        onSelect(nextIndex, nextPhoto.src);
       }
     },
-    [landscapeIndices, onSelect, selectedIndex],
+    [landscapeIndices, onSelect, photos, selectedIndex],
   );
+
+  useEffect(() => {
+    const adjacentIndices = new Set(
+      ([-1, 1] as const)
+        .map((direction) =>
+          getAdjacentPhotoIndex(selectedIndex, landscapeIndices, direction),
+        )
+        .filter((index): index is number => index != null),
+    );
+    adjacentIndices.forEach((index) => {
+      const adjacentPhoto = photos[index];
+      if (!adjacentPhoto) return;
+      const preload = new Image();
+      preload.decoding = "async";
+      preload.src = adjacentPhoto.src;
+    });
+  }, [landscapeIndices, photos, selectedIndex]);
 
   useEffect(() => {
     updateCloseButton();
@@ -191,21 +212,41 @@ export default function Lightbox({
         </>
       )}
 
-      <ResponsiveImage
-        key={selectedIndex}
-        imageRef={imageRef}
-        src={photo.src}
-        srcSet={photo.srcSet}
-        sources={photo.sources}
-        sizes={LIGHTBOX_IMAGE_SIZES}
-        width={photo.width}
-        height={photo.height}
-        alt={photo.alt}
-        loading="eager"
-        fetchPriority="high"
-        className="relative z-10 max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
-        onLoad={updateCloseButton}
-      />
+      <div className="relative z-10 grid max-w-[95vw] max-h-[95vh]">
+        <img
+          data-lightbox-preview="true"
+          src={previewSrc}
+          width={photo.width}
+          height={photo.height}
+          alt=""
+          aria-hidden="true"
+          draggable="false"
+          className={`col-start-1 row-start-1 max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-opacity ${
+            loadedPhotoId === photo.id ? "opacity-0" : "opacity-100"
+          }`}
+        />
+        <ResponsiveImage
+          key={photo.id}
+          imageRef={imageRef}
+          src={photo.src}
+          srcSet={photo.srcSet}
+          sources={photo.sources}
+          sizes={LIGHTBOX_IMAGE_SIZES}
+          width={photo.width}
+          height={photo.height}
+          alt={photo.alt}
+          loading="eager"
+          fetchPriority="high"
+          pictureClassName="contents"
+          className={`col-start-1 row-start-1 max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-opacity ${
+            loadedPhotoId === photo.id ? "opacity-100" : "opacity-0"
+          }`}
+          onLoad={() => {
+            setLoadedPhotoId(photo.id);
+            updateCloseButton();
+          }}
+        />
+      </div>
     </div>
   );
 }

@@ -49,7 +49,7 @@ The repository currently contains a strict TypeScript React application using Vi
 | Legacy code      | `old_website/`, retained historical implementation                                                                                                   |
 | Verification     | ESLint, Prettier, strict TypeScript, Vitest, Cypress component and E2E tests, Husky/lint-staged, and pull-request CI are configured                  |
 
-The application shell and portfolio now have explicit feature-oriented ownership, cross-component DOM coordination uses an explicit element reference, and affected global effects have local cleanup paths. Automated regression coverage protects photo navigation, gallery timers and listeners, route links, contact-form presentation, shop cart behavior, and core desktop/mobile gallery journeys. The responsive catalog supplies intrinsic dimensions and generated sources without exposing original photographs to browsers. Large editing sources remain in Git, while placeholder commerce and incomplete gallery focus management remain known limitations for later plans.
+The application shell and portfolio now have explicit feature-oriented ownership, cross-component DOM coordination uses an explicit element reference, and affected global effects have local cleanup paths. Automated regression coverage protects photo navigation, gallery timers and listeners, route links, contact-form presentation, shop cart behavior, and core desktop/mobile gallery journeys. The responsive catalog supplies intrinsic dimensions and generated sources without exposing original photographs to browsers. The lightbox opens with the source already rendered in the selected hero or grid item, upgrades after its larger source loads, and prepares adjacent fallbacks. Large editing sources remain in Git, while placeholder commerce and incomplete gallery focus management remain known limitations for later plans.
 
 ## 4. Target frontend organization
 
@@ -192,6 +192,7 @@ Adapt adopted components to the project's TypeScript contracts, tokens, accessib
 - Preserve image aspect ratios and known dimensions to limit layout movement.
 - Keep editing originals out of browser imports. Generate responsive delivery assets through the configured Vite image pipeline, and expose them through the typed photo catalog rather than constructing URLs in presentation components.
 - Give only the first-view hero image high fetch priority. Prepare the next slideshow image without mounting the entire sequence, and lazy load gallery images below the fold.
+- Open enlarged media with the selected element's already-rendered source as an immediate preview, then replace it after the larger responsive source loads. Keep preview selection and preloading in the portfolio feature rather than the shared image component.
 - Review real photographs at representative portrait and landscape sizes, including slow loading and failed images.
 - Assess bundle size and rendering cost before adopting heavy effects. Avoid unrelated global listeners, permanent animation loops, and unnecessary offscreen work.
 
