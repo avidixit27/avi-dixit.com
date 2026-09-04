@@ -15,6 +15,7 @@
 - Treat the selected plan as the end-to-end work ticket. Before editing, ensure its outcome, prerequisites, scope, non-goals, deliverables, implementation steps, acceptance criteria, verification, risks, and definition of done are actionable. Resolve or record a material gap before proceeding.
 - Keep task scope, checklists, progress, decisions, and verification evidence in the plan and its linked PR. Keep enduring design rules in `architecture.md`.
 - Update the plan index when status or PR relationships change. A plan's existence does not authorize starting it. Apply a temporary exception only to the plans it explicitly names.
+- Name branches with a purpose-based conventional prefix such as `feat/`, `fix/`, `refactor/`, `test/`, or `chore/`, followed by a concise kebab-case description.
 - Keep the ticket accurate during implementation. At completion, record the result and evidence, link the PR, and update the index; do not leave planned language describing implemented repository state.
 
 ## Architecture and component design
@@ -27,7 +28,7 @@
 - Keep feature-specific types, hooks, helpers, constants, API operations, and tests near their owners. Avoid catch-all utility or handler folders.
 - Extract code for a coherent responsibility, readability, reuse, or testability. Three uses are not a prerequisite. Do not introduce speculative factories, generic frameworks, or unnecessary wrappers.
 - Treat approximately 200 lines of hand-written source as a review signal, not a hard cap. Do not fragment a cohesive component merely to meet a number. Documentation and generated files are not subject to this signal.
-- TypeScript is planned, not currently configured. When introduced, use straightforward strict types and inference. Do not routinely bypass checking with `any`, assertions, or suppression comments. Validate external data at integration boundaries.
+- TypeScript is configured with strict no-emit checking. Use straightforward contracts and inference, preserve the configured strictness, and do not routinely bypass checking with `any`, assertions, or suppression comments. Validate external data at integration boundaries.
 
 ## Styling and external components
 
@@ -58,8 +59,9 @@ The source of truth is `package.json`; inspect it before selecting commands.
 | `npm run build` | Defined: frontend production build |
 | `npm run preview` | Defined: preview a built frontend |
 | `npm run lint` | Defined, but no ESLint configuration exists; this currently blocks linting |
+| `npm run typecheck` | Defined: strict TypeScript check without emitting files |
 
-TypeScript checking, Prettier, Husky/lint-staged, Vitest, Cypress, and GitHub Actions are planned and not configured. Do not invent commands or imply those checks have passed. Configure missing tooling only within an authorized implementation task, and update this table when the repository changes.
+Prettier, Husky/lint-staged, Vitest, Cypress, and GitHub Actions are planned and not configured. Do not invent commands or imply those checks have passed. Configure missing tooling only within an authorized implementation task, and update this table when the repository changes.
 
 The planned workflow uses fast staged-file lint/format checks in pre-commit hooks and full lint, format, type, unit, component, build, and browser checks in GitHub Actions. CI enforces checks independently of local hooks. Tooling setup must establish a working harness before claiming a red–green–refactor loop.
 

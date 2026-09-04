@@ -68,5 +68,5 @@
 }
 
 .custom-scrollbar:hover {
-  opacity: 1 !important;  /* override any inline 0 from JS */
+  opacity: 1 !important;  /* override the inline hidden state */
 }

@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { PRODUCT_CATALOG } from "./resources/products";
+import type { Product } from "./resources/products";
+
+interface CartItem extends Product {
+  readonly quantity: number;
+}
 
 export default function Shop() {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState<CartItem[]>([]);
 
-  const addToCart = (product) => {
+  const addToCart = (product: Product) => {
     setCart((currentCart) => {
       const existingItem = currentCart.find((item) => item.id === product.id);
       if (existingItem) {

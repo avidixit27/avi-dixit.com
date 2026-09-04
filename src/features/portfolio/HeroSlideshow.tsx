@@ -1,8 +1,17 @@
 import { useEffect, useState } from "react";
+import type { Photo } from "./photoCatalog";
 
 const HERO_ROTATION_DELAY_MS = 5000;
 
-export default function HeroSlideshow({ photos, onOpen }) {
+interface HeroSlideshowProps {
+  photos: readonly Photo[];
+  onOpen: (index: number) => void;
+}
+
+export default function HeroSlideshow({
+  photos,
+  onOpen,
+}: HeroSlideshowProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {

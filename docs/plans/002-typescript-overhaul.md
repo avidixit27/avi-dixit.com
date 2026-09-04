@@ -6,8 +6,8 @@
 | Status | Tracked in the [plan index](README.md) |
 | Depends on | Reviewed output of [001 — Code cleanup](001-code-cleanup.md) |
 | Blocks | [003 — Verification pipeline](003-verification-pipeline.md) |
-| Planned branch | `codex/typescript-overhaul` |
-| PR base | `codex/code-cleanup` |
+| Planned branch | `refactor/typescript-overhaul` |
+| PR base | `react-website-overhaul` |
 | PR | Not opened |
 
 ## Outcome
@@ -96,4 +96,26 @@ Update `AGENTS.md` and the current-state architecture description so TypeScript 
 
 ## Implementation record
 
-Not started. No implementation checks have been run for this plan. Add a concise outcome or link to PR evidence when implemented.
+Started on 2026-09-03 from merged Plan 001 commit `8d91640` on branch `refactor/typescript-overhaul`. The pre-migration production build and Plan 001 browser baseline passed.
+
+### Outcome
+
+- Added TypeScript 5.9 and React 18 type packages as development dependencies, a strict no-emit `tsconfig.json`, Vite client and uppercase-JPG declarations, and `npm run typecheck`.
+- Migrated every active source module to `.ts` or `.tsx`, the application entrypoint to `main.tsx`, and the Vite configuration to the checked ESM file `vite.config.mts`. The ESM configuration also removes the prior Vite CJS Node API deprecation warning.
+- Added owner-local contracts for navigation and product catalogs, photo records and direction, component props and callbacks, cart state, nullable selections, DOM refs, browser events, timers, observers, asset modules, and the eager image glob.
+- Catalogs use `as const satisfies` to preserve literal values while checking durable interfaces. No `any`, suppression comments, broad global declarations, or unchecked runtime assertions were introduced.
+
+### Verification evidence
+
+- `npm run typecheck` passes with strict checking, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, unused-code checks, implicit-return checks, isolated modules, verbatim module syntax, and consistent file casing enabled.
+- `npm run build` passes independently. The build resolves the lazy feature imports, SVG logo, and all twelve uppercase-JPG portfolio assets.
+- Desktop and 390 × 844 mobile browser checks passed for direct and client-side home, shop, and contact routes; all 21 rendered images loaded in the final clean desktop session; and the browser console contained no warnings or errors.
+- Hero rotation, hero and grid gallery entry, previous/next controls, keyboard navigation, Escape and close cleanup, the existing landscape-only sequence, cart totals, navigation, scrolling, and the single custom scrollbar preserved Plan 001 behavior.
+- `git diff --check` passes and no active `.js` or `.jsx` source remains. `npm run lint` still stops at the pre-existing missing ESLint configuration, and no automated test pass is claimed under the temporary bootstrap exception.
+
+### Remaining limitations and handoff
+
+- Large bundled photographs, browser-side orientation discovery, incomplete gallery focus management, placeholder commerce, and the contact form without submission remain unchanged. The build still reports stale Browserslist data.
+- The dependency install reports 20 audit findings in the current dependency tree. No unrelated runtime or tooling upgrades were made to address them in this migration.
+- Plan 003 should retain `npm run typecheck`, configure linting for `.ts` and `.tsx`, and automate the Plan 001 browser scenarios plus the pure `getAdjacentPhotoIndex` behavior. It should keep Vitest and Cypress type environments isolated from the application configuration.
+- Implementation is complete locally. Record the PR link and final index status after the branch is published.

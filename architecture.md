@@ -32,22 +32,22 @@ The first product milestone is the portfolio and inquiries experience. Publishin
 
 ## 3. Current repository
 
-The repository currently contains a JavaScript React application using Vite, Tailwind, and React Router. The manifest specifies React 18, Vite 5, Tailwind 3, and React Router 7 version ranges; these are existing dependencies, not permanent version requirements.
+The repository currently contains a strict TypeScript React application using Vite, Tailwind, and React Router. The manifest specifies React 18, Vite 5, Tailwind 3, React Router 7, and TypeScript 5 version ranges; these are existing dependencies, not permanent version requirements.
 
 | Area | Current implementation |
 | --- | --- |
-| Entry and shell | `src/main.jsx` initializes React; `src/app/App.jsx` composes the router, navigation, routes, and custom scrollbar |
-| Routes | `/`, `/shop`, and `/contact`, declared in `src/app/App.jsx` |
+| Entry and shell | `src/main.tsx` initializes React; `src/app/App.tsx` composes the router, navigation, routes, and custom scrollbar |
+| Routes | `/`, `/shop`, and `/contact`, declared in `src/app/App.tsx` |
 | Portfolio | `src/features/portfolio/`, with separate orchestration, slideshow, grid, lightbox, photo catalog, navigation policy, and orientation loading modules |
-| Navigation | `src/app/Navigation.jsx`, which owns navigation visibility and receives the portfolio marker as an explicit prop |
-| Custom scrollbar | `src/app/CustomScrollbar.jsx`, which owns its listeners, timers, drag state, and cleanup |
-| Static resources | Application navigation data in `src/resources/navigation.js`; feature-specific product data in `src/features/shop/resources/products.js` |
+| Navigation | `src/app/Navigation.tsx`, which owns navigation visibility and receives the portfolio marker as an explicit prop |
+| Custom scrollbar | `src/app/CustomScrollbar.tsx`, which owns its listeners, timers, drag state, and cleanup |
+| Static resources | Typed application navigation data in `src/resources/navigation.ts`; typed feature-specific product data in `src/features/shop/resources/products.ts` |
 | Styling | `src/index.css` and `tailwind.config.js` |
 | Photographs | Twelve JPEG files under `src/imgs/portfolio`, totaling approximately 146 MB |
-| Shop | `src/features/shop/Shop.jsx`, with placeholder products and a component-local cart; no integrated checkout |
-| Contact | `src/features/inquiries/Contact.jsx`, with form presentation and no submission integration |
+| Shop | `src/features/shop/Shop.tsx`, with placeholder products and a component-local cart; no integrated checkout |
+| Contact | `src/features/inquiries/Contact.tsx`, with form presentation and no submission integration |
 | Legacy code | `old_website/`, retained historical implementation |
-| Verification | A lint script exists, but no ESLint configuration or test setup is present |
+| Verification | Strict `npm run typecheck` and production build commands are available; the lint script still lacks configuration and no test setup is present |
 
 The application shell and portfolio now have explicit feature-oriented ownership, cross-component DOM coordination uses an explicit element reference, and affected global effects have local cleanup paths. The repository still has no automated regression baseline. Browser-side orientation discovery, large source photographs, placeholder commerce, incomplete gallery accessibility, and missing lint/test configuration remain known limitations for later plans.
 
@@ -132,7 +132,7 @@ For example, a photo display component can accept source variants, dimensions, a
 
 ### TypeScript direction
 
-**Planned:** migrate the frontend to TypeScript with strict checking through small coherent changes. Type component inputs, feature data, and integration boundaries; let inference handle obvious local values.
+**Current:** active frontend source and Vite configuration use TypeScript with strict checking, including unchecked-index, exact-optional-property, unused-code, and implicit-return checks. `npm run typecheck` performs a no-emit check independently of the production build. Type component inputs, feature data, and integration boundaries; let inference handle obvious local values.
 
 TypeScript improves component contracts and refactoring feedback. It does not prove that behavior is correct or validate incoming JSON. Validate external data at the integration boundary. Avoid routine use of `any`, unchecked assertions, and suppression comments to bypass a design problem.
 
@@ -148,7 +148,7 @@ Use interfaces for stable object-shaped contracts such as component props and do
 - Keep feature-specific text and catalogs inside the owning feature, for example `src/features/portfolio/resources/`. A one-off label that is clearer beside its component may remain local; centralize content when it is shared, structured, independently maintained, or needs a stable identifier.
 - Keep catalog modules data-only. They must not contain JSX, Hooks, browser effects, API calls, or imports from routes and feature internals.
 - Represent each catalog entry as a typed datum with a stable `id` or slug separate from its display text. Store collections as immutable arrays or records so UI components can map them with stable keys.
-- When TypeScript is available, validate catalogs without widening their useful literals, for example with `as const satisfies readonly NavigationItem[]`. Derive types from the source data when that prevents a second schema from drifting; declare an interface when consumers need an explicit durable contract.
+- Validate catalogs without widening their useful literals, for example with `as const satisfies readonly NavigationItem[]`. Derive types from the source data when that prevents a second schema from drifting; declare an interface when consumers need an explicit durable contract.
 - Do not duplicate user-editable or backend-owned data into resources. Map validated external data into feature-owned models at the integration boundary.
 - Do not introduce an internationalization framework until localization is approved. Resource ownership should make a later migration possible without inventing translation keys prematurely.
 
@@ -208,15 +208,15 @@ Search-ready collection URLs and metadata are frontend goals. Evaluate pre-rende
 
 ## 8. Engineering tooling and verification
 
-Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-commands-and-tooling-gaps) summarizes current commands and known gaps. A tool listed below is a target, not evidence that it has been configured. Setup work and proposed command names belong in the implementation plans.
+Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-commands-and-tooling-gaps) summarizes current commands and known gaps. The table distinguishes implemented checks from agreed direction. Setup work and proposed command names belong in the implementation plans.
 
-### Planned tooling
+### Current and planned tooling
 
-| Concern | Agreed direction |
+| Concern | Status and direction |
 | --- | --- |
 | Linting | ESLint flat configuration with typescript-eslint, React Hooks, and JSX accessibility rules |
 | Formatting | Prettier, separate from correctness linting |
-| Type checking | TypeScript strict checks |
+| Type checking | Current: TypeScript strict no-emit checks through `npm run typecheck` |
 | Local hooks | Husky and lint-staged |
 | Pure frontend logic | Vitest unit tests |
 | React component behavior | Cypress Component Testing with Vite |

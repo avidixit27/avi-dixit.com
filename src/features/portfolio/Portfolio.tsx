@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import type { Ref } from "react";
 import HeroSlideshow from "./HeroSlideshow";
 import Lightbox from "./Lightbox";
 import { PHOTO_CATALOG } from "./photoCatalog";
@@ -8,12 +9,16 @@ import useLandscapePhotoIndices from "./useLandscapePhotoIndices";
 const HERO_PHOTO_COUNT = 8;
 const HERO_PHOTOS = Object.freeze(PHOTO_CATALOG.slice(0, HERO_PHOTO_COUNT));
 
-export default function Portfolio({ gridMarkerRef }) {
-  const [selectedIndex, setSelectedIndex] = useState(null);
+interface PortfolioProps {
+  gridMarkerRef: Ref<HTMLDivElement>;
+}
+
+export default function Portfolio({ gridMarkerRef }: PortfolioProps) {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const landscapeIndices = useLandscapePhotoIndices(PHOTO_CATALOG);
   const isLightboxOpen = selectedIndex != null;
 
-  const openLightbox = useCallback((index) => {
+  const openLightbox = useCallback((index: number) => {
     setSelectedIndex(index);
   }, []);
   const closeLightbox = useCallback(() => {
