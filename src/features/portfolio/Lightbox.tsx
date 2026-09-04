@@ -1,9 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Photo } from "./photoCatalog";
+import type { PhotoDirection } from "./photoNavigation";
 import { getAdjacentPhotoIndex } from "./photoNavigation";
 
 const CLOSE_DURATION_MS = 150;
 const CLOSE_BUTTON_TOP_OFFSET_PX = 12;
 const DEFAULT_CLOSE_BUTTON_TOP_PX = 24;
+
+interface LightboxProps {
+  photos: readonly Photo[];
+  selectedIndex: number;
+  landscapeIndices: readonly number[];
+  onSelect: (index: number) => void;
+  onClosed: () => void;
+}
 
 export default function Lightbox({
   photos,
@@ -11,9 +21,9 @@ export default function Lightbox({
   landscapeIndices,
   onSelect,
   onClosed,
-}) {
-  const imageRef = useRef(null);
-  const closeTimerRef = useRef(null);
+}: LightboxProps) {
+  const imageRef = useRef<HTMLImageElement>(null);
+  const closeTimerRef = useRef<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
   const [closeButtonTop, setCloseButtonTop] = useState(
     DEFAULT_CLOSE_BUTTON_TOP_PX,
@@ -28,14 +38,14 @@ export default function Lightbox({
   const requestClose = useCallback(() => {
     if (closeTimerRef.current) return;
     setIsClosing(true);
-    closeTimerRef.current = setTimeout(() => {
+    closeTimerRef.current = window.setTimeout(() => {
       closeTimerRef.current = null;
       onClosed();
     }, CLOSE_DURATION_MS);
   }, [onClosed]);
 
   const selectAdjacent = useCallback(
-    (direction) => {
+    (direction: PhotoDirection) => {
       const nextIndex = getAdjacentPhotoIndex(
         selectedIndex,
         landscapeIndices,
@@ -57,7 +67,7 @@ export default function Lightbox({
   }, [updateCloseButton]);
 
   useEffect(() => {
-    const onKeyDown = (event) => {
+    const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
         requestClose();
@@ -76,12 +86,15 @@ export default function Lightbox({
 
   useEffect(
     () => () => {
-      clearTimeout(closeTimerRef.current);
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+      }
     },
     [],
   );
 
   const photo = photos[selectedIndex];
+  if (!photo) return null;
 
   return (
     <div

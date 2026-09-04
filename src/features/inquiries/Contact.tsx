@@ -22,7 +22,7 @@ export default function Contact() {
         />
         <textarea
           placeholder="Message"
-          rows="4"
+          rows={4}
           className="w-full p-3 bg-white bg-opacity-50 border-b border-accent
                      focus:outline-none focus:border-accentWarm rounded-t-lg"
         />

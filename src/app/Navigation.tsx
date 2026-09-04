@@ -10,18 +10,30 @@ const HOME_UPWARD_REVEAL_DELTA_PX = -40;
 const PAGE_HIDE_DELTA_PX = 6;
 const PAGE_REVEAL_DELTA_PX = -8;
 
-export default function Navigation({ portfolioGridElement }) {
+interface NavigationProps {
+  portfolioGridElement: HTMLDivElement | null;
+}
+
+interface IndicatorPosition {
+  left: number;
+  width: number;
+  visible: boolean;
+}
+
+export default function Navigation({
+  portfolioGridElement,
+}: NavigationProps) {
   const location = useLocation();
   const isHome = location.pathname === ROUTES.home;
-  const navRef = useRef(null);
-  const linksWrapRef = useRef(null);
-  const linkRefs = useRef(new Map());
+  const navRef = useRef<HTMLElement>(null);
+  const linksWrapRef = useRef<HTMLDivElement>(null);
+  const linkRefs = useRef(new Map<string, HTMLAnchorElement>());
   const pastGridRef = useRef(false);
   const observerReadyRef = useRef(true);
   const lastYRef = useRef(0);
-  const inactivityTimerRef = useRef(null);
+  const inactivityTimerRef = useRef<number | null>(null);
   const [isHidden, setIsHidden] = useState(false);
-  const [indicator, setIndicator] = useState({
+  const [indicator, setIndicator] = useState<IndicatorPosition>({
     left: 0,
     width: 0,
     visible: false,
@@ -54,14 +66,18 @@ export default function Navigation({ portfolioGridElement }) {
   }, [location.pathname]);
 
   useEffect(() => {
-    clearTimeout(inactivityTimerRef.current);
+    if (inactivityTimerRef.current !== null) {
+      window.clearTimeout(inactivityTimerRef.current);
+    }
     if (!isHome) {
       return undefined;
     }
 
     const hideLater = () => {
-      clearTimeout(inactivityTimerRef.current);
-      inactivityTimerRef.current = setTimeout(
+      if (inactivityTimerRef.current !== null) {
+        window.clearTimeout(inactivityTimerRef.current);
+      }
+      inactivityTimerRef.current = window.setTimeout(
         () => setIsHidden(true),
         HOME_HIDE_DELAY_MS,
       );
@@ -77,7 +93,9 @@ export default function Navigation({ portfolioGridElement }) {
     return () => {
       window.removeEventListener("mousemove", revealTemporarily);
       window.removeEventListener("scroll", revealTemporarily);
-      clearTimeout(inactivityTimerRef.current);
+      if (inactivityTimerRef.current !== null) {
+        window.clearTimeout(inactivityTimerRef.current);
+      }
     };
   }, [isHome]);
 
@@ -88,12 +106,13 @@ export default function Navigation({ portfolioGridElement }) {
       return undefined;
     }
 
-    let observer;
+    let observer: IntersectionObserver | undefined;
     const observeGrid = () => {
       observer?.disconnect();
       const navHeight = navRef.current?.offsetHeight ?? NAV_FALLBACK_HEIGHT_PX;
       observer = new IntersectionObserver(
         ([entry]) => {
+          if (!entry) return;
           pastGridRef.current = entry.boundingClientRect.top <= navHeight;
           observerReadyRef.current = true;
         },
@@ -134,7 +153,7 @@ export default function Navigation({ portfolioGridElement }) {
 
   useEffect(() => {
     if (!isHome) return undefined;
-    const revealNearTop = (event) => {
+    const revealNearTop = (event: MouseEvent) => {
       if (!pastGridRef.current && event.clientY < TOP_REVEAL_DISTANCE_PX) {
         setIsHidden(false);
       }

@@ -28,17 +28,23 @@ The ticket is the source of truth for execution. Keep it current when repository
 
 The agreed order is cleanup, TypeScript, then verification tooling. Cleanup establishes readable responsibilities; TypeScript gives them checked contracts; the verification feature makes correctness repeatably enforceable.
 
-The stack starts from `react-website-overhaul`. The names below are planned; the documentation does not create branches or authorize implementation.
+The stack starts from `react-website-overhaul`. Branch names use a purpose-based conventional prefix. The documentation does not create branches or authorize implementation.
 
 | Plan | Status | Depends on | Planned branch | PR base | PR |
 | --- | --- | --- | --- | --- | --- |
-| [001 — Code cleanup](001-code-cleanup.md) | Completed | Existing frontend | `codex/code-cleanup` | `react-website-overhaul` | [#2](https://github.com/avidixit27/avi-dixit.com/pull/2) |
-| [002 — TypeScript overhaul](002-typescript-overhaul.md) | Planned | 001 | `codex/typescript-overhaul` | `codex/code-cleanup` | Not opened |
-| [003 — Verification pipeline](003-verification-pipeline.md) | Planned | 002 | `codex/verification-pipeline` | `codex/typescript-overhaul` | Not opened |
+| [002 — TypeScript overhaul](002-typescript-overhaul.md) | Completed | 001 | `refactor/typescript-overhaul` | `react-website-overhaul` | [#3](https://github.com/avidixit27/avi-dixit.com/pull/3) |
+| [003 — Verification pipeline](003-verification-pipeline.md) | Planned | 002 | `test/verification-pipeline` | `refactor/typescript-overhaul` | Not opened |
+
+## Completed
+
+| Plan | Status | Branch | PR |
+| --- | --- | --- | --- |
+| [001 — Code cleanup](001-code-cleanup.md) | Completed | `codex/code-cleanup` | [#2](https://github.com/avidixit27/avi-dixit.com/pull/2) |
 
 ### Stack management
 
 - Create each child branch from the reviewed, committed state of its parent. Each PR targets its immediate parent and identifies that dependency, so its diff contains only its own layer.
+- Use purpose-based branch prefixes such as `feat/`, `fix/`, `refactor/`, `test/`, and `chore/`; keep the remainder concise and kebab-case.
 - Keep the three scopes distinct. Do not mix visual redesign, image hosting, a backend, commerce, or unrelated dependency upgrades into this stack.
 - Merge in dependency order: 001, 002, then 003. When a parent merges, update the dependent PR base and restack as necessary to avoid repeating merged changes. Do not blindly merge a child into an obsolete parent branch.
 - Run pull-request CI for intermediate base branches as well as `main`. Introduce required-check rules only when the relevant workflow exists on the protected target.

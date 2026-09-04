@@ -9,7 +9,8 @@ const Shop = lazy(() => import("../features/shop/Shop"));
 const Contact = lazy(() => import("../features/inquiries/Contact"));
 
 export default function App() {
-  const [portfolioGridElement, setPortfolioGridElement] = useState(null);
+  const [portfolioGridElement, setPortfolioGridElement] =
+    useState<HTMLDivElement | null>(null);
 
   return (
     <BrowserRouter>

@@ -5,20 +5,20 @@ const SCROLL_HIDE_DELAY_MS = 1200;
 const DRAG_HIDE_DELAY_MS = 700;
 
 export default function CustomScrollbar() {
-  const scrollbarRef = useRef(null);
+  const scrollbarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const scrollbar = scrollbarRef.current;
     if (!scrollbar) return undefined;
 
     const documentElement = document.documentElement;
-    let hideTimer;
+    let hideTimer: number | undefined;
     let isDragging = false;
     let dragOffsetY = 0;
 
-    const hideAfter = (delay) => {
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => {
+    const hideAfter = (delay: number) => {
+      if (hideTimer !== undefined) window.clearTimeout(hideTimer);
+      hideTimer = window.setTimeout(() => {
         scrollbar.style.opacity = "0";
       }, delay);
     };
@@ -31,7 +31,7 @@ export default function CustomScrollbar() {
       };
     };
 
-    const positionFromScroll = (reveal) => {
+    const positionFromScroll = (reveal: boolean) => {
       const { scrollHeight, trackHeight } = getMeasurements();
       const progress = scrollHeight > 0 ? window.scrollY / scrollHeight : 0;
       scrollbar.style.top = `${progress * trackHeight}px`;
@@ -45,9 +45,9 @@ export default function CustomScrollbar() {
     const onScroll = () => positionFromScroll(true);
     const onResize = () => positionFromScroll(false);
 
-    const onMouseDown = (event) => {
+    const onMouseDown = (event: MouseEvent) => {
       event.preventDefault();
-      clearTimeout(hideTimer);
+      if (hideTimer !== undefined) window.clearTimeout(hideTimer);
       isDragging = true;
       scrollbar.dataset.dragging = "true";
       scrollbar.classList.add("dragging");
@@ -55,7 +55,7 @@ export default function CustomScrollbar() {
       dragOffsetY = event.clientY - scrollbar.getBoundingClientRect().top;
     };
 
-    const onMouseMove = (event) => {
+    const onMouseMove = (event: MouseEvent) => {
       if (!isDragging) return;
 
       const { scrollHeight, trackHeight } = getMeasurements();
@@ -85,7 +85,7 @@ export default function CustomScrollbar() {
     window.addEventListener("mouseup", endDrag);
 
     return () => {
-      clearTimeout(hideTimer);
+      if (hideTimer !== undefined) window.clearTimeout(hideTimer);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       scrollbar.removeEventListener("mousedown", onMouseDown);

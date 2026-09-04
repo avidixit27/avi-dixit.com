@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import type { Photo } from "./photoCatalog";
 
 const LANDSCAPE_ASPECT_RATIO = 1.2;
-let cachedPhotos;
-let cachedLandscapeIndicesPromise;
+let cachedPhotos: readonly Photo[] | undefined;
+let cachedLandscapeIndicesPromise: Promise<readonly number[]> | undefined;
 
-function loadLandscapePhotoIndices(photos) {
+function loadLandscapePhotoIndices(
+  photos: readonly Photo[],
+): Promise<readonly number[]> {
   if (cachedPhotos === photos && cachedLandscapeIndicesPromise) {
     return cachedLandscapeIndicesPromise;
   }
@@ -13,8 +16,10 @@ function loadLandscapePhotoIndices(photos) {
   cachedLandscapeIndicesPromise = (async () => {
     const indices = [];
     for (let index = 0; index < photos.length; index += 1) {
+      const photo = photos[index];
+      if (!photo) continue;
       const image = new Image();
-      image.src = photos[index].src;
+      image.src = photo.src;
       await image.decode().catch(() => undefined);
       if (image.width > image.height * LANDSCAPE_ASPECT_RATIO) {
         indices.push(index);
@@ -26,8 +31,12 @@ function loadLandscapePhotoIndices(photos) {
   return cachedLandscapeIndicesPromise;
 }
 
-export default function useLandscapePhotoIndices(photos) {
-  const [landscapeIndices, setLandscapeIndices] = useState([]);
+export default function useLandscapePhotoIndices(
+  photos: readonly Photo[],
+): readonly number[] {
+  const [landscapeIndices, setLandscapeIndices] = useState<readonly number[]>(
+    [],
+  );
 
   useEffect(() => {
     if (photos.length === 0) {

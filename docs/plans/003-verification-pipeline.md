@@ -6,8 +6,8 @@
 | Status | Tracked in the [plan index](README.md) |
 | Depends on | Reviewed output of [002 — TypeScript overhaul](002-typescript-overhaul.md), including the behavioral handoff from plan 001 |
 | Blocks | Routine feature work that relies on the full red–green–refactor workflow |
-| Planned branch | `codex/verification-pipeline` |
-| PR base | `codex/typescript-overhaul` |
+| Planned branch | `test/verification-pipeline` |
+| PR base | `refactor/typescript-overhaul` |
 | Pull request | Not opened |
 
 ## Outcome

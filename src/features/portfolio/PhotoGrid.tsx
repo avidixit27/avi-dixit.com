@@ -1,6 +1,18 @@
+import type { Ref } from "react";
 import BlurImage from "../../components/BlurImage";
+import type { Photo } from "./photoCatalog";
 
-export default function PhotoGrid({ photos, gridMarkerRef, onOpen }) {
+interface PhotoGridProps {
+  photos: readonly Photo[];
+  gridMarkerRef: Ref<HTMLDivElement>;
+  onOpen: (index: number) => void;
+}
+
+export default function PhotoGrid({
+  photos,
+  gridMarkerRef,
+  onOpen,
+}: PhotoGridProps) {
   return (
     <>
       <div ref={gridMarkerRef} className="h-0 w-full" />
