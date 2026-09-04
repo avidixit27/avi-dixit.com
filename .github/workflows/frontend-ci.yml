@@ -26,7 +26,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --no-audit
       - run: npm run lint
       - run: npm run format:check
       - run: npm run typecheck
@@ -40,7 +40,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --no-audit
       - run: npm run test:unit
 
   component-tests:
@@ -52,7 +52,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --no-audit
       - run: npm run test:component
       - name: Upload component failure screenshots
         if: failure()
@@ -72,7 +72,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
+      - run: npm ci --no-audit
       - run: npm run test:e2e
       - name: Upload browser failure screenshots
         if: failure()
