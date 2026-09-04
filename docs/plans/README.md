@@ -41,6 +41,18 @@ The stack starts from `react-website-overhaul`. Branch names use a purpose-based
 | ----------------------------------------- | --------- | -------------------- | -------------------------------------------------------- |
 | [001 — Code cleanup](001-code-cleanup.md) | Completed | `codex/code-cleanup` | [#2](https://github.com/avidixit27/avi-dixit.com/pull/2) |
 
+## Visual and performance sequence
+
+The next sequence establishes delivery-sized photography before visual and motion work, then introduces each motion class against a real use case. This keeps image decoding, design-system migration, scroll composition, and route lifecycle risk independently measurable. Plans are stacked in dependency order; rebase or retarget each child after its parent merges.
+
+| Plan                                                                                     | Status  | Depends on | Planned branch                      | PR base                             | PR         |
+| ---------------------------------------------------------------------------------------- | ------- | ---------- | ----------------------------------- | ----------------------------------- | ---------- |
+| [004 — Responsive media and performance](004-responsive-media-performance-foundation.md) | Planned | 003        | `feat/responsive-media-foundation`  | `main`                              | Not opened |
+| [005 — Dark visual system and shell](005-dark-visual-system-and-shell.md)                | Planned | 004        | `feat/dark-visual-system`           | `feat/responsive-media-foundation`  | Not opened |
+| [006 — Accessible Motion foundation](006-accessible-motion-foundation.md)                | Planned | 005        | `feat/motion-foundation`            | `feat/dark-visual-system`           | Not opened |
+| [007 — Portfolio scroll composition](007-portfolio-scroll-composition.md)                | Planned | 006        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened |
+| [008 — Route and layout transitions](008-route-and-layout-transitions.md)                | Planned | 007        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened |
+
 ### Stack management
 
 - Create each child branch from the reviewed, committed state of its parent. Each PR targets its immediate parent and identifies that dependency, so its diff contains only its own layer.

@@ -154,9 +154,17 @@ Use interfaces for stable object-shaped contracts such as component props and do
 
 ## 6. Visual system and external components
 
-**Agreed direction:** Tailwind remains the primary styling approach. Establish shared design tokens for color, typography, spacing, radii, layering, and motion. Use global CSS for genuinely global concerns and component-local styles where an effect needs them.
+**Agreed direction:** React and Vite remain the application and build foundation. Tailwind remains the primary styling approach for layout, typography, responsive behavior, and simple hover, focus, and state transitions. Establish shared design tokens for color, typography, spacing, radii, layering, and motion. Use global CSS for genuinely global concerns and component-local styles where an effect needs them.
 
-Use CSS transitions for simple feedback. Motion is the preferred candidate for coordinated React entrances, exits, layout transitions, and gestures. Adopt it when the selected interaction needs it; documentation alone does not install it. Introduce another animation runtime only with a concrete justification.
+Motion for React is the selected general-purpose runtime for coordinated entrances and exits, page transitions, scroll reveals, scroll-linked transforms, bounded parallax, and justified layout animation. It is planned work until installed by an implementation ticket. Native browser scrolling and CSS layout retain ownership of document flow and sticky positioning; Motion may transform presentation in response to scroll but must not emulate or hijack scrolling.
+
+| Layer            | Ownership                                                                                                                   |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| React + Vite     | Component composition, state, routing integration, code splitting, and production bundling                                  |
+| Tailwind + CSS   | Layout, typography, responsive styling, design tokens, native sticky behavior, and simple interaction transitions           |
+| Motion for React | Coordinated enter/exit behavior, reveals, scroll-linked transforms, parallax, page transitions, and proven layout animation |
+
+Prefer strict `LazyMotion` with the slim `m` components and the smallest feature bundle that supports implemented behavior. Load animation features after semantic content can render, measure bundle cost, and avoid a full `motion` import that defeats lazy loading. Start with `domAnimation`; add layout or gesture features only when an accepted interaction requires them. Introduce another animation runtime only with a concrete, measured justification.
 
 ### Candidate sources
 
@@ -176,6 +184,7 @@ Adapt adopted components to the project's TypeScript contracts, tokens, accessib
 
 - Photographs remain the primary content; animation must support the intended viewing experience.
 - Test mobile layouts, touch interaction, keyboard interaction, visible focus, and reduced motion.
+- Configure Motion to respect the operating-system reduced-motion preference globally, then remove parallax and large transforms explicitly where automatic behavior is insufficient.
 - Lightboxes need clear controls, focus containment and restoration, and predictable scroll recovery.
 - Essential content and controls must remain available when animation is reduced or disabled.
 - Check both normal motion and reduced motion; do not use the reduced-motion case to hide animation defects.
