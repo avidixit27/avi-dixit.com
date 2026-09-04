@@ -1,14 +1,14 @@
 # 005 — Establish responsive media and a performance baseline
 
-| Field          | Value                                  |
-| -------------- | -------------------------------------- |
-| Type           | Feature                                |
-| Status         | Tracked in the [plan index](README.md) |
-| Depends on     | 004                                    |
-| Blocks         | 006, 007, and media-heavy feature work |
-| Planned branch | `feat/responsive-media-foundation`     |
-| PR base        | `fix/dependabot-compatibility-guards`  |
-| PR             | Pending                                |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| Type           | Feature                                                    |
+| Status         | Tracked in the [plan index](README.md)                     |
+| Depends on     | 004                                                        |
+| Blocks         | 006, 007, and media-heavy feature work                     |
+| Planned branch | `feat/responsive-media-foundation`                         |
+| PR base        | `fix/dependabot-compatibility-guards`                      |
+| PR             | [#16](https://github.com/avidixit27/avi-dixit.com/pull/16) |
 
 ## Outcome
 
@@ -120,6 +120,6 @@ Two local derivative approaches were evaluated. A custom Sharp script would prov
 
 The production build emits 96 hashed derivatives: four widths in JPEG and WebP for each of twelve photographs. They total 8,673,148 bytes; the entire `dist` directory is 12,775,083 bytes, and the largest derivative is 520,052 bytes. This reduces total build output by about 91% and portfolio media by about 94%. No original 10–14 MB JPEG is emitted. A cold build after removing the image-transform cache reproduced identical filenames and SHA-256 content hashes and completed in 6.24 seconds.
 
-Component and browser tests cover responsive markup, intrinsic dimensions, loading priority, the two-image hero window, readiness-gated rotation, gallery behavior, mobile access, and reduced-motion rendering. The portrait and representative landscape derivatives were reviewed at full generated resolution; orientation, film texture, gradients, highlights, and shadow detail remain suitable at quality 82. `npm run check`, `npm run security:audit`, and the full development-dependency `npm audit --audit-level=moderate` pass locally on Node 22.23.2. Pull-request CI results are recorded with the PR.
+Component and browser tests cover responsive markup, intrinsic dimensions, loading priority, the two-image hero window, readiness-gated rotation, gallery behavior, mobile access, and reduced-motion rendering. The portrait and representative landscape derivatives were reviewed at full generated resolution; orientation, film texture, gradients, highlights, and shadow detail remain suitable at quality 82. `npm run check`, `npm run security:audit`, and the full development-dependency `npm audit --audit-level=moderate` pass locally on Node 22.23.2. Pull-request CI results are recorded on [PR #16](https://github.com/avidixit27/avi-dixit.com/pull/16).
 
 The editing originals still occupy approximately 146 MB in Git. Their long-term source storage and any CDN remain open. The current build cost is dominated by image transformation on a clean cache; subsequent plans should measure it as the catalog grows rather than increasing derivative tiers preemptively.
