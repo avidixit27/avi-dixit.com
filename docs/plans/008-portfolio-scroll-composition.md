@@ -18,7 +18,7 @@ The home portfolio demonstrates the approved cinematic direction with real photo
 
 - Plans 005–007 provide responsive media, semantic visual tokens, and the accessible Motion boundary.
 - Approve the representative photograph sequence and editorial copy before implementation. Store fixed copy in feature resources.
-- Confirm whether the existing draggable custom scrollbar remains part of the design; this ticket must not build scroll-linked effects on unresolved competing scroll behavior.
+- Plan 006 removes the JavaScript-driven draggable scrollbar and restores native browser scrolling before scroll-linked effects are introduced.
 
 ## Scope
 
@@ -60,7 +60,7 @@ The home portfolio demonstrates the approved cinematic direction with real photo
 - Parallax uses Motion values and transforms without continuous React scroll-state updates.
 - Reduced motion removes parallax and large transforms while preserving all content.
 - Mobile/touch layouts remain readable and may use normal flow instead of sticky behavior.
-- Initial media loading stays within Plan 004’s established policy and budget.
+- Initial media loading stays within Plan 005’s established policy and budget.
 - Keyboard navigation and gallery access remain functional throughout the composition.
 - Profiling shows no unresolved material forced-layout loop, long-task regression, or persistent dropped-frame behavior caused by the new effects.
 

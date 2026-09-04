@@ -156,7 +156,7 @@ Use interfaces for stable object-shaped contracts such as component props and do
 
 **Agreed direction:** React and Vite remain the application and build foundation. Tailwind remains the primary styling approach for layout, typography, responsive behavior, and simple hover, focus, and state transitions. Establish shared design tokens for color, typography, spacing, radii, layering, and motion. Use global CSS for genuinely global concerns and component-local styles where an effect needs them.
 
-Motion for React is the selected general-purpose runtime for coordinated entrances and exits, page transitions, scroll reveals, scroll-linked transforms, bounded parallax, and justified layout animation. It is planned work until installed by an implementation ticket. Native browser scrolling and CSS layout retain ownership of document flow and sticky positioning; Motion may transform presentation in response to scroll but must not emulate or hijack scrolling.
+Motion for React is the selected general-purpose runtime for coordinated entrances and exits, page transitions, scroll reveals, scroll-linked transforms, bounded parallax, and justified layout animation. It is planned work until installed by an implementation ticket. Native browser scrolling and CSS layout retain ownership of document flow and sticky positioning; Motion may transform presentation in response to scroll but must not emulate or hijack scrolling. Replace the current JavaScript-driven draggable scrollbar with the native browser scrollbar and, if useful, restrained CSS styling that preserves platform scrolling behavior and accessibility.
 
 | Layer            | Ownership                                                                                                                   |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -183,6 +183,7 @@ Adapt adopted components to the project's TypeScript contracts, tokens, accessib
 ### Visual acceptance
 
 - Photographs remain the primary content; animation must support the intended viewing experience.
+- Support the latest two stable releases of Chrome, Edge, Firefox, and Safari, including the current iOS Safari. Older browsers may receive the complete static experience without every decorative effect.
 - Test mobile layouts, touch interaction, keyboard interaction, visible focus, and reduced motion.
 - Configure Motion to respect the operating-system reduced-motion preference globally, then remove parallax and large transforms explicitly where automatic behavior is insufficient.
 - Lightboxes need clear controls, focus containment and restoration, and predictable scroll recovery.
