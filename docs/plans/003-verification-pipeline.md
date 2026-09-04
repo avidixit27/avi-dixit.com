@@ -8,7 +8,7 @@
 | Blocks         | Routine feature work that relies on the full red–green–refactor workflow                                                   |
 | Planned branch | `test/verification-pipeline`                                                                                               |
 | PR base        | `react-website-overhaul`                                                                                                   |
-| Pull request   | [#4](https://github.com/avidixit27/avi-dixit.com/pull/4)                                                                   |
+| Pull request   | [#4](https://github.com/avidixit27/avi-dixit.com/pull/4); security follow-up on `fix/security-scanning`                    |
 
 ## Outcome
 
@@ -149,3 +149,5 @@ Local verification passed with `npm run check`, which runs linting, formatting, 
 The workflow triggered when PR #4 opened. Its first component-test failure retained a downloadable screenshot artifact, proving the diagnostic path; the slideshow test was then made deterministic by waiting for interval registration before advancing the controlled clock. The subsequent [fully passing workflow run](https://github.com/avidixit27/avi-dixit.com/actions/runs/33833098538) completed all four jobs, and another push verified superseded-run cancellation. The final pull-request checks remain the authoritative verification for the completed branch.
 
 React Router was updated from 7.1.3 to 7.18.3 after the production audit identified advisories in the earlier lock entry. The complete local suite still passed, and `npm audit --omit=dev` reports zero production vulnerabilities. The full dependency audit still reports 19 advisories in development tooling dependencies; resolving those requires coordinated major tool upgrades and remains follow-up work. Large source photographs also continue to produce a roughly 146 MB build, and complete modal focus management remains an acknowledged accessibility improvement. No backend, deployment, publishing, contact delivery, authentication, checkout, or production commerce behavior was added.
+
+After PR #4 merged, the security follow-up remained part of Plan 003 but moved to the separate `fix/security-scanning` branch. It adds Dependabot monitoring for npm and GitHub Actions, pull-request dependency review at moderate severity, a production dependency audit, and CodeQL analysis. Security checks run for pull requests, pushes to `main`, a weekly schedule, and manual dispatch. Repository-level vulnerability alerts, automated Dependabot security updates, secret scanning, and push protection were enabled alongside the committed configuration.
