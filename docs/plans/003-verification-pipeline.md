@@ -8,7 +8,7 @@
 | Blocks         | Routine feature work that relies on the full red–green–refactor workflow                                                   |
 | Planned branch | `test/verification-pipeline`                                                                                               |
 | PR base        | `react-website-overhaul`                                                                                                   |
-| Pull request   | Not opened                                                                                                                 |
+| Pull request   | [#4](https://github.com/avidixit27/avi-dixit.com/pull/4)                                                                   |
 
 ## Outcome
 
@@ -140,4 +140,12 @@ Do not add empty scripts that report success without performing checks. Pin comp
 
 ## Implementation record
 
-Implementation started on `test/verification-pipeline` from merge commit `06b586c`. The pre-change baseline passed `npm run typecheck` and `npm run build`; the build retained the known stale Browserslist-data warning and large local image outputs. Node `22.22.2` is the shared local and CI runtime. Tool selection preserves Vite 5 compatibility: Vitest 2 and Cypress 14 support the current application, while ESLint 9 is the newest major accepted by the current JSX accessibility plugin. Final commands, failure-path evidence, CI results, limitations, and the pull-request link will be recorded before completion.
+Implementation was completed on `test/verification-pipeline` from merge commit `06b586c` in [PR #4](https://github.com/avidixit27/avi-dixit.com/pull/4). The pre-change baseline passed `npm run typecheck` and `npm run build`. Node `22.22.2` is the shared supported runtime. Tool selection preserves Vite 5 compatibility: ESLint 9, Vitest 2, and Cypress 14 provide static, unit, component, and production browser checks without changing the application bundler.
+
+The final implementation provides four independent CI jobs for static checks, unit tests, component tests, and the production build plus browser journeys. Pull-request events include opened, synchronized, reopened, and ready-for-review changes for intermediate stack bases as well as the eventual main branch. Superseded runs are cancelled, installs use the committed lockfile, and Cypress failure screenshots are retained for seven days. `npm ci --no-audit` keeps package installation deterministic without coupling every job to the registry advisory endpoint; security review remains an explicit command and policy concern.
+
+Local verification passed with `npm run check`, which runs linting, formatting, root and Cypress type checks, unit tests, component tests, and production end-to-end tests. `npm run test:unit:coverage` passed with 91.66% statement coverage for the extracted photo-navigation logic. Controlled temporary faults proved that ESLint, Prettier, TypeScript, Vitest, Cypress component tests, and Cypress end-to-end tests each return a nonzero exit. A disposable worktree also proved that the pre-commit hook accepts valid staged TypeScript and rejects a staged formatting violation without creating a synthetic commit.
+
+The workflow triggered when PR #4 opened. Its first component-test failure retained a downloadable screenshot artifact, proving the diagnostic path; the slideshow test was then made deterministic by waiting for interval registration before advancing the controlled clock. The subsequent [fully passing workflow run](https://github.com/avidixit27/avi-dixit.com/actions/runs/33833098538) completed all four jobs, and another push verified superseded-run cancellation. The final pull-request checks remain the authoritative verification for the completed branch.
+
+React Router was updated from 7.1.3 to 7.18.3 after the production audit identified advisories in the earlier lock entry. The complete local suite still passed, and `npm audit --omit=dev` reports zero production vulnerabilities. The full dependency audit still reports 19 advisories in development tooling dependencies; resolving those requires coordinated major tool upgrades and remains follow-up work. Large source photographs also continue to produce a roughly 146 MB build, and complete modal focus management remains an acknowledged accessibility improvement. No backend, deployment, publishing, contact delivery, authentication, checkout, or production commerce behavior was added.
