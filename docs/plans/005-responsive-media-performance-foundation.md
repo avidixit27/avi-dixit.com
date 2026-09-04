@@ -20,7 +20,7 @@ The current portfolio no longer serves full-resolution originals for every brows
 - `HeroSlideshow` mounts eight full-resolution images in the viewport. `BlurImage` supports only `src`, `alt`, lazy loading, and a class name; the catalog has no dimensions or responsive variants.
 - Vite route chunks are already lazy loaded. No responsive image generator, bundle visualizer, CDN, or remote media service is configured.
 - Media hosting, CDN provider, and backend remain open decisions. This ticket must not assume AWS, S3, CloudFront, or a backend repository.
-- Plan 004 provides the supported Node and Vite baseline. Record the clean starting result of `npm run check`, `npm run security:audit`, and `npm run build` before changing media behavior.
+- Plan 004 provides the supported Node 22/24 and Vite 8 baseline. Record the clean starting result of `npm run check`, `npm run security:audit`, and `npm run build` before changing media behavior.
 
 ## Scope
 
@@ -52,7 +52,7 @@ The current portfolio no longer serves full-resolution originals for every brows
 ## Implementation plan
 
 1. Run the existing checks and production build. Record total output, largest raster assets, route JavaScript, initial home-route requests, layout shift, and scroll/decode behavior on representative mobile and desktop viewports.
-2. Evaluate the two local derivative approaches against Vite 5, Node 22, cacheability, reproducibility, security, and future replacement by CDN URLs. Add only the chosen dependency and command.
+2. Evaluate the two local derivative approaches against Vite 8, Node 22/24, cacheability, reproducibility, security, and future replacement by CDN URLs. Add only the chosen dependency and command.
 3. Extend the photo catalog with stable IDs, intrinsic dimensions, aspect ratio, alt text, and responsive source data. Keep URL construction outside presentation components and independent of a storage vendor.
 4. Generate the smallest useful set of current-layout variants. Start with 480, 960, 1440, and 2160 pixel width candidates; remove any tier that browser evidence shows is redundant.
 5. Replace original browser imports with responsive sources. Reserve layout space and set accurate `sizes` for hero, grid, and lightbox contexts.
@@ -89,7 +89,7 @@ The current portfolio no longer serves full-resolution originals for every brows
 | Generation slows every build                  | Cache deterministic output or separate generation from unchanged builds while keeping clean-checkout reproduction.     |
 | Responsive metadata becomes provider-specific | Keep a narrow media contract and map local or future CDN sources into it.                                              |
 | Hero crossfades reveal unloaded frames        | Preload only the next frame and retain the current frame until its replacement decodes.                                |
-| A plugin conflicts with Vite 5                | Use the evaluated Sharp generation path or stop and record the toolchain prerequisite.                                 |
+| A plugin conflicts with Vite 8                | Use the evaluated Sharp generation path or stop and record the toolchain prerequisite.                                 |
 
 ## Definition of done
 

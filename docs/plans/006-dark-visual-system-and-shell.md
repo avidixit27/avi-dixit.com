@@ -28,6 +28,7 @@ The application has a coherent dark-first visual language derived from the Avi D
 - Define typography roles, spacing rhythm, content widths, section spacing, radii, shadows, and layer ordering.
 - Make the existing application shell and routes usable in the dark theme at mobile through wide-desktop sizes.
 - Keep Tailwind responsible for layout, typography, responsive behavior, and simple hover/focus transitions.
+- Migrate Tailwind 3 to Tailwind 4 in this plan, adapting the design-token configuration once and protecting current output before applying the new dark visual system.
 - Centralize stable design values in Tailwind/CSS tokens; remove touched floating color and timing values.
 - Remove the custom draggable scrollbar and the CSS that hides the platform scrollbar. Preserve ordinary keyboard, pointer, touch, and assistive-technology scrolling; style the native scrollbar only where browser support and contrast remain sound.
 - Add the shared footer using the approved email, Instagram destination, and copyright copy, storing immutable copy and destinations in the appropriate resource catalog.
@@ -52,12 +53,13 @@ The application has a coherent dark-first visual language derived from the Avi D
 ## Implementation plan
 
 1. Inventory current colors, hard-coded values, typography, widths, layers, and interactive states. Extract the logo palette and test candidate text/background pairings for contrast.
-2. Define semantic CSS variables and map Tailwind names to them so components consume roles rather than raw brand colors.
-3. Establish display/body/meta typography, spacing, containers, section rhythm, border, focus, radius, shadow, and layer tokens. Use the current system font stack until typography licensing is decided.
-4. Remove `CustomScrollbar` from the application shell and restore the native scrollbar. Remove its listeners, timers, DOM writes, and hidden-scrollbar rules; add only restrained native scrollbar styling that preserves visibility and platform behavior.
-5. Migrate global styles and the remaining application shell, then update current routes in coherent slices. Preserve behavior while replacing touched floating values.
-6. Implement the footer from approved resource data. Ensure keyboard order, visible focus, email/Instagram behavior, external-link security attributes, and small-screen wrapping are deliberate.
-7. Add component assertions for semantics and state classes where useful, then review real images and content at representative sizes and supported browsers.
+2. Protect current rendering and class behavior, then follow Tailwind's official major-version migration for the package, PostCSS integration, CSS entrypoint, content discovery, and theme values. Verify visual parity before introducing the dark system.
+3. Define semantic CSS variables and map Tailwind names to them so components consume roles rather than raw brand colors.
+4. Establish display/body/meta typography, spacing, containers, section rhythm, border, focus, radius, shadow, and layer tokens. Use the current system font stack until typography licensing is decided.
+5. Remove `CustomScrollbar` from the application shell and restore the native scrollbar. Remove its listeners, timers, DOM writes, and hidden-scrollbar rules; add only restrained native scrollbar styling that preserves visibility and platform behavior.
+6. Migrate global styles and the remaining application shell, then update current routes in coherent slices. Preserve behavior while replacing touched floating values.
+7. Implement the footer from approved resource data. Ensure keyboard order, visible focus, email/Instagram behavior, external-link security attributes, and small-screen wrapping are deliberate.
+8. Add component assertions for semantics and state classes where useful, then review real images and content at representative sizes and supported browsers.
 
 ## Acceptance criteria
 
@@ -81,13 +83,14 @@ The application has a coherent dark-first visual language derived from the Avi D
 
 ## Risks and recovery
 
-| Risk                                           | Mitigation or recovery                                                                         |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Dark styling obscures image detail or controls | Review representative bright and dark photographs and strengthen local contrast where needed.  |
-| Tokens become a second utility framework       | Keep only recurring semantic roles and use Tailwind’s existing scale for ordinary values.      |
-| Footer destinations drift                      | Keep approved values in one typed resource catalog and update them through a scoped change.    |
-| Native scrollbar styling reduces usability     | Prefer platform defaults; remove styling that weakens visibility, contrast, or input behavior. |
-| Broad restyling masks behavior regressions     | Migrate by owner and keep existing component/E2E journeys passing.                             |
+| Risk                                           | Mitigation or recovery                                                                            |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Tailwind migration and redesign fail together  | Establish Tailwind 4 visual parity first, then apply token and theme changes in protected slices. |
+| Dark styling obscures image detail or controls | Review representative bright and dark photographs and strengthen local contrast where needed.     |
+| Tokens become a second utility framework       | Keep only recurring semantic roles and use Tailwind’s existing scale for ordinary values.         |
+| Footer destinations drift                      | Keep approved values in one typed resource catalog and update them through a scoped change.       |
+| Native scrollbar styling reduces usability     | Prefer platform defaults; remove styling that weakens visibility, contrast, or input behavior.    |
+| Broad restyling masks behavior regressions     | Migrate by owner and keep existing component/E2E journeys passing.                                |
 
 ## Definition of done
 
