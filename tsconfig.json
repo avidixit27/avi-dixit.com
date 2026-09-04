@@ -21,5 +21,11 @@
     "noImplicitReturns": true,
     "types": ["vite/client"]
   },
-  "include": ["src", "vite.config.mts"]
+  "include": ["src", "vite.config.mts", "vitest.config.mts"],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.cy.tsx",
+    "cypress",
+    "cypress.config.ts"
+  ]
 }

@@ -8,10 +8,7 @@ interface HeroSlideshowProps {
   onOpen: (index: number) => void;
 }
 
-export default function HeroSlideshow({
-  photos,
-  onOpen,
-}: HeroSlideshowProps) {
+export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -25,8 +22,9 @@ export default function HeroSlideshow({
   if (photos.length === 0) return null;
 
   return (
-    <div
-      className="relative h-[100svh] w-full cursor-pointer"
+    <button
+      type="button"
+      className="relative block h-[100svh] w-full cursor-pointer"
       onClick={() => onOpen(activeIndex)}
       aria-label="Open hero image gallery"
     >
@@ -40,6 +38,6 @@ export default function HeroSlideshow({
           }`}
         />
       ))}
-    </div>
+    </button>
   );
 }

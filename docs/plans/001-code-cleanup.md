@@ -1,14 +1,14 @@
 # 001 — Code cleanup
 
-| Field | Value |
-| --- | --- |
-| Type | Refactor |
-| Status | Tracked in the [plan index](README.md) |
-| Depends on | Existing frontend on `react-website-overhaul` |
-| Blocks | [002 — TypeScript overhaul](002-typescript-overhaul.md) |
-| Planned branch | `codex/code-cleanup` |
-| PR base | `react-website-overhaul` |
-| PR | [#2](https://github.com/avidixit27/avi-dixit.com/pull/2) |
+| Field          | Value                                                    |
+| -------------- | -------------------------------------------------------- |
+| Type           | Refactor                                                 |
+| Status         | Tracked in the [plan index](README.md)                   |
+| Depends on     | Existing frontend on `react-website-overhaul`            |
+| Blocks         | [002 — TypeScript overhaul](002-typescript-overhaul.md)  |
+| Planned branch | `codex/code-cleanup`                                     |
+| PR base        | `react-website-overhaul`                                 |
+| PR             | [#2](https://github.com/avidixit27/avi-dixit.com/pull/2) |
 
 ## Outcome
 
@@ -19,7 +19,7 @@ The JavaScript frontend has explicit ownership for the application shell, portfo
 - Start from the reviewed, committed `react-website-overhaul` state and confirm the working tree does not contain unrelated edits.
 - Run and record the current production build result before editing.
 - Record browser behavior for home, shop, contact, hero rotation, gallery controls, header visibility, and scrollbar behavior at desktop and mobile sizes.
-Reconfirm these findings against the checkout before editing:
+  Reconfirm these findings against the checkout before editing:
 
 - `Portfolio.jsx` combines image discovery, slideshow timing, grid rendering, lightbox selection, image decoding, keyboard behavior, and DOM measurements.
 - `Navigation.jsx` combines route presentation, visibility rules, timers, observers, global DOM coordination, and draggable scrollbar behavior.
@@ -83,12 +83,12 @@ Apply the [temporary bootstrap verification exception](README.md#temporary-verif
 
 ## Risks and recovery
 
-| Risk | Mitigation or recovery |
-| --- | --- |
-| Structural moves change lazy loading or asset resolution | Move one ownership area at a time and run the build plus affected routes after each coherent step. Revert the responsible step if resolution cannot be preserved in scope. |
-| Splitting effects duplicates listeners or leaves global state behind | Centralize each effect under one owner and verify repeated navigation, mount, and unmount behavior. |
-| Cleanup freezes or changes accidental behavior | Compare against the recorded baseline, call out intentional fixes in the PR, and defer ambiguous product changes. |
-| Excessive component extraction increases indirection | Require a sentence-level responsibility for every module and collapse forwarding-only layers before review. |
+| Risk                                                                 | Mitigation or recovery                                                                                                                                                     |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Structural moves change lazy loading or asset resolution             | Move one ownership area at a time and run the build plus affected routes after each coherent step. Revert the responsible step if resolution cannot be preserved in scope. |
+| Splitting effects duplicates listeners or leaves global state behind | Centralize each effect under one owner and verify repeated navigation, mount, and unmount behavior.                                                                        |
+| Cleanup freezes or changes accidental behavior                       | Compare against the recorded baseline, call out intentional fixes in the PR, and defer ambiguous product changes.                                                          |
+| Excessive component extraction increases indirection                 | Require a sentence-level responsibility for every module and collapse forwarding-only layers before review.                                                                |
 
 ## Definition of done
 

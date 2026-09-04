@@ -51,13 +51,15 @@ export default function Lightbox({
         landscapeIndices,
         direction,
       );
-      if (nextIndex != null) onSelect(nextIndex);
+      if (nextIndex != null) {
+        setIsClosing(false);
+        onSelect(nextIndex);
+      }
     },
     [landscapeIndices, onSelect, selectedIndex],
   );
 
   useEffect(() => {
-    setIsClosing(false);
     updateCloseButton();
   }, [selectedIndex, updateCloseButton]);
 
@@ -101,10 +103,18 @@ export default function Lightbox({
       className={`fixed inset-0 bg-black/95 z-[100] overflow-hidden flex items-center justify-center
                   transition-opacity ${isClosing ? "opacity-0" : "opacity-100"}`}
       style={{ transitionDuration: `${CLOSE_DURATION_MS}ms` }}
-      onMouseDown={requestClose}
-      onClick={requestClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Photo viewer"
     >
       <button
+        type="button"
+        className="fixed inset-0 z-0 cursor-default"
+        onClick={requestClose}
+        aria-label="Close photo viewer"
+      />
+      <button
+        type="button"
         onMouseDown={(event) => {
           event.stopPropagation();
           requestClose();
@@ -126,6 +136,7 @@ export default function Lightbox({
       {landscapeIndices.length > 0 && (
         <>
           <button
+            type="button"
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
@@ -151,6 +162,7 @@ export default function Lightbox({
           </button>
 
           <button
+            type="button"
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
@@ -182,10 +194,8 @@ export default function Lightbox({
         ref={imageRef}
         src={photo.src}
         alt={photo.alt}
-        className="max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
+        className="relative z-10 max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
         onLoad={updateCloseButton}
-        onMouseDown={(event) => event.stopPropagation()}
-        onClick={(event) => event.stopPropagation()}
         draggable="false"
       />
     </div>

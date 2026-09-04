@@ -1,14 +1,14 @@
 # 002 — TypeScript overhaul
 
-| Field | Value |
-| --- | --- |
-| Type | Refactor |
-| Status | Tracked in the [plan index](README.md) |
-| Depends on | Reviewed output of [001 — Code cleanup](001-code-cleanup.md) |
-| Blocks | [003 — Verification pipeline](003-verification-pipeline.md) |
-| Planned branch | `refactor/typescript-overhaul` |
-| PR base | `react-website-overhaul` |
-| PR | [#3](https://github.com/avidixit27/avi-dixit.com/pull/3) |
+| Field          | Value                                                        |
+| -------------- | ------------------------------------------------------------ |
+| Type           | Refactor                                                     |
+| Status         | Tracked in the [plan index](README.md)                       |
+| Depends on     | Reviewed output of [001 — Code cleanup](001-code-cleanup.md) |
+| Blocks         | [003 — Verification pipeline](003-verification-pipeline.md)  |
+| Planned branch | `refactor/typescript-overhaul`                               |
+| PR base        | `react-website-overhaul`                                     |
+| PR             | [#3](https://github.com/avidixit27/avi-dixit.com/pull/3)     |
 
 ## Outcome
 
@@ -74,12 +74,12 @@ Apply the [temporary bootstrap verification exception](README.md#temporary-verif
 
 ## Risks and recovery
 
-| Risk | Mitigation or recovery |
-| --- | --- |
-| Migration hides uncertainty behind `any` or assertions | Type leaf contracts first, prefer `unknown` plus narrowing for external shapes, and review every assertion or suppression. |
-| Vite asset or glob declarations compile but fail at runtime | Verify real `.JPG`/SVG imports in both production build and browser scenarios. |
-| A mass rename obscures behavior changes | Migrate in ownership-based batches and keep semantic corrections separate and documented. |
-| Type packages force an unintended runtime upgrade | Select compatible types for the installed runtime or pause for an explicit dependency decision. |
+| Risk                                                        | Mitigation or recovery                                                                                                     |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Migration hides uncertainty behind `any` or assertions      | Type leaf contracts first, prefer `unknown` plus narrowing for external shapes, and review every assertion or suppression. |
+| Vite asset or glob declarations compile but fail at runtime | Verify real `.JPG`/SVG imports in both production build and browser scenarios.                                             |
+| A mass rename obscures behavior changes                     | Migrate in ownership-based batches and keep semantic corrections separate and documented.                                  |
+| Type packages force an unintended runtime upgrade           | Select compatible types for the installed runtime or pause for an explicit dependency decision.                            |
 
 ## Definition of done
 

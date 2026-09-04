@@ -20,9 +20,7 @@ interface IndicatorPosition {
   visible: boolean;
 }
 
-export default function Navigation({
-  portfolioGridElement,
-}: NavigationProps) {
+export default function Navigation({ portfolioGridElement }: NavigationProps) {
   const location = useLocation();
   const isHome = location.pathname === ROUTES.home;
   const navRef = useRef<HTMLElement>(null);

@@ -34,24 +34,22 @@ function loadLandscapePhotoIndices(
 export default function useLandscapePhotoIndices(
   photos: readonly Photo[],
 ): readonly number[] {
-  const [landscapeIndices, setLandscapeIndices] = useState<readonly number[]>(
-    [],
-  );
+  const [result, setResult] = useState<{
+    photos: readonly Photo[];
+    indices: readonly number[];
+  }>({ photos, indices: [] });
 
   useEffect(() => {
-    if (photos.length === 0) {
-      setLandscapeIndices([]);
-      return undefined;
-    }
+    if (photos.length === 0) return undefined;
 
     let isCancelled = false;
     loadLandscapePhotoIndices(photos).then((indices) => {
-      if (!isCancelled) setLandscapeIndices(indices);
+      if (!isCancelled) setResult({ photos, indices });
     });
     return () => {
       isCancelled = true;
     };
   }, [photos]);
 
-  return landscapeIndices;
+  return result.photos === photos ? result.indices : [];
 }
