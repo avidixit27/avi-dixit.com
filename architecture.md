@@ -223,6 +223,7 @@ Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-c
 | React component behavior      | Cypress Component Testing with Vite and application styles                                 |
 | Critical application journeys | Cypress end-to-end tests against the Vite production build                                 |
 | Pull-request checks           | Four independent GitHub Actions jobs                                                       |
+| Security                      | Dependabot, dependency review, production npm audit, CodeQL, and secret scanning           |
 
 The manifest and lockfile are the source of truth for installed versions. The verification stack intentionally stays compatible with Vite 5: Vitest 2, Cypress 14, and ESLint 9 are pinned through the lockfile. Cypress is the selected browser test system; do not add Playwright or a duplicate component test stack without a specific requirement.
 
@@ -256,6 +257,8 @@ Do not claim a red/green loop when the necessary checks could not run. Any user-
 The pre-commit hook checks staged source files with ESLint and staged supported text files with Prettier. Failed checks block the commit. Fixes remain explicit through developer commands, and the full browser suites stay outside the fast hook.
 
 The GitHub Actions workflow runs when a pull request is opened, synchronized, reopened, or marked ready for review, regardless of its target branch, and on pushes to `main`. Its independent jobs run lint/format/type checks, unit tests, Cypress component tests, and a production build followed by critical browser journeys.
+
+The security workflow runs on the same pull-request events, pushes to `main`, a weekly schedule, and manual dispatch. Dependency review rejects newly introduced dependencies with moderate or higher known vulnerabilities. The production npm audit enforces the same severity floor for the deployable dependency tree, while CodeQL scans JavaScript and TypeScript source for security weaknesses. Dependabot monitors npm and GitHub Actions dependencies and proposes grouped security and routine version updates. GitHub vulnerability alerts, automated security updates, secret scanning, and push protection are enabled at the repository level so advisories and recognized credentials are caught between workflow runs.
 
 Use lockfile-based installation, consistent runtime versions, dependency caching, cancellation of superseded runs, and useful failure artifacts. Configure required checks before merging. Hooks can be bypassed locally, so CI must independently enforce the checks. Cypress Cloud is not required. Deployment is a separate scoped workflow; test CI does not authorize publishing.
 

@@ -19,6 +19,7 @@
     "test:component:open": "cypress open --component",
     "test:e2e:run": "cypress run --e2e --browser chrome",
     "test:e2e": "npm run build && start-server-and-test preview:test http://127.0.0.1:4173 test:e2e:run",
+    "security:audit": "npm audit --omit=dev --audit-level=moderate",
     "preview": "vite preview",
     "preview:test": "vite preview --host 127.0.0.1 --port 4173",
     "check": "run-s lint format:check typecheck test:unit test:component test:e2e",

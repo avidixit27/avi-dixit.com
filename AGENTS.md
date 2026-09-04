@@ -70,9 +70,12 @@ Use Node `22.22.2` from `.nvmrc`. The source of truth remains `package.json`; th
 | `npm run test:component`      | Run Cypress component tests in headless Chrome                  |
 | `npm run test:component:open` | Open the Cypress component runner                               |
 | `npm run test:e2e`            | Build, serve, and test critical journeys in headless Chrome     |
+| `npm run security:audit`      | Fail on moderate or higher production dependency advisories     |
 | `npm run check`               | Run the complete local verification sequence                    |
 
 Husky and lint-staged run fast staged-file lint and formatting checks before commits. GitHub Actions independently runs lint/format/types, unit tests, component tests, and production build/E2E jobs on pull requests and pushes to `main`.
+
+The separate security workflow runs a production dependency audit and CodeQL on pull requests, pushes to `main`, a weekly schedule, and manual dispatch. Pull requests also receive dependency review. Dependabot checks npm and GitHub Actions dependencies weekly and opens grouped update pull requests. GitHub secret scanning and push protection are enabled at the repository level. Do not silence a security finding merely to pass; determine whether it affects production, update the dependency when possible, and record accepted risk explicitly.
 
 ## Backend remains open
 
