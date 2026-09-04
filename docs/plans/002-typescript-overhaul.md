@@ -8,7 +8,7 @@
 | Blocks | [003 — Verification pipeline](003-verification-pipeline.md) |
 | Planned branch | `refactor/typescript-overhaul` |
 | PR base | `react-website-overhaul` |
-| PR | Not opened |
+| PR | [#3](https://github.com/avidixit27/avi-dixit.com/pull/3) |
 
 ## Outcome
 
@@ -118,4 +118,4 @@ Started on 2026-09-03 from merged Plan 001 commit `8d91640` on branch `refactor/
 - Large bundled photographs, browser-side orientation discovery, incomplete gallery focus management, placeholder commerce, and the contact form without submission remain unchanged. The build still reports stale Browserslist data.
 - The dependency install reports 20 audit findings in the current dependency tree. No unrelated runtime or tooling upgrades were made to address them in this migration.
 - Plan 003 should retain `npm run typecheck`, configure linting for `.ts` and `.tsx`, and automate the Plan 001 browser scenarios plus the pure `getAdjacentPhotoIndex` behavior. It should keep Vitest and Cypress type environments isolated from the application configuration.
-- Implementation is complete locally. Record the PR link and final index status after the branch is published.
+- Implementation and verification are complete in draft PR [#3](https://github.com/avidixit27/avi-dixit.com/pull/3), which targets `react-website-overhaul`. Plan 003 should branch from this reviewed commit after the PR is merged or explicitly approved as its stack base.
