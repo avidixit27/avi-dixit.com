@@ -1,14 +1,14 @@
 # 003 — Verification pipeline
 
-| Field | Value |
-| --- | --- |
-| Type | Tooling feature |
-| Status | Tracked in the [plan index](README.md) |
-| Depends on | Reviewed output of [002 — TypeScript overhaul](002-typescript-overhaul.md), including the behavioral handoff from plan 001 |
-| Blocks | Routine feature work that relies on the full red–green–refactor workflow |
-| Planned branch | `test/verification-pipeline` |
-| PR base | `refactor/typescript-overhaul` |
-| Pull request | Not opened |
+| Field          | Value                                                                                                                      |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Type           | Tooling feature                                                                                                            |
+| Status         | Tracked in the [plan index](README.md)                                                                                     |
+| Depends on     | Reviewed output of [002 — TypeScript overhaul](002-typescript-overhaul.md), including the behavioral handoff from plan 001 |
+| Blocks         | Routine feature work that relies on the full red–green–refactor workflow                                                   |
+| Planned branch | `test/verification-pipeline`                                                                                               |
+| PR base        | `react-website-overhaul`                                                                                                   |
+| Pull request   | [#4](https://github.com/avidixit27/avi-dixit.com/pull/4)                                                                   |
 
 ## Outcome
 
@@ -16,7 +16,7 @@ Make frontend correctness repeatably verifiable through local commands, pre-comm
 
 ## Prerequisites and current state
 
-- Plan 002 must be complete and reviewed. Create this branch from its reviewed commit and confirm no unrelated working-tree changes are present.
+- Plan 002 is merged into `react-website-overhaul`. This branch was created from that merge with no unrelated working-tree changes present.
 - Record the working `typecheck` and `build` commands, supported Node runtime, and behavioral handoff from plans 001 and 002 before changing tooling.
 - Inspect the package manifest, lockfile, existing configuration, hooks, and `.github/` directory before adding or replacing files. Preserve compatible configuration and unrelated workflows.
 - Run the available type check and production build to establish a baseline. Record pre-existing failures in this ticket before proceeding.
@@ -46,19 +46,19 @@ Make frontend correctness repeatably verifiable through local commands, pre-comm
 
 Introduce the following explicit scripts, retaining the working `typecheck` and `build` scripts from the preceding plan:
 
-| Script | Purpose |
-| --- | --- |
-| `lint` | Check active source with ESLint and fail on warnings |
-| `format:check` | Check formatting without changing files |
-| `format` | Apply formatting explicitly |
-| `typecheck` | Run strict TypeScript checks without emitting files |
-| `test:unit` | Run Vitest once |
-| `test:unit:watch` | Run the unit-test development loop |
-| `test:component` | Run Cypress component tests headlessly |
-| `test:component:open` | Open the Cypress component-test runner |
-| `test:e2e` | Build and serve the production frontend, run critical Cypress journeys, and clean up the server |
-| `build` | Produce the production frontend |
-| `check` | Run lint, format, types, unit, component, and end-to-end checks, including the production build |
+| Script                | Purpose                                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| `lint`                | Check active source with ESLint and fail on warnings                                            |
+| `format:check`        | Check formatting without changing files                                                         |
+| `format`              | Apply formatting explicitly                                                                     |
+| `typecheck`           | Run strict TypeScript checks without emitting files                                             |
+| `test:unit`           | Run Vitest once                                                                                 |
+| `test:unit:watch`     | Run the unit-test development loop                                                              |
+| `test:component`      | Run Cypress component tests headlessly                                                          |
+| `test:component:open` | Open the Cypress component-test runner                                                          |
+| `test:e2e`            | Build and serve the production frontend, run critical Cypress journeys, and clean up the server |
+| `build`               | Produce the production frontend                                                                 |
+| `check`               | Run lint, format, types, unit, component, and end-to-end checks, including the production build |
 
 Do not add empty scripts that report success without performing checks. Pin compatible tool versions through the lockfile and document the supported Node runtime.
 
@@ -121,14 +121,14 @@ Do not add empty scripts that report success without performing checks. Pin comp
 
 ## Risks and recovery
 
-| Risk | Mitigation or recovery |
-| --- | --- |
-| Local and CI environments drift | Pin and document the Node runtime, install from the lockfile, and use the same package scripts in both environments. |
-| Browser tests become flaky | Assert observable states, control clocks and network data, avoid arbitrary waits, and retain failure artifacts. |
-| Vitest and Cypress types or discovery overlap | Give each runner explicit file patterns and TypeScript environments; verify neither runner discovers the other's files. |
-| Pre-commit checks become too slow | Restrict hooks to staged lint and formatting checks; keep the complete suite in explicit commands and CI. |
-| Regression tests preserve accidental behavior | Base coverage on reviewed handoff contracts and record known limitations instead of asserting incidental implementation details. |
-| Tooling rules expose broad unrelated work | Fix findings required by this ticket, document justified configuration choices, and move unrelated product changes to separate tickets. |
+| Risk                                          | Mitigation or recovery                                                                                                                  |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Local and CI environments drift               | Pin and document the Node runtime, install from the lockfile, and use the same package scripts in both environments.                    |
+| Browser tests become flaky                    | Assert observable states, control clocks and network data, avoid arbitrary waits, and retain failure artifacts.                         |
+| Vitest and Cypress types or discovery overlap | Give each runner explicit file patterns and TypeScript environments; verify neither runner discovers the other's files.                 |
+| Pre-commit checks become too slow             | Restrict hooks to staged lint and formatting checks; keep the complete suite in explicit commands and CI.                               |
+| Regression tests preserve accidental behavior | Base coverage on reviewed handoff contracts and record known limitations instead of asserting incidental implementation details.        |
+| Tooling rules expose broad unrelated work     | Fix findings required by this ticket, document justified configuration choices, and move unrelated product changes to separate tickets. |
 
 ## Definition of done
 
@@ -140,4 +140,12 @@ Do not add empty scripts that report success without performing checks. Pin comp
 
 ## Implementation record
 
-Not started. No tooling has been installed or verification pipeline executed for this plan. Replace this text with a concise result, verification evidence, decisions, remaining limitations, and the pull-request link when implemented.
+Implementation was completed on `test/verification-pipeline` from merge commit `06b586c` in [PR #4](https://github.com/avidixit27/avi-dixit.com/pull/4). The pre-change baseline passed `npm run typecheck` and `npm run build`. Node `22.22.2` is the shared supported runtime. Tool selection preserves Vite 5 compatibility: ESLint 9, Vitest 2, and Cypress 14 provide static, unit, component, and production browser checks without changing the application bundler.
+
+The final implementation provides four independent CI jobs for static checks, unit tests, component tests, and the production build plus browser journeys. Pull-request events include opened, synchronized, reopened, and ready-for-review changes for intermediate stack bases as well as the eventual main branch. Superseded runs are cancelled, installs use the committed lockfile, and Cypress failure screenshots are retained for seven days. `npm ci --no-audit` keeps package installation deterministic without coupling every job to the registry advisory endpoint; security review remains an explicit command and policy concern.
+
+Local verification passed with `npm run check`, which runs linting, formatting, root and Cypress type checks, unit tests, component tests, and production end-to-end tests. `npm run test:unit:coverage` passed with 91.66% statement coverage for the extracted photo-navigation logic. Controlled temporary faults proved that ESLint, Prettier, TypeScript, Vitest, Cypress component tests, and Cypress end-to-end tests each return a nonzero exit. A disposable worktree also proved that the pre-commit hook accepts valid staged TypeScript and rejects a staged formatting violation without creating a synthetic commit.
+
+The workflow triggered when PR #4 opened. Its first component-test failure retained a downloadable screenshot artifact, proving the diagnostic path; the slideshow test was then made deterministic by waiting for interval registration before advancing the controlled clock. The subsequent [fully passing workflow run](https://github.com/avidixit27/avi-dixit.com/actions/runs/33833098538) completed all four jobs, and another push verified superseded-run cancellation. The final pull-request checks remain the authoritative verification for the completed branch.
+
+React Router was updated from 7.1.3 to 7.18.3 after the production audit identified advisories in the earlier lock entry. The complete local suite still passed, and `npm audit --omit=dev` reports zero production vulnerabilities. The full dependency audit still reports 19 advisories in development tooling dependencies; resolving those requires coordinated major tool upgrades and remains follow-up work. Large source photographs also continue to produce a roughly 146 MB build, and complete modal focus management remains an acknowledged accessibility improvement. No backend, deployment, publishing, contact delivery, authentication, checkout, or production commerce behavior was added.

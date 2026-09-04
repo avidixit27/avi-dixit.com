@@ -30,15 +30,15 @@ The agreed order is cleanup, TypeScript, then verification tooling. Cleanup esta
 
 The stack starts from `react-website-overhaul`. Branch names use a purpose-based conventional prefix. The documentation does not create branches or authorize implementation.
 
-| Plan | Status | Depends on | Planned branch | PR base | PR |
-| --- | --- | --- | --- | --- | --- |
-| [002 — TypeScript overhaul](002-typescript-overhaul.md) | Completed | 001 | `refactor/typescript-overhaul` | `react-website-overhaul` | [#3](https://github.com/avidixit27/avi-dixit.com/pull/3) |
-| [003 — Verification pipeline](003-verification-pipeline.md) | Planned | 002 | `test/verification-pipeline` | `refactor/typescript-overhaul` | Not opened |
+| Plan                                                        | Status    | Depends on | Planned branch                 | PR base                  | PR                                                       |
+| ----------------------------------------------------------- | --------- | ---------- | ------------------------------ | ------------------------ | -------------------------------------------------------- |
+| [002 — TypeScript overhaul](002-typescript-overhaul.md)     | Completed | 001        | `refactor/typescript-overhaul` | `react-website-overhaul` | [#3](https://github.com/avidixit27/avi-dixit.com/pull/3) |
+| [003 — Verification pipeline](003-verification-pipeline.md) | Completed | 002        | `test/verification-pipeline`   | `react-website-overhaul` | [#4](https://github.com/avidixit27/avi-dixit.com/pull/4) |
 
 ## Completed
 
-| Plan | Status | Branch | PR |
-| --- | --- | --- | --- |
+| Plan                                      | Status    | Branch               | PR                                                       |
+| ----------------------------------------- | --------- | -------------------- | -------------------------------------------------------- |
 | [001 — Code cleanup](001-code-cleanup.md) | Completed | `codex/code-cleanup` | [#2](https://github.com/avidixit27/avi-dixit.com/pull/2) |
 
 ### Stack management

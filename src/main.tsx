@@ -8,6 +8,7 @@ if (!rootElement) {
   throw new Error("Expected the application root element to exist.");
 }
 
+// dummy commit
 ReactDOM.createRoot(rootElement).render(
   <StrictMode>
     <App />

@@ -8,19 +8,34 @@ export default function Contact() {
       </p>
 
       <form className="max-w-xl space-y-6 mt-10">
+        <label className="sr-only" htmlFor="contact-name">
+          Name
+        </label>
         <input
+          id="contact-name"
+          name="name"
           type="text"
           placeholder="Name"
           className="w-full p-3 bg-white bg-opacity-50 border-b border-accent
                      focus:outline-none focus:border-accentWarm rounded-t-lg"
         />
+        <label className="sr-only" htmlFor="contact-email">
+          Email
+        </label>
         <input
+          id="contact-email"
+          name="email"
           type="email"
           placeholder="Email"
           className="w-full p-3 bg-white bg-opacity-50 border-b border-accent
                      focus:outline-none focus:border-accentWarm rounded-t-lg"
         />
+        <label className="sr-only" htmlFor="contact-message">
+          Message
+        </label>
         <textarea
+          id="contact-message"
+          name="message"
           placeholder="Message"
           rows={4}
           className="w-full p-3 bg-white bg-opacity-50 border-b border-accent

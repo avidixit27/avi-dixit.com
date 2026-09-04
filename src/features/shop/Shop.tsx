@@ -49,6 +49,7 @@ export default function Shop() {
                       ${product.price}
                     </p>
                     <button
+                      type="button"
                       onClick={() => addToCart(product)}
                       className="w-full py-2 bg-accent hover:bg-accentWarm text-white font-bold transition-colors"
                     >
@@ -60,9 +61,7 @@ export default function Shop() {
             </section>
 
             <aside className="w-full lg:w-80 bg-slate-800 p-6 rounded-lg h-fit lg:sticky lg:top-36">
-              <h2 className="text-2xl font-bold mb-6">
-                Cart ({totalItems})
-              </h2>
+              <h2 className="text-2xl font-bold mb-6">Cart ({totalItems})</h2>
 
               <div className="space-y-4 mb-8">
                 {cart.length === 0 && (
@@ -85,6 +84,7 @@ export default function Shop() {
                   <span className="font-bold">${totalPrice.toFixed(2)}</span>
                 </div>
                 <button
+                  type="button"
                   className="w-full py-3 bg-accent hover:bg-accentWarm text-white font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={cart.length === 0}
                 >

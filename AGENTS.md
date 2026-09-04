@@ -49,21 +49,30 @@
 - Never weaken assertions, remove useful tests, skip failing checks, or disable lint rules merely to obtain a passing result. A rule change requires a concrete rationale.
 - Review the final diff for scope, readability, accidental files, and unresolved failures. Update architecture documentation with material architectural changes in the same PR.
 
-## Current commands and tooling gaps
+## Current commands and tooling
 
 The source of truth is `package.json`; inspect it before selecting commands.
 
-| Command | Status at documentation creation |
-| --- | --- |
-| `npm run dev` | Defined: Vite development server |
-| `npm run build` | Defined: frontend production build |
-| `npm run preview` | Defined: preview a built frontend |
-| `npm run lint` | Defined, but no ESLint configuration exists; this currently blocks linting |
-| `npm run typecheck` | Defined: strict TypeScript check without emitting files |
+Use Node `22.22.2` from `.nvmrc`. The source of truth remains `package.json`; these are the main developer commands:
 
-Prettier, Husky/lint-staged, Vitest, Cypress, and GitHub Actions are planned and not configured. Do not invent commands or imply those checks have passed. Configure missing tooling only within an authorized implementation task, and update this table when the repository changes.
+| Command                       | Purpose                                                         |
+| ----------------------------- | --------------------------------------------------------------- |
+| `npm run dev`                 | Start the Vite development server                               |
+| `npm run build`               | Build the production frontend                                   |
+| `npm run preview`             | Preview an existing build                                       |
+| `npm run lint`                | Run ESLint and fail on warnings                                 |
+| `npm run format:check`        | Check repository formatting without editing                     |
+| `npm run format`              | Apply Prettier explicitly                                       |
+| `npm run typecheck`           | Check application and Cypress TypeScript without emitting files |
+| `npm run test:unit`           | Run Vitest once                                                 |
+| `npm run test:unit:watch`     | Run the Vitest development loop                                 |
+| `npm run test:unit:coverage`  | Produce the focused unit coverage report                        |
+| `npm run test:component`      | Run Cypress component tests in headless Chrome                  |
+| `npm run test:component:open` | Open the Cypress component runner                               |
+| `npm run test:e2e`            | Build, serve, and test critical journeys in headless Chrome     |
+| `npm run check`               | Run the complete local verification sequence                    |
 
-The planned workflow uses fast staged-file lint/format checks in pre-commit hooks and full lint, format, type, unit, component, build, and browser checks in GitHub Actions. CI enforces checks independently of local hooks. Tooling setup must establish a working harness before claiming a red–green–refactor loop.
+Husky and lint-staged run fast staged-file lint and formatting checks before commits. GitHub Actions independently runs lint/format/types, unit tests, component tests, and production build/E2E jobs on pull requests and pushes to `main`.
 
 ## Backend remains open
 

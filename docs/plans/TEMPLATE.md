@@ -2,15 +2,15 @@
 
 > Copy this file to the next stable numeric filename. Remove instructional placeholders before adding the ticket to the plan index.
 
-| Field | Value |
-| --- | --- |
-| Type | Feature, refactor, fix, or tooling |
-| Status | Tracked in the [plan index](README.md) |
-| Depends on | Plan ID or repository state |
-| Blocks | Plan IDs or `None` |
-| Planned branch | `codex/descriptive-name` |
-| PR base | Immediate parent branch |
-| PR | Not opened |
+| Field          | Value                                  |
+| -------------- | -------------------------------------- |
+| Type           | Feature, refactor, fix, or tooling     |
+| Status         | Tracked in the [plan index](README.md) |
+| Depends on     | Plan ID or repository state            |
+| Blocks         | Plan IDs or `None`                     |
+| Planned branch | `codex/descriptive-name`               |
+| PR base        | Immediate parent branch                |
+| PR             | Not opened                             |
 
 ## Outcome
 
@@ -52,8 +52,8 @@ List exact commands and manual scenarios available in the ticket's starting stat
 
 ## Risks and recovery
 
-| Risk | Mitigation or recovery |
-| --- | --- |
+| Risk                  | Mitigation or recovery                              |
+| --------------------- | --------------------------------------------------- |
 | Concrete failure mode | Prevention, detection, rollback, or recovery action |
 
 ## Definition of done

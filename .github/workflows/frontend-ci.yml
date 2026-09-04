@@ -1,0 +1,84 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+concurrency:
+  group: frontend-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CI: true
+
+jobs:
+  static-analysis:
+    name: Lint, format, and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --no-audit
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --no-audit
+      - run: npm run test:unit
+
+  component-tests:
+    name: Component tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --no-audit
+      - run: npm run test:component
+      - name: Upload component failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: component-test-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+          retention-days: 7
+
+  production-e2e:
+    name: Production build and browser tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --no-audit
+      - run: npm run test:e2e
+      - name: Upload browser failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: end-to-end-test-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+          retention-days: 7

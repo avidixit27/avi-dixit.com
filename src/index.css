@@ -50,17 +50,17 @@
 
 .custom-scrollbar {
   position: fixed;
-  top: 0;                  /* will be updated via JS */
+  top: 0; /* will be updated via JS */
   right: 4px;
-  width: 0.6rem;              /* a bit wider for grabbing */
-  height: 10rem;            /* FIXED HEIGHT THUMB */
-  background: #fd7100;     /* accentWarm */
+  width: 0.6rem; /* a bit wider for grabbing */
+  height: 10rem; /* FIXED HEIGHT THUMB */
+  background: #fd7100; /* accentWarm */
   border-radius: 999px;
-  opacity: 0;   
-  pointer-events: auto;    /* allow clicking/dragging */
+  opacity: 0;
+  pointer-events: auto; /* allow clicking/dragging */
   cursor: grab;
   transition: opacity 0.35s ease;
-  z-index: 9999;           /* above everything */
+  z-index: 9999; /* above everything */
 }
 
 .custom-scrollbar.dragging {
@@ -68,5 +68,5 @@
 }
 
 .custom-scrollbar:hover {
-  opacity: 1 !important;  /* override the inline hidden state */
+  opacity: 1 !important; /* override the inline hidden state */
 }

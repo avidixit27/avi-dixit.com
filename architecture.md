@@ -34,22 +34,22 @@ The first product milestone is the portfolio and inquiries experience. Publishin
 
 The repository currently contains a strict TypeScript React application using Vite, Tailwind, and React Router. The manifest specifies React 18, Vite 5, Tailwind 3, React Router 7, and TypeScript 5 version ranges; these are existing dependencies, not permanent version requirements.
 
-| Area | Current implementation |
-| --- | --- |
-| Entry and shell | `src/main.tsx` initializes React; `src/app/App.tsx` composes the router, navigation, routes, and custom scrollbar |
-| Routes | `/`, `/shop`, and `/contact`, declared in `src/app/App.tsx` |
-| Portfolio | `src/features/portfolio/`, with separate orchestration, slideshow, grid, lightbox, photo catalog, navigation policy, and orientation loading modules |
-| Navigation | `src/app/Navigation.tsx`, which owns navigation visibility and receives the portfolio marker as an explicit prop |
-| Custom scrollbar | `src/app/CustomScrollbar.tsx`, which owns its listeners, timers, drag state, and cleanup |
+| Area             | Current implementation                                                                                                                               |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entry and shell  | `src/main.tsx` initializes React; `src/app/App.tsx` composes the router, navigation, routes, and custom scrollbar                                    |
+| Routes           | `/`, `/shop`, and `/contact`, declared in `src/app/App.tsx`                                                                                          |
+| Portfolio        | `src/features/portfolio/`, with separate orchestration, slideshow, grid, lightbox, photo catalog, navigation policy, and orientation loading modules |
+| Navigation       | `src/app/Navigation.tsx`, which owns navigation visibility and receives the portfolio marker as an explicit prop                                     |
+| Custom scrollbar | `src/app/CustomScrollbar.tsx`, which owns its listeners, timers, drag state, and cleanup                                                             |
 | Static resources | Typed application navigation data in `src/resources/navigation.ts`; typed feature-specific product data in `src/features/shop/resources/products.ts` |
-| Styling | `src/index.css` and `tailwind.config.js` |
-| Photographs | Twelve JPEG files under `src/imgs/portfolio`, totaling approximately 146 MB |
-| Shop | `src/features/shop/Shop.tsx`, with placeholder products and a component-local cart; no integrated checkout |
-| Contact | `src/features/inquiries/Contact.tsx`, with form presentation and no submission integration |
-| Legacy code | `old_website/`, retained historical implementation |
-| Verification | Strict `npm run typecheck` and production build commands are available; the lint script still lacks configuration and no test setup is present |
+| Styling          | `src/index.css` and `tailwind.config.js`                                                                                                             |
+| Photographs      | Twelve JPEG files under `src/imgs/portfolio`, totaling approximately 146 MB                                                                          |
+| Shop             | `src/features/shop/Shop.tsx`, with placeholder products and a component-local cart; no integrated checkout                                           |
+| Contact          | `src/features/inquiries/Contact.tsx`, with form presentation and no submission integration                                                           |
+| Legacy code      | `old_website/`, retained historical implementation                                                                                                   |
+| Verification     | ESLint, Prettier, strict TypeScript, Vitest, Cypress component and E2E tests, Husky/lint-staged, and pull-request CI are configured                  |
 
-The application shell and portfolio now have explicit feature-oriented ownership, cross-component DOM coordination uses an explicit element reference, and affected global effects have local cleanup paths. The repository still has no automated regression baseline. Browser-side orientation discovery, large source photographs, placeholder commerce, incomplete gallery accessibility, and missing lint/test configuration remain known limitations for later plans.
+The application shell and portfolio now have explicit feature-oriented ownership, cross-component DOM coordination uses an explicit element reference, and affected global effects have local cleanup paths. Automated regression coverage protects photo navigation, gallery timers and listeners, route links, contact-form presentation, shop cart behavior, and core desktop/mobile gallery journeys. Browser-side orientation discovery, large source photographs, placeholder commerce, and incomplete gallery focus management remain known limitations for later plans.
 
 ## 4. Target frontend organization
 
@@ -74,14 +74,14 @@ This is an ownership map, not a scaffolding checklist. Create a directory only w
 
 ### Allowed dependency directions
 
-| Owner | Allowed responsibilities and dependencies |
-| --- | --- |
-| Application | Compose routes, layout, and providers; coordinate workflows spanning features |
-| Routes | Connect route parameters and page metadata to feature entrypoints |
-| Features | Own business behavior; use shared components, resources, transport, styles, and their own internal modules |
-| Shared components | Render through explicit props; use shared presentation helpers, resources, and styles |
-| Shared resources | Export immutable application-wide content and catalog data without importing React, routes, features, or transport |
-| Shared transport | Handle common HTTP mechanics without importing UI or feature behavior |
+| Owner             | Allowed responsibilities and dependencies                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Application       | Compose routes, layout, and providers; coordinate workflows spanning features                                      |
+| Routes            | Connect route parameters and page metadata to feature entrypoints                                                  |
+| Features          | Own business behavior; use shared components, resources, transport, styles, and their own internal modules         |
+| Shared components | Render through explicit props; use shared presentation helpers, resources, and styles                              |
+| Shared resources  | Export immutable application-wide content and catalog data without importing React, routes, features, or transport |
+| Shared transport  | Handle common HTTP mechanics without importing UI or feature behavior                                              |
 
 - Shared components must not import routes, application providers, feature internals, or perform business API requests.
 - A feature must not reach into another feature's internals. Compose their interaction above them, or deliberately extract a shared responsibility.
@@ -160,13 +160,13 @@ Use CSS transitions for simple feedback. Motion is the preferred candidate for c
 
 ### Candidate sources
 
-| Source | Role |
-| --- | --- |
-| [Animmaster](https://animmasterlib.dev/) | Hero, gallery, navigation, and animation examples; assess React compatibility per component |
-| [Skiper UI](https://skiper-ui.com/) | Selected React components and interaction patterns |
-| [Vengeance UI](https://www.vengenceui.com/) | Selected animated components and presentation patterns |
-| [Liquid Gooey](https://gooey.jakubantalik.com/) | Expressive visual effects to evaluate individually |
-| [Motion](https://motion.dev/) | React animation primitives and motion guidance |
+| Source                                          | Role                                                                                        |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [Animmaster](https://animmasterlib.dev/)        | Hero, gallery, navigation, and animation examples; assess React compatibility per component |
+| [Skiper UI](https://skiper-ui.com/)             | Selected React components and interaction patterns                                          |
+| [Vengeance UI](https://www.vengenceui.com/)     | Selected animated components and presentation patterns                                      |
+| [Liquid Gooey](https://gooey.jakubantalik.com/) | Expressive visual effects to evaluate individually                                          |
+| [Motion](https://motion.dev/)                   | React animation primitives and motion guidance                                              |
 
 These are approved sources to evaluate, not blanket approval to install every dependency or purchase access. Some examples have framework assumptions or paid distribution. Inspect the selected source, dependencies, and applicable license; preserve required attribution and record the source beside adapted code.
 
@@ -212,18 +212,19 @@ Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-c
 
 ### Current and planned tooling
 
-| Concern | Status and direction |
-| --- | --- |
-| Linting | ESLint flat configuration with typescript-eslint, React Hooks, and JSX accessibility rules |
-| Formatting | Prettier, separate from correctness linting |
-| Type checking | Current: TypeScript strict no-emit checks through `npm run typecheck` |
-| Local hooks | Husky and lint-staged |
-| Pure frontend logic | Vitest unit tests |
-| React component behavior | Cypress Component Testing with Vite |
-| Critical application journeys | Cypress end-to-end tests |
-| Pull-request checks | GitHub Actions |
+| Concern                       | Current implementation                                                                     |
+| ----------------------------- | ------------------------------------------------------------------------------------------ |
+| Runtime                       | Node `22.22.2`, recorded in `.nvmrc` and used by CI                                        |
+| Linting                       | ESLint flat configuration with typescript-eslint, React Hooks, and JSX accessibility rules |
+| Formatting                    | Prettier, separate from correctness linting                                                |
+| Type checking                 | Strict no-emit checks for application and Cypress TypeScript environments                  |
+| Local hooks                   | Husky and lint-staged check staged source and supported text                               |
+| Pure frontend logic           | Vitest unit tests                                                                          |
+| React component behavior      | Cypress Component Testing with Vite and application styles                                 |
+| Critical application journeys | Cypress end-to-end tests against the Vite production build                                 |
+| Pull-request checks           | Four independent GitHub Actions jobs                                                       |
 
-Use compatible supported versions when implementing the foundation and commit the lockfile. The manifest remains the source of truth for installed versions. Cypress is the selected browser test system; do not add Playwright or a duplicate component test stack without a specific requirement.
+The manifest and lockfile are the source of truth for installed versions. The verification stack intentionally stays compatible with Vite 5: Vitest 2, Cypress 14, and ESLint 9 are pinned through the lockfile. Cypress is the selected browser test system; do not add Playwright or a duplicate component test stack without a specific requirement.
 
 ### Test boundaries
 
@@ -252,9 +253,9 @@ Do not claim a red/green loop when the necessary checks could not run. Any user-
 
 ### Hooks and continuous integration
 
-Pre-commit hooks should check staged source files with ESLint and staged supported text files with Prettier. Failed checks block the commit. Keep fixes explicit through developer commands and keep hooks fast; full browser suites belong in CI.
+The pre-commit hook checks staged source files with ESLint and staged supported text files with Prettier. Failed checks block the commit. Fixes remain explicit through developer commands, and the full browser suites stay outside the fast hook.
 
-The planned GitHub Actions workflow runs on pull requests and pushes to the main branch. It includes linting, formatting checks, type checking, unit tests, Cypress component tests, and a production build followed by critical browser journeys. Run independent checks concurrently and make end-to-end tests depend on the build they exercise.
+The GitHub Actions workflow runs when a pull request is opened, synchronized, reopened, or marked ready for review, regardless of its target branch, and on pushes to `main`. Its independent jobs run lint/format/type checks, unit tests, Cypress component tests, and a production build followed by critical browser journeys.
 
 Use lockfile-based installation, consistent runtime versions, dependency caching, cancellation of superseded runs, and useful failure artifacts. Configure required checks before merging. Hooks can be bypassed locally, so CI must independently enforce the checks. Cypress Cloud is not required. Deployment is a separate scoped workflow; test CI does not authorize publishing.
 
@@ -262,12 +263,12 @@ Do not add backend jobs to this repository until backend ownership and integrati
 
 ## 9. Documentation and planning
 
-| Location | Responsibility |
-| --- | --- |
-| `architecture.md` | Current system overview, enduring design direction, boundaries, and rationale |
-| `AGENTS.md` | Concise agent instructions and current verification commands |
-| [docs/plans/README.md](docs/plans/README.md) | Plan status, dependencies, branch relationships, PR links, and shared execution constraints |
-| Individual plans | End-to-end work tickets containing outcome, prerequisites, bounded scope, non-goals, deliverables, implementation steps, acceptance criteria, verification, risks, and completion evidence |
+| Location                                     | Responsibility                                                                                                                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `architecture.md`                            | Current system overview, enduring design direction, boundaries, and rationale                                                                                                              |
+| `AGENTS.md`                                  | Concise agent instructions and current verification commands                                                                                                                               |
+| [docs/plans/README.md](docs/plans/README.md) | Plan status, dependencies, branch relationships, PR links, and shared execution constraints                                                                                                |
+| Individual plans                             | End-to-end work tickets containing outcome, prerequisites, bounded scope, non-goals, deliverables, implementation steps, acceptance criteria, verification, risks, and completion evidence |
 
 Read the plan index and only the relevant plan and necessary dependency outcomes. Do not load all plans or completed work by default. Keep branch names, task checklists, temporary exceptions, and progress out of this architecture document.
 
