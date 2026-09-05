@@ -50,7 +50,9 @@ describe("Lightbox", () => {
       .should("have.attr", "loading", "eager")
       .and("have.attr", "fetchpriority", "high")
       .and("have.attr", "decoding", "async")
-      .and("have.attr", "sizes", "95vw");
+      .and("have.attr", "sizes", "95vw")
+      .trigger("load")
+      .should("have.class", "opacity-100");
     cy.get('[aria-label="Next image"]').click();
     cy.get("@onSelect").should("have.been.calledOnceWith", 2, "/last.jpg");
     pressKey("ArrowLeft");
@@ -88,6 +90,7 @@ describe("Lightbox", () => {
   });
 
   it("keeps a stable stage while the larger image decodes", () => {
+    cy.clock();
     let finishDecode: (() => void) | undefined;
     const decodePromise = new Promise<void>((resolve) => {
       finishDecode = resolve;
@@ -105,6 +108,7 @@ describe("Lightbox", () => {
     );
 
     cy.get('[data-lightbox-stage="true"]')
+      .should("have.attr", "aria-busy", "true")
       .should("have.css", "aspect-ratio", "6000 / 4000")
       .then(($stage) => {
         const initialRect = $stage.get(0)?.getBoundingClientRect();
@@ -121,6 +125,11 @@ describe("Lightbox", () => {
           "have.class",
           "opacity-100",
         );
+        cy.get('[data-lightbox-preview="true"]').should(
+          "have.class",
+          "blur-sm",
+        );
+        cy.get('[aria-label="Next image"]').should("be.disabled");
         cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
         cy.then(() => finishDecode?.());
         cy.get('img[alt="First test photo"]')
@@ -130,6 +139,14 @@ describe("Lightbox", () => {
             expect(finalRect?.width).to.equal(initialRect.width);
             expect(finalRect?.height).to.equal(initialRect.height);
           });
+        cy.get('[aria-label="Next image"]').should("be.disabled");
+        cy.tick(300);
+        cy.get('[data-lightbox-stage="true"]').should(
+          "have.attr",
+          "aria-busy",
+          "false",
+        );
+        cy.get('[aria-label="Next image"]').should("not.be.disabled");
       });
   });
 

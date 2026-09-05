@@ -7,6 +7,7 @@ import { getAdjacentPhotoIndex } from "./photoNavigation";
 const CLOSE_DURATION_MS = 150;
 const CLOSE_BUTTON_TOP_OFFSET_PX = 12;
 const DEFAULT_CLOSE_BUTTON_TOP_PX = 24;
+const LIGHTBOX_IMAGE_TRANSITION_MS = 300;
 const LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT = 95;
 const LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT = 95;
 const LIGHTBOX_IMAGE_SIZES = `${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw`;
@@ -32,6 +33,7 @@ export default function Lightbox({
   const closeTimerRef = useRef<number | null>(null);
   const [isClosing, setIsClosing] = useState(false);
   const [loadedPhotoId, setLoadedPhotoId] = useState<string | null>(null);
+  const [settledPhotoId, setSettledPhotoId] = useState<string | null>(null);
   const [closeButtonTop, setCloseButtonTop] = useState(
     DEFAULT_CLOSE_BUTTON_TOP_PX,
   );
@@ -53,6 +55,8 @@ export default function Lightbox({
 
   const selectAdjacent = useCallback(
     (direction: PhotoDirection) => {
+      const currentPhoto = photos[selectedIndex];
+      if (!currentPhoto || settledPhotoId !== currentPhoto.id) return;
       const nextIndex = getAdjacentPhotoIndex(
         selectedIndex,
         landscapeIndices,
@@ -64,7 +68,7 @@ export default function Lightbox({
         onSelect(nextIndex, nextPhoto.src);
       }
     },
-    [landscapeIndices, onSelect, photos, selectedIndex],
+    [landscapeIndices, onSelect, photos, selectedIndex, settledPhotoId],
   );
 
   useEffect(() => {
@@ -92,6 +96,15 @@ export default function Lightbox({
     window.addEventListener("resize", updateCloseButton);
     return () => window.removeEventListener("resize", updateCloseButton);
   }, [updateCloseButton]);
+
+  useEffect(() => {
+    const selectedPhoto = photos[selectedIndex];
+    if (!selectedPhoto || loadedPhotoId !== selectedPhoto.id) return undefined;
+    const transitionTimer = window.setTimeout(() => {
+      setSettledPhotoId(selectedPhoto.id);
+    }, LIGHTBOX_IMAGE_TRANSITION_MS);
+    return () => window.clearTimeout(transitionTimer);
+  }, [loadedPhotoId, photos, selectedIndex]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -122,6 +135,8 @@ export default function Lightbox({
 
   const photo = photos[selectedIndex];
   if (!photo) return null;
+  const isFullImageReady = loadedPhotoId === photo.id;
+  const isNavigationReady = settledPhotoId === photo.id;
   const stageWidth = `min(${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw, ${
     LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT * photo.aspectRatio
   }vh)`;
@@ -165,6 +180,7 @@ export default function Lightbox({
         <>
           <button
             type="button"
+            disabled={!isNavigationReady}
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
@@ -172,7 +188,8 @@ export default function Lightbox({
             }}
             className="fixed left-4 top-1/2 -translate-y-1/2 z-[200]
                        grid place-items-center w-12 h-12 md:w-14 md:h-14
-                       rounded-full bg-white/10 hover:bg-white/20"
+                       rounded-full bg-white/10 hover:bg-white/20
+                       disabled:cursor-wait disabled:opacity-50"
             aria-label="Previous image"
           >
             <svg
@@ -191,6 +208,7 @@ export default function Lightbox({
 
           <button
             type="button"
+            disabled={!isNavigationReady}
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
@@ -198,7 +216,8 @@ export default function Lightbox({
             }}
             className="fixed right-4 top-1/2 -translate-y-1/2 z-[200]
                        grid place-items-center w-12 h-12 md:w-14 md:h-14
-                       rounded-full bg-white/10 hover:bg-white/20"
+                       rounded-full bg-white/10 hover:bg-white/20
+                       disabled:cursor-wait disabled:opacity-50"
             aria-label="Next image"
           >
             <svg
@@ -219,7 +238,8 @@ export default function Lightbox({
 
       <div
         data-lightbox-stage="true"
-        className="pointer-events-none relative z-10 grid"
+        aria-busy={!isNavigationReady}
+        className="pointer-events-none relative z-10 grid overflow-hidden rounded-lg shadow-2xl"
         style={{
           width: stageWidth,
           aspectRatio: `${photo.width} / ${photo.height}`,
@@ -233,8 +253,10 @@ export default function Lightbox({
           alt=""
           aria-hidden="true"
           draggable="false"
-          className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain rounded-lg shadow-2xl transition-opacity ${
-            loadedPhotoId === photo.id ? "opacity-0" : "opacity-100"
+          className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-[filter,opacity,transform] duration-300 ${
+            isFullImageReady
+              ? "opacity-0 blur-none scale-100"
+              : "opacity-100 blur-sm scale-[1.01]"
           }`}
         />
         <ResponsiveImage
@@ -250,8 +272,8 @@ export default function Lightbox({
           loading="eager"
           fetchPriority="high"
           pictureClassName="contents"
-          className={`pointer-events-auto col-start-1 row-start-1 w-full h-full object-contain rounded-lg shadow-2xl transition-opacity ${
-            loadedPhotoId === photo.id ? "opacity-100" : "opacity-0"
+          className={`pointer-events-auto col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-300 ${
+            isFullImageReady ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => {
             const loadedImage = imageRef.current;
