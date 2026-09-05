@@ -24,6 +24,15 @@ describe("photography portfolio", () => {
       .and("have.attr", "fetchpriority", "low")
       .and("have.attr", "sizes")
       .and("contain", "min-width: 1024px");
+    cy.get("main button")
+      .first()
+      .should(($card) => {
+        const card = $card.get(0);
+        if (!card) throw new Error("Expected a rendered gallery card");
+        const style = getComputedStyle(card);
+        expect(style.willChange).to.equal("auto");
+        expect(style.contain).not.to.contain("paint");
+      });
 
     cy.get('[aria-label="Open hero image gallery"] img')
       .first()
@@ -47,11 +56,21 @@ describe("photography portfolio", () => {
 
   it("opens from the rendered preview and closes only from the backdrop", () => {
     cy.visit("/");
-    cy.get('main [aria-label^="Open "]')
-      .first()
+    cy.get(
+      'main [aria-label="Open A person photographing their reflection in a tall mirror outdoors"]',
+    )
+      .scrollIntoView()
       .find("img")
+      .should(($image) => {
+        const image = $image.get(0);
+        if (!image) throw new Error("Expected a rendered portrait thumbnail");
+        expect(image.complete).to.equal(true);
+        expect(image.naturalWidth).to.be.greaterThan(0);
+      })
       .then(($image) => {
-        const previewSrc = $image.prop("currentSrc") as string;
+        const previewSrc =
+          ($image.prop("currentSrc") as string) ||
+          ($image.attr("src") as string);
         cy.wrap($image).click();
         cy.get('[data-lightbox-preview="true"]').should(
           "have.attr",
@@ -62,7 +81,20 @@ describe("photography portfolio", () => {
 
     cy.get('[role="dialog"] img[alt]:not([alt=""])').click();
     cy.get('[role="dialog"]').should("exist");
-    cy.get('[aria-label="Close photo viewer"]').click("topLeft");
+    cy.get('[role="dialog"] img[alt]:not([alt=""])').then(($image) => {
+      const image = $image.get(0);
+      if (!image) throw new Error("Expected a rendered lightbox image");
+      const imageRect = image.getBoundingClientRect();
+      const backdropX = imageRect.left / 2;
+      const backdropY = imageRect.top + imageRect.height / 2;
+      cy.window().then((window) => {
+        const backdrop = window.document.elementFromPoint(backdropX, backdropY);
+        expect(backdrop?.getAttribute("aria-label")).to.equal(
+          "Close photo viewer",
+        );
+        (backdrop as HTMLElement).click();
+      });
+    });
     cy.get('[role="dialog"]').should("not.exist");
   });
 

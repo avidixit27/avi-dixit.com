@@ -25,7 +25,7 @@ export default function PhotoGrid({
             <button
               type="button"
               key={photo.id}
-              className="relative block w-full rounded-xl bg-white/5 p-3 transform-gpu transition-transform duration-200 will-change-transform contain-paint
+              className="relative block w-full rounded-xl bg-white/5 p-3 transition-transform duration-200
                          cursor-pointer hover:scale-[1.015] shadow-md hover:shadow-lg"
               onClick={(event) =>
                 onOpen(

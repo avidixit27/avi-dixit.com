@@ -212,7 +212,7 @@ export default function Lightbox({
         </>
       )}
 
-      <div className="relative z-10 grid max-w-[95vw] max-h-[95vh]">
+      <div className="pointer-events-none relative z-10 grid max-w-[95vw] max-h-[95vh]">
         <img
           data-lightbox-preview="true"
           src={previewSrc}
@@ -221,7 +221,7 @@ export default function Lightbox({
           alt=""
           aria-hidden="true"
           draggable="false"
-          className={`col-start-1 row-start-1 max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-opacity ${
+          className={`pointer-events-none col-start-1 row-start-1 w-auto h-auto max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-opacity ${
             loadedPhotoId === photo.id ? "opacity-0" : "opacity-100"
           }`}
         />
@@ -238,7 +238,7 @@ export default function Lightbox({
           loading="eager"
           fetchPriority="high"
           pictureClassName="contents"
-          className={`col-start-1 row-start-1 max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-opacity ${
+          className={`pointer-events-auto col-start-1 row-start-1 w-auto h-auto max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-opacity ${
             loadedPhotoId === photo.id ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => {
