@@ -7,7 +7,9 @@ import { getAdjacentPhotoIndex } from "./photoNavigation";
 const CLOSE_DURATION_MS = 150;
 const CLOSE_BUTTON_TOP_OFFSET_PX = 12;
 const DEFAULT_CLOSE_BUTTON_TOP_PX = 24;
-const LIGHTBOX_IMAGE_SIZES = "95vw";
+const LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT = 95;
+const LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT = 95;
+const LIGHTBOX_IMAGE_SIZES = `${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw`;
 
 interface LightboxProps {
   photos: readonly Photo[];
@@ -120,6 +122,9 @@ export default function Lightbox({
 
   const photo = photos[selectedIndex];
   if (!photo) return null;
+  const stageWidth = `min(${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw, ${
+    LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT * photo.aspectRatio
+  }vh)`;
 
   return (
     <div
@@ -212,7 +217,14 @@ export default function Lightbox({
         </>
       )}
 
-      <div className="pointer-events-none relative z-10 grid max-w-[95vw] max-h-[95vh]">
+      <div
+        data-lightbox-stage="true"
+        className="pointer-events-none relative z-10 grid"
+        style={{
+          width: stageWidth,
+          aspectRatio: `${photo.width} / ${photo.height}`,
+        }}
+      >
         <img
           data-lightbox-preview="true"
           src={previewSrc}
@@ -221,7 +233,7 @@ export default function Lightbox({
           alt=""
           aria-hidden="true"
           draggable="false"
-          className={`pointer-events-none col-start-1 row-start-1 w-auto h-auto max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-opacity ${
+          className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain rounded-lg shadow-2xl transition-opacity ${
             loadedPhotoId === photo.id ? "opacity-0" : "opacity-100"
           }`}
         />
@@ -238,12 +250,25 @@ export default function Lightbox({
           loading="eager"
           fetchPriority="high"
           pictureClassName="contents"
-          className={`pointer-events-auto col-start-1 row-start-1 w-auto h-auto max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl transition-opacity ${
+          className={`pointer-events-auto col-start-1 row-start-1 w-full h-full object-contain rounded-lg shadow-2xl transition-opacity ${
             loadedPhotoId === photo.id ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => {
-            setLoadedPhotoId(photo.id);
-            updateCloseButton();
+            const loadedImage = imageRef.current;
+            if (!loadedImage) return;
+            const revealLoadedImage = () => {
+              if (imageRef.current !== loadedImage) return;
+              setLoadedPhotoId(photo.id);
+              updateCloseButton();
+            };
+            if (typeof loadedImage.decode !== "function") {
+              revealLoadedImage();
+              return;
+            }
+            void loadedImage
+              .decode()
+              .catch(() => undefined)
+              .then(revealLoadedImage);
           }}
         />
       </div>

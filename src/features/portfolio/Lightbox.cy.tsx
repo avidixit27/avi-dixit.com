@@ -87,6 +87,52 @@ describe("Lightbox", () => {
     cy.get("@onClosed").should("have.been.calledOnce");
   });
 
+  it("keeps a stable stage while the larger image decodes", () => {
+    let finishDecode: (() => void) | undefined;
+    const decodePromise = new Promise<void>((resolve) => {
+      finishDecode = resolve;
+    });
+
+    mount(
+      <Lightbox
+        photos={photos}
+        selectedIndex={0}
+        previewSrc="/first-preview.jpg"
+        landscapeIndices={[0, 2]}
+        onSelect={cy.stub()}
+        onClosed={cy.stub()}
+      />,
+    );
+
+    cy.get('[data-lightbox-stage="true"]')
+      .should("have.css", "aspect-ratio", "6000 / 4000")
+      .then(($stage) => {
+        const initialRect = $stage.get(0)?.getBoundingClientRect();
+        if (!initialRect) throw new Error("Expected a lightbox stage");
+
+        cy.get('img[alt="First test photo"]').then(($image) => {
+          const image = $image.get(0) as HTMLImageElement | undefined;
+          if (!image) throw new Error("Expected a full lightbox image");
+          cy.stub(image, "decode").returns(decodePromise);
+          cy.wrap(image).trigger("load");
+        });
+
+        cy.get('[data-lightbox-preview="true"]').should(
+          "have.class",
+          "opacity-100",
+        );
+        cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
+        cy.then(() => finishDecode?.());
+        cy.get('img[alt="First test photo"]')
+          .should("have.class", "opacity-100")
+          .then(() => {
+            const finalRect = $stage.get(0)?.getBoundingClientRect();
+            expect(finalRect?.width).to.equal(initialRect.width);
+            expect(finalRect?.height).to.equal(initialRect.height);
+          });
+      });
+  });
+
   it("closes on Escape after the exit transition", () => {
     cy.clock();
     const onClosed = cy.spy().as("onClosed");

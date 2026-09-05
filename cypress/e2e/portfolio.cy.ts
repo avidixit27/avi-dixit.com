@@ -47,8 +47,17 @@ describe("photography portfolio", () => {
       .click();
     cy.get('[role="dialog"]').should("be.visible");
     cy.get("html").should("have.class", "modal-open");
-    cy.get('[aria-label="Next image"]').click();
-    cy.get('[role="dialog"] img').should("be.visible");
+    cy.get('[data-lightbox-stage="true"]').then(($stage) => {
+      const initialRect = $stage.get(0)?.getBoundingClientRect();
+      if (!initialRect) throw new Error("Expected a lightbox stage");
+      cy.get('[aria-label="Next image"]').click().click().click();
+      cy.get('[data-lightbox-stage="true"]').should(($nextStage) => {
+        const nextRect = $nextStage.get(0)?.getBoundingClientRect();
+        expect(nextRect?.width).to.equal(initialRect.width);
+        expect(nextRect?.height).to.equal(initialRect.height);
+      });
+    });
+    cy.get('[role="dialog"] img[alt]:not([alt=""])').should("be.visible");
     cy.get("body").type("{esc}");
     cy.get('[role="dialog"]').should("not.exist");
     cy.get("html").should("not.have.class", "modal-open");
