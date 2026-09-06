@@ -1,4 +1,5 @@
 import { mount } from "@cypress/react";
+import { useState } from "react";
 import Lightbox from "./Lightbox";
 import type { Photo } from "./photoCatalog";
 
@@ -32,6 +33,27 @@ function pressKey(key: string) {
   });
 }
 
+function StatefulLightbox({ onSelect }: { onSelect: () => void }) {
+  const [selection, setSelection] = useState({
+    index: 0,
+    previewSrc: "/first-preview.jpg",
+  });
+
+  return (
+    <Lightbox
+      photos={photos}
+      selectedIndex={selection.index}
+      previewSrc={selection.previewSrc}
+      landscapeIndices={[0, 2]}
+      onSelect={(index, previewSrc) => {
+        onSelect();
+        setSelection({ index, previewSrc });
+      }}
+      onClosed={cy.stub()}
+    />
+  );
+}
+
 describe("Lightbox", () => {
   it("navigates eligible photos with buttons and arrow keys", () => {
     const onSelect = cy.spy().as("onSelect");
@@ -53,6 +75,11 @@ describe("Lightbox", () => {
       .and("have.attr", "sizes", "95vw")
       .trigger("load")
       .should("have.class", "opacity-100");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
     cy.get('[aria-label="Next image"]').click();
     cy.get("@onSelect").should("have.been.calledOnceWith", 2, "/last.jpg");
     pressKey("ArrowLeft");
@@ -125,29 +152,101 @@ describe("Lightbox", () => {
           "have.class",
           "opacity-100",
         );
-        cy.get('[data-lightbox-preview="true"]').should(
-          "have.class",
-          "blur-sm",
-        );
-        cy.get('[aria-label="Next image"]').should("be.disabled");
+        cy.get('[data-lightbox-preview="true"]')
+          .should("not.have.class", "blur-sm")
+          .then(($preview) => {
+            cy.get('img[alt="First test photo"]').then(($fullImage) => {
+              const fullImage = $fullImage.get(0);
+              const preview = $preview.get(0);
+              expect(
+                fullImage.compareDocumentPosition(preview) &
+                  Node.DOCUMENT_POSITION_FOLLOWING,
+              ).to.equal(Node.DOCUMENT_POSITION_FOLLOWING);
+            });
+          });
+        cy.get('[aria-label="Next image"]')
+          .should("not.be.disabled")
+          .and("have.attr", "aria-disabled", "true")
+          .and("not.have.class", "disabled:opacity-50");
         cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
         cy.then(() => finishDecode?.());
         cy.get('img[alt="First test photo"]')
           .should("have.class", "opacity-100")
+          .and("not.have.class", "transition-opacity")
           .then(() => {
             const finalRect = $stage.get(0)?.getBoundingClientRect();
             expect(finalRect?.width).to.equal(initialRect.width);
             expect(finalRect?.height).to.equal(initialRect.height);
           });
-        cy.get('[aria-label="Next image"]').should("be.disabled");
+        cy.get('[aria-label="Next image"]').should(
+          "have.attr",
+          "aria-disabled",
+          "true",
+        );
         cy.tick(300);
+        cy.get('[data-lightbox-preview="true"]').should("not.exist");
         cy.get('[data-lightbox-stage="true"]').should(
           "have.attr",
           "aria-busy",
           "false",
         );
-        cy.get('[aria-label="Next image"]').should("not.be.disabled");
+        cy.get('[aria-label="Next image"]').should(
+          "have.attr",
+          "aria-disabled",
+          "false",
+        );
       });
+  });
+
+  it("keeps the outgoing full-resolution frame until its replacement settles", () => {
+    cy.clock();
+    const onSelect = cy.spy().as("statefulOnSelect");
+    let finishIncomingDecode: (() => void) | undefined;
+
+    mount(<StatefulLightbox onSelect={onSelect} />);
+    cy.get('img[alt="First test photo"]').then(($image) => {
+      const image = $image.get(0) as HTMLImageElement | undefined;
+      if (!image) throw new Error("Expected the initial full image");
+      cy.stub(image, "decode").resolves();
+      cy.wrap(image).trigger("load");
+    });
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.tick(300);
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+
+    cy.get('img[alt="First test photo"]').then(($image) => {
+      const image = $image.get(0) as HTMLImageElement | undefined;
+      if (!image) throw new Error("Expected the settled full image");
+      const outgoingSrc = image.currentSrc || image.src;
+
+      cy.get('[aria-label="Next image"]').click().click();
+      cy.get("@statefulOnSelect").should("have.been.calledOnce");
+      cy.get('[data-lightbox-outgoing="true"]')
+        .should("have.attr", "src", outgoingSrc)
+        .and("have.class", "opacity-100");
+    });
+
+    const incomingDecode = new Promise<void>((resolve) => {
+      finishIncomingDecode = resolve;
+    });
+    cy.get('img[alt="Last test photo"]').then(($image) => {
+      const image = $image.get(0) as HTMLImageElement | undefined;
+      if (!image) throw new Error("Expected the incoming full image");
+      cy.stub(image, "decode").returns(incomingDecode);
+      cy.wrap(image).trigger("load");
+    });
+    cy.get('[data-lightbox-outgoing="true"]').should(
+      "have.class",
+      "opacity-100",
+    );
+    cy.then(() => finishIncomingDecode?.());
+    cy.get('[data-lightbox-outgoing="true"]').should("have.class", "opacity-0");
+    cy.tick(300);
+    cy.get('[data-lightbox-outgoing="true"]').should("not.exist");
   });
 
   it("closes on Escape after the exit transition", () => {

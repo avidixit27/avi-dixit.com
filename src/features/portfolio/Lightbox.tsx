@@ -31,9 +31,11 @@ export default function Lightbox({
 }: LightboxProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const closeTimerRef = useRef<number | null>(null);
+  const navigationLockedRef = useRef(true);
   const [isClosing, setIsClosing] = useState(false);
   const [loadedPhotoId, setLoadedPhotoId] = useState<string | null>(null);
   const [settledPhotoId, setSettledPhotoId] = useState<string | null>(null);
+  const [outgoingSrc, setOutgoingSrc] = useState<string | null>(null);
   const [closeButtonTop, setCloseButtonTop] = useState(
     DEFAULT_CLOSE_BUTTON_TOP_PX,
   );
@@ -56,7 +58,12 @@ export default function Lightbox({
   const selectAdjacent = useCallback(
     (direction: PhotoDirection) => {
       const currentPhoto = photos[selectedIndex];
-      if (!currentPhoto || settledPhotoId !== currentPhoto.id) return;
+      if (
+        navigationLockedRef.current ||
+        !currentPhoto ||
+        settledPhotoId !== currentPhoto.id
+      )
+        return;
       const nextIndex = getAdjacentPhotoIndex(
         selectedIndex,
         landscapeIndices,
@@ -64,11 +71,23 @@ export default function Lightbox({
       );
       const nextPhoto = nextIndex == null ? undefined : photos[nextIndex];
       if (nextIndex != null && nextPhoto) {
+        navigationLockedRef.current = true;
+        const currentImage = imageRef.current;
+        setOutgoingSrc(
+          currentImage?.currentSrc || currentImage?.src || previewSrc,
+        );
         setIsClosing(false);
         onSelect(nextIndex, nextPhoto.src);
       }
     },
-    [landscapeIndices, onSelect, photos, selectedIndex, settledPhotoId],
+    [
+      landscapeIndices,
+      onSelect,
+      photos,
+      previewSrc,
+      selectedIndex,
+      settledPhotoId,
+    ],
   );
 
   useEffect(() => {
@@ -102,6 +121,8 @@ export default function Lightbox({
     if (!selectedPhoto || loadedPhotoId !== selectedPhoto.id) return undefined;
     const transitionTimer = window.setTimeout(() => {
       setSettledPhotoId(selectedPhoto.id);
+      setOutgoingSrc(null);
+      navigationLockedRef.current = false;
     }, LIGHTBOX_IMAGE_TRANSITION_MS);
     return () => window.clearTimeout(transitionTimer);
   }, [loadedPhotoId, photos, selectedIndex]);
@@ -180,7 +201,7 @@ export default function Lightbox({
         <>
           <button
             type="button"
-            disabled={!isNavigationReady}
+            aria-disabled={!isNavigationReady}
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
@@ -188,8 +209,7 @@ export default function Lightbox({
             }}
             className="fixed left-4 top-1/2 -translate-y-1/2 z-[200]
                        grid place-items-center w-12 h-12 md:w-14 md:h-14
-                       rounded-full bg-white/10 hover:bg-white/20
-                       disabled:cursor-wait disabled:opacity-50"
+                       rounded-full bg-white/10 hover:bg-white/20"
             aria-label="Previous image"
           >
             <svg
@@ -208,7 +228,7 @@ export default function Lightbox({
 
           <button
             type="button"
-            disabled={!isNavigationReady}
+            aria-disabled={!isNavigationReady}
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
@@ -216,8 +236,7 @@ export default function Lightbox({
             }}
             className="fixed right-4 top-1/2 -translate-y-1/2 z-[200]
                        grid place-items-center w-12 h-12 md:w-14 md:h-14
-                       rounded-full bg-white/10 hover:bg-white/20
-                       disabled:cursor-wait disabled:opacity-50"
+                       rounded-full bg-white/10 hover:bg-white/20"
             aria-label="Next image"
           >
             <svg
@@ -245,20 +264,6 @@ export default function Lightbox({
           aspectRatio: `${photo.width} / ${photo.height}`,
         }}
       >
-        <img
-          data-lightbox-preview="true"
-          src={previewSrc}
-          width={photo.width}
-          height={photo.height}
-          alt=""
-          aria-hidden="true"
-          draggable="false"
-          className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-[filter,opacity,transform] duration-300 ${
-            isFullImageReady
-              ? "opacity-0 blur-none scale-100"
-              : "opacity-100 blur-sm scale-[1.01]"
-          }`}
-        />
         <ResponsiveImage
           key={photo.id}
           imageRef={imageRef}
@@ -272,7 +277,7 @@ export default function Lightbox({
           loading="eager"
           fetchPriority="high"
           pictureClassName="contents"
-          className={`pointer-events-auto col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-300 ${
+          className={`pointer-events-auto col-start-1 row-start-1 w-full h-full object-contain ${
             isFullImageReady ? "opacity-100" : "opacity-0"
           }`}
           onLoad={() => {
@@ -293,6 +298,34 @@ export default function Lightbox({
               .then(revealLoadedImage);
           }}
         />
+        {outgoingSrc && (
+          <img
+            data-lightbox-outgoing="true"
+            src={outgoingSrc}
+            width={photo.width}
+            height={photo.height}
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-300 ${
+              isFullImageReady ? "opacity-0" : "opacity-100"
+            }`}
+          />
+        )}
+        {!outgoingSrc && !isNavigationReady && (
+          <img
+            data-lightbox-preview="true"
+            src={previewSrc}
+            width={photo.width}
+            height={photo.height}
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-300 ${
+              isFullImageReady ? "opacity-0" : "opacity-100"
+            }`}
+          />
+        )}
       </div>
     </div>
   );

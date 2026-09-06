@@ -47,16 +47,32 @@ describe("photography portfolio", () => {
       .click();
     cy.get('[role="dialog"]').should("be.visible");
     cy.get("html").should("have.class", "modal-open");
-    cy.get('[data-lightbox-stage="true"]').then(($stage) => {
-      const initialRect = $stage.get(0)?.getBoundingClientRect();
-      if (!initialRect) throw new Error("Expected a lightbox stage");
-      cy.get('[aria-label="Next image"]').click().click().click();
-      cy.get('[data-lightbox-stage="true"]').should(($nextStage) => {
-        const nextRect = $nextStage.get(0)?.getBoundingClientRect();
-        expect(nextRect?.width).to.equal(initialRect.width);
-        expect(nextRect?.height).to.equal(initialRect.height);
+    cy.get('[data-lightbox-stage="true"]')
+      .should("have.attr", "aria-busy", "false")
+      .then(($stage) => {
+        const initialRect = $stage.get(0)?.getBoundingClientRect();
+        if (!initialRect) throw new Error("Expected a lightbox stage");
+        cy.get('[aria-label="Next image"]').then(($button) => {
+          const initialOpacity = getComputedStyle($button.get(0)).opacity;
+          cy.wrap($button).click().click();
+          cy.get('[data-lightbox-outgoing="true"]').should("exist");
+          cy.get('[aria-label="Next image"]')
+            .should("not.be.disabled")
+            .and("have.css", "opacity", initialOpacity)
+            .and("have.attr", "aria-disabled", "true");
+        });
+        cy.get('[data-lightbox-stage="true"]').should(($nextStage) => {
+          const nextRect = $nextStage.get(0)?.getBoundingClientRect();
+          expect(nextRect?.width).to.equal(initialRect.width);
+          expect(nextRect?.height).to.equal(initialRect.height);
+        });
+        cy.get('[data-lightbox-outgoing="true"]').should("not.exist");
+        cy.get('[aria-label="Next image"]').should(
+          "have.attr",
+          "aria-disabled",
+          "false",
+        );
       });
-    });
     cy.get('[role="dialog"] img[alt]:not([alt=""])').should("be.visible");
     cy.get("body").type("{esc}");
     cy.get('[role="dialog"]').should("not.exist");
