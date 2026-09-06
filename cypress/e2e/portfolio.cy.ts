@@ -59,7 +59,7 @@ describe("photography portfolio", () => {
           cy.get('[aria-label="Next image"]')
             .should("not.be.disabled")
             .and("have.css", "opacity", initialOpacity)
-            .and("have.attr", "aria-disabled", "true");
+            .and("not.have.attr", "aria-disabled");
         });
         cy.get('[data-lightbox-stage="true"]').should(($nextStage) => {
           const nextRect = $nextStage.get(0)?.getBoundingClientRect();
@@ -68,9 +68,8 @@ describe("photography portfolio", () => {
         });
         cy.get('[data-lightbox-outgoing="true"]').should("not.exist");
         cy.get('[aria-label="Next image"]').should(
-          "have.attr",
+          "not.have.attr",
           "aria-disabled",
-          "false",
         );
       });
     cy.get('[role="dialog"] img[alt]:not([alt=""])').should("be.visible");

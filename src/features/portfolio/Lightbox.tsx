@@ -2,12 +2,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
 import type { PhotoDirection } from "./photoNavigation";
-import { getAdjacentPhotoIndex } from "./photoNavigation";
+import {
+  getPhotoIndexByOffset,
+  getSurroundingPhotoIndices,
+} from "./photoNavigation";
 
 const CLOSE_DURATION_MS = 150;
 const CLOSE_BUTTON_TOP_OFFSET_PX = 12;
 const DEFAULT_CLOSE_BUTTON_TOP_PX = 24;
-const LIGHTBOX_IMAGE_TRANSITION_MS = 300;
+const LIGHTBOX_IMAGE_TRANSITION_MS = 250;
+const LIGHTBOX_PRELOAD_FORWARD_COUNT = 3;
+const LIGHTBOX_PRELOAD_BACKWARD_COUNT = 2;
 const LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT = 95;
 const LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT = 95;
 const LIGHTBOX_IMAGE_SIZES = `${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw`;
@@ -32,6 +37,8 @@ export default function Lightbox({
   const imageRef = useRef<HTMLImageElement>(null);
   const closeTimerRef = useRef<number | null>(null);
   const navigationLockedRef = useRef(true);
+  const pendingNavigationOffsetRef = useRef(0);
+  const preloadCacheRef = useRef(new Map<string, HTMLImageElement>());
   const [isClosing, setIsClosing] = useState(false);
   const [loadedPhotoId, setLoadedPhotoId] = useState<string | null>(null);
   const [settledPhotoId, setSettledPhotoId] = useState<string | null>(null);
@@ -55,55 +62,68 @@ export default function Lightbox({
     }, CLOSE_DURATION_MS);
   }, [onClosed]);
 
+  const openPhoto = useCallback(
+    (nextIndex: number) => {
+      const nextPhoto = photos[nextIndex];
+      if (!nextPhoto || nextIndex === selectedIndex) return;
+      navigationLockedRef.current = true;
+      const currentImage = imageRef.current;
+      setOutgoingSrc(
+        currentImage?.currentSrc || currentImage?.src || previewSrc,
+      );
+      setIsClosing(false);
+      onSelect(nextIndex, nextPhoto.src);
+    },
+    [onSelect, photos, previewSrc, selectedIndex],
+  );
+
   const selectAdjacent = useCallback(
     (direction: PhotoDirection) => {
       const currentPhoto = photos[selectedIndex];
-      if (
-        navigationLockedRef.current ||
-        !currentPhoto ||
-        settledPhotoId !== currentPhoto.id
-      )
+      if (!currentPhoto) return;
+      if (navigationLockedRef.current || settledPhotoId !== currentPhoto.id) {
+        pendingNavigationOffsetRef.current += direction;
         return;
-      const nextIndex = getAdjacentPhotoIndex(
+      }
+      const nextIndex = getPhotoIndexByOffset(
         selectedIndex,
         landscapeIndices,
         direction,
       );
-      const nextPhoto = nextIndex == null ? undefined : photos[nextIndex];
-      if (nextIndex != null && nextPhoto) {
-        navigationLockedRef.current = true;
-        const currentImage = imageRef.current;
-        setOutgoingSrc(
-          currentImage?.currentSrc || currentImage?.src || previewSrc,
-        );
-        setIsClosing(false);
-        onSelect(nextIndex, nextPhoto.src);
-      }
+      if (nextIndex != null) openPhoto(nextIndex);
     },
-    [
-      landscapeIndices,
-      onSelect,
-      photos,
-      previewSrc,
-      selectedIndex,
-      settledPhotoId,
-    ],
+    [landscapeIndices, openPhoto, photos, selectedIndex, settledPhotoId],
   );
 
   useEffect(() => {
-    const adjacentIndices = new Set(
-      ([-1, 1] as const)
-        .map((direction) =>
-          getAdjacentPhotoIndex(selectedIndex, landscapeIndices, direction),
-        )
-        .filter((index): index is number => index != null),
+    const preloadIndices = getSurroundingPhotoIndices(
+      selectedIndex,
+      landscapeIndices,
+      LIGHTBOX_PRELOAD_FORWARD_COUNT,
+      LIGHTBOX_PRELOAD_BACKWARD_COUNT,
     );
-    adjacentIndices.forEach((index) => {
-      const adjacentPhoto = photos[index];
-      if (!adjacentPhoto) return;
-      const preload = new Image();
+    const retainedPhotoIds = new Set<string>();
+    preloadIndices.forEach((index) => {
+      const preloadPhoto = photos[index];
+      if (!preloadPhoto) return;
+      retainedPhotoIds.add(preloadPhoto.id);
+      if (preloadCacheRef.current.has(preloadPhoto.id)) return;
+      const imageWindow = imageRef.current?.ownerDocument.defaultView ?? window;
+      const preload = new imageWindow.Image();
       preload.decoding = "async";
-      preload.src = adjacentPhoto.src;
+      preload.fetchPriority = "low";
+      preload.sizes = LIGHTBOX_IMAGE_SIZES;
+      preload.srcset =
+        preloadPhoto.sources.find((source) => source.type === "image/webp")
+          ?.srcSet ?? preloadPhoto.srcSet;
+      preload.src = preloadPhoto.src;
+      preloadCacheRef.current.set(preloadPhoto.id, preload);
+      void preload.decode().catch(() => undefined);
+    });
+    preloadCacheRef.current.forEach((_, photoId) => {
+      if (!retainedPhotoIds.has(photoId)) {
+        preloadCacheRef.current.delete(photoId);
+      }
     });
   }, [landscapeIndices, photos, selectedIndex]);
 
@@ -123,9 +143,18 @@ export default function Lightbox({
       setSettledPhotoId(selectedPhoto.id);
       setOutgoingSrc(null);
       navigationLockedRef.current = false;
+      const pendingOffset = pendingNavigationOffsetRef.current;
+      pendingNavigationOffsetRef.current = 0;
+      if (pendingOffset === 0) return;
+      const pendingIndex = getPhotoIndexByOffset(
+        selectedIndex,
+        landscapeIndices,
+        pendingOffset,
+      );
+      if (pendingIndex != null) openPhoto(pendingIndex);
     }, LIGHTBOX_IMAGE_TRANSITION_MS);
     return () => window.clearTimeout(transitionTimer);
-  }, [loadedPhotoId, photos, selectedIndex]);
+  }, [landscapeIndices, loadedPhotoId, openPhoto, photos, selectedIndex]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -150,6 +179,7 @@ export default function Lightbox({
       if (closeTimerRef.current !== null) {
         window.clearTimeout(closeTimerRef.current);
       }
+      preloadCacheRef.current.clear();
     },
     [],
   );
@@ -201,7 +231,6 @@ export default function Lightbox({
         <>
           <button
             type="button"
-            aria-disabled={!isNavigationReady}
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
@@ -228,7 +257,6 @@ export default function Lightbox({
 
           <button
             type="button"
-            aria-disabled={!isNavigationReady}
             onMouseDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
@@ -307,7 +335,7 @@ export default function Lightbox({
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-300 ${
+            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-250 ${
               isFullImageReady ? "opacity-0" : "opacity-100"
             }`}
           />
@@ -321,7 +349,7 @@ export default function Lightbox({
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-300 ${
+            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-250 ${
               isFullImageReady ? "opacity-0" : "opacity-100"
             }`}
           />

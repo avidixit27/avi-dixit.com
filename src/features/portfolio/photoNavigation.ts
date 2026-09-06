@@ -44,3 +44,38 @@ export function getAdjacentPhotoIndex(
     null
   );
 }
+
+export function getPhotoIndexByOffset(
+  currentIndex: number,
+  eligibleIndices: readonly number[],
+  offset: number,
+): number | null {
+  if (offset === 0) {
+    return eligibleIndices.includes(currentIndex) ? currentIndex : null;
+  }
+
+  const direction: PhotoDirection = offset > 0 ? 1 : -1;
+  let nextIndex: number | null = currentIndex;
+  for (let step = 0; step < Math.abs(offset); step += 1) {
+    nextIndex = getAdjacentPhotoIndex(nextIndex, eligibleIndices, direction);
+    if (nextIndex == null) return null;
+  }
+  return nextIndex;
+}
+
+export function getSurroundingPhotoIndices(
+  currentIndex: number,
+  eligibleIndices: readonly number[],
+  forwardCount: number,
+  backwardCount: number,
+): readonly number[] {
+  const surroundingIndices = new Set<number>();
+  const addOffset = (offset: number) => {
+    const index = getPhotoIndexByOffset(currentIndex, eligibleIndices, offset);
+    if (index != null && index !== currentIndex) surroundingIndices.add(index);
+  };
+
+  for (let offset = 1; offset <= forwardCount; offset += 1) addOffset(offset);
+  for (let offset = 1; offset <= backwardCount; offset += 1) addOffset(-offset);
+  return [...surroundingIndices];
+}

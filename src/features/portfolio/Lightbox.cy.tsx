@@ -33,7 +33,11 @@ function pressKey(key: string) {
   });
 }
 
-function StatefulLightbox({ onSelect }: { onSelect: () => void }) {
+function StatefulLightbox({
+  onSelect,
+}: {
+  onSelect: (index: number, previewSrc: string) => void;
+}) {
   const [selection, setSelection] = useState({
     index: 0,
     previewSrc: "/first-preview.jpg",
@@ -46,7 +50,7 @@ function StatefulLightbox({ onSelect }: { onSelect: () => void }) {
       previewSrc={selection.previewSrc}
       landscapeIndices={[0, 2]}
       onSelect={(index, previewSrc) => {
-        onSelect();
+        onSelect(index, previewSrc);
         setSelection({ index, previewSrc });
       }}
       onClosed={cy.stub()}
@@ -55,6 +59,49 @@ function StatefulLightbox({ onSelect }: { onSelect: () => void }) {
 }
 
 describe("Lightbox", () => {
+  it("preloads and decodes a bounded responsive navigation window", () => {
+    const preloadedImages: HTMLImageElement[] = [];
+    const preloadPhotos = Array.from({ length: 6 }, (_, index) =>
+      createPhoto(`preload-${index}`, `Preload photo ${index}`),
+    );
+
+    cy.window().then((window) => {
+      cy.stub(window, "Image").callsFake(() => {
+        const image = window.document.createElement("img");
+        cy.stub(image, "decode").resolves();
+        preloadedImages.push(image);
+        return image;
+      });
+      mount(
+        <Lightbox
+          photos={preloadPhotos}
+          selectedIndex={0}
+          previewSrc="/preload-preview.jpg"
+          landscapeIndices={[0, 1, 2, 3, 4, 5]}
+          onSelect={cy.stub()}
+          onClosed={cy.stub()}
+        />,
+      );
+    });
+
+    cy.wrap(preloadedImages)
+      .should("have.length", 5)
+      .then((images) => {
+        expect(images.map((image) => image.srcset)).to.deep.equal([
+          "/preload-1-480.webp 480w, /preload-1-960.webp 960w",
+          "/preload-2-480.webp 480w, /preload-2-960.webp 960w",
+          "/preload-3-480.webp 480w, /preload-3-960.webp 960w",
+          "/preload-5-480.webp 480w, /preload-5-960.webp 960w",
+          "/preload-4-480.webp 480w, /preload-4-960.webp 960w",
+        ]);
+        images.forEach((image) => {
+          expect(image.sizes).to.equal("95vw");
+          expect(image.fetchPriority).to.equal("low");
+          expect(image.decode).to.have.callCount(1);
+        });
+      });
+  });
+
   it("navigates eligible photos with buttons and arrow keys", () => {
     const onSelect = cy.spy().as("onSelect");
     mount(
@@ -166,8 +213,11 @@ describe("Lightbox", () => {
           });
         cy.get('[aria-label="Next image"]')
           .should("not.be.disabled")
-          .and("have.attr", "aria-disabled", "true")
-          .and("not.have.class", "disabled:opacity-50");
+          .and("not.have.attr", "aria-disabled");
+        cy.get('[aria-label="Next image"]').should(
+          "not.have.class",
+          "disabled:opacity-50",
+        );
         cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
         cy.then(() => finishDecode?.());
         cy.get('img[alt="First test photo"]')
@@ -179,11 +229,10 @@ describe("Lightbox", () => {
             expect(finalRect?.height).to.equal(initialRect.height);
           });
         cy.get('[aria-label="Next image"]').should(
-          "have.attr",
+          "not.have.attr",
           "aria-disabled",
-          "true",
         );
-        cy.tick(300);
+        cy.tick(250);
         cy.get('[data-lightbox-preview="true"]').should("not.exist");
         cy.get('[data-lightbox-stage="true"]').should(
           "have.attr",
@@ -191,9 +240,8 @@ describe("Lightbox", () => {
           "false",
         );
         cy.get('[aria-label="Next image"]').should(
-          "have.attr",
+          "not.have.attr",
           "aria-disabled",
-          "false",
         );
       });
   });
@@ -211,7 +259,7 @@ describe("Lightbox", () => {
       cy.wrap(image).trigger("load");
     });
     cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
-    cy.tick(300);
+    cy.tick(250);
     cy.get('[data-lightbox-stage="true"]').should(
       "have.attr",
       "aria-busy",
@@ -224,7 +272,11 @@ describe("Lightbox", () => {
       const outgoingSrc = image.currentSrc || image.src;
 
       cy.get('[aria-label="Next image"]').click().click();
-      cy.get("@statefulOnSelect").should("have.been.calledOnce");
+      cy.get("@statefulOnSelect").should(
+        "have.been.calledOnceWith",
+        2,
+        "/last.jpg",
+      );
       cy.get('[data-lightbox-outgoing="true"]')
         .should("have.attr", "src", outgoingSrc)
         .and("have.class", "opacity-100");
@@ -245,8 +297,9 @@ describe("Lightbox", () => {
     );
     cy.then(() => finishIncomingDecode?.());
     cy.get('[data-lightbox-outgoing="true"]').should("have.class", "opacity-0");
-    cy.tick(300);
-    cy.get('[data-lightbox-outgoing="true"]').should("not.exist");
+    cy.tick(250);
+    cy.get("@statefulOnSelect").should("have.been.calledWith", 0, "/first.jpg");
+    cy.get("@statefulOnSelect").should("have.been.calledTwice");
   });
 
   it("closes on Escape after the exit transition", () => {
