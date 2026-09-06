@@ -9,6 +9,18 @@ updates:
       time: "09:00"
       timezone: America/New_York
     open-pull-requests-limit: 5
+    ignore:
+      # ESLint 10 is blocked until both React and JSX accessibility plugins support it.
+      - dependency-name: eslint
+        versions:
+          - ">=10.0.0 <11.0.0"
+      - dependency-name: "@eslint/js"
+        versions:
+          - ">=10.0.0 <11.0.0"
+      # Keep ambient Node APIs aligned with the repository's supported Node 22 line.
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
     groups:
       npm-security:
         applies-to: security-updates
