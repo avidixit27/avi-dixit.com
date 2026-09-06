@@ -46,10 +46,10 @@ describe("HeroSlideshow", () => {
     cy.get('img[alt="Third test photo"]').should("not.exist");
     cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
     cy.get("@rotationInterval").should("have.been.calledOnce");
-    cy.tick(5001);
+    cy.tick(2501);
     cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
     cy.get('img[alt="Second test photo"]').trigger("load");
-    cy.tick(5001);
+    cy.tick(2501);
     cy.get("img").should("have.length", 3);
     cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
     cy.get('img[alt="Second test photo"]').should("have.class", "opacity-100");

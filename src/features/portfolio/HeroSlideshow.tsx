@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
 
-const HERO_ROTATION_DELAY_MS = 5000;
+const HERO_ROTATION_DELAY_MS = 2500;
 const HERO_CROSSFADE_DURATION_MS = 700;
 const HERO_IMAGE_SIZES = "100vw";
 
