@@ -1,30 +1,48 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
 import type { PhotoDirection } from "./photoNavigation";
-import { getAdjacentPhotoIndex } from "./photoNavigation";
+import {
+  getPhotoIndexByOffset,
+  getSurroundingPhotoIndices,
+} from "./photoNavigation";
 
 const CLOSE_DURATION_MS = 150;
 const CLOSE_BUTTON_TOP_OFFSET_PX = 12;
 const DEFAULT_CLOSE_BUTTON_TOP_PX = 24;
+const LIGHTBOX_IMAGE_TRANSITION_MS = 250;
+const LIGHTBOX_PRELOAD_FORWARD_COUNT = 3;
+const LIGHTBOX_PRELOAD_BACKWARD_COUNT = 2;
+const LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT = 95;
+const LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT = 95;
+const LIGHTBOX_IMAGE_SIZES = `${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw`;
 
 interface LightboxProps {
   photos: readonly Photo[];
   selectedIndex: number;
+  previewSrc: string;
   landscapeIndices: readonly number[];
-  onSelect: (index: number) => void;
+  onSelect: (index: number, previewSrc: string) => void;
   onClosed: () => void;
 }
 
 export default function Lightbox({
   photos,
   selectedIndex,
+  previewSrc,
   landscapeIndices,
   onSelect,
   onClosed,
 }: LightboxProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const closeTimerRef = useRef<number | null>(null);
+  const navigationLockedRef = useRef(true);
+  const pendingNavigationOffsetRef = useRef(0);
+  const preloadCacheRef = useRef(new Map<string, HTMLImageElement>());
   const [isClosing, setIsClosing] = useState(false);
+  const [loadedPhotoId, setLoadedPhotoId] = useState<string | null>(null);
+  const [settledPhotoId, setSettledPhotoId] = useState<string | null>(null);
+  const [outgoingSrc, setOutgoingSrc] = useState<string | null>(null);
   const [closeButtonTop, setCloseButtonTop] = useState(
     DEFAULT_CLOSE_BUTTON_TOP_PX,
   );
@@ -44,20 +62,70 @@ export default function Lightbox({
     }, CLOSE_DURATION_MS);
   }, [onClosed]);
 
+  const openPhoto = useCallback(
+    (nextIndex: number) => {
+      const nextPhoto = photos[nextIndex];
+      if (!nextPhoto || nextIndex === selectedIndex) return;
+      navigationLockedRef.current = true;
+      const currentImage = imageRef.current;
+      setOutgoingSrc(
+        currentImage?.currentSrc || currentImage?.src || previewSrc,
+      );
+      setIsClosing(false);
+      onSelect(nextIndex, nextPhoto.src);
+    },
+    [onSelect, photos, previewSrc, selectedIndex],
+  );
+
   const selectAdjacent = useCallback(
     (direction: PhotoDirection) => {
-      const nextIndex = getAdjacentPhotoIndex(
+      const currentPhoto = photos[selectedIndex];
+      if (!currentPhoto) return;
+      if (navigationLockedRef.current || settledPhotoId !== currentPhoto.id) {
+        pendingNavigationOffsetRef.current += direction;
+        return;
+      }
+      const nextIndex = getPhotoIndexByOffset(
         selectedIndex,
         landscapeIndices,
         direction,
       );
-      if (nextIndex != null) {
-        setIsClosing(false);
-        onSelect(nextIndex);
-      }
+      if (nextIndex != null) openPhoto(nextIndex);
     },
-    [landscapeIndices, onSelect, selectedIndex],
+    [landscapeIndices, openPhoto, photos, selectedIndex, settledPhotoId],
   );
+
+  useEffect(() => {
+    const preloadIndices = getSurroundingPhotoIndices(
+      selectedIndex,
+      landscapeIndices,
+      LIGHTBOX_PRELOAD_FORWARD_COUNT,
+      LIGHTBOX_PRELOAD_BACKWARD_COUNT,
+    );
+    const retainedPhotoIds = new Set<string>();
+    preloadIndices.forEach((index) => {
+      const preloadPhoto = photos[index];
+      if (!preloadPhoto) return;
+      retainedPhotoIds.add(preloadPhoto.id);
+      if (preloadCacheRef.current.has(preloadPhoto.id)) return;
+      const imageWindow = imageRef.current?.ownerDocument.defaultView ?? window;
+      const preload = new imageWindow.Image();
+      preload.decoding = "async";
+      preload.fetchPriority = "low";
+      preload.sizes = LIGHTBOX_IMAGE_SIZES;
+      preload.srcset =
+        preloadPhoto.sources.find((source) => source.type === "image/webp")
+          ?.srcSet ?? preloadPhoto.srcSet;
+      preload.src = preloadPhoto.src;
+      preloadCacheRef.current.set(preloadPhoto.id, preload);
+      void preload.decode().catch(() => undefined);
+    });
+    preloadCacheRef.current.forEach((_, photoId) => {
+      if (!retainedPhotoIds.has(photoId)) {
+        preloadCacheRef.current.delete(photoId);
+      }
+    });
+  }, [landscapeIndices, photos, selectedIndex]);
 
   useEffect(() => {
     updateCloseButton();
@@ -67,6 +135,26 @@ export default function Lightbox({
     window.addEventListener("resize", updateCloseButton);
     return () => window.removeEventListener("resize", updateCloseButton);
   }, [updateCloseButton]);
+
+  useEffect(() => {
+    const selectedPhoto = photos[selectedIndex];
+    if (!selectedPhoto || loadedPhotoId !== selectedPhoto.id) return undefined;
+    const transitionTimer = window.setTimeout(() => {
+      setSettledPhotoId(selectedPhoto.id);
+      setOutgoingSrc(null);
+      navigationLockedRef.current = false;
+      const pendingOffset = pendingNavigationOffsetRef.current;
+      pendingNavigationOffsetRef.current = 0;
+      if (pendingOffset === 0) return;
+      const pendingIndex = getPhotoIndexByOffset(
+        selectedIndex,
+        landscapeIndices,
+        pendingOffset,
+      );
+      if (pendingIndex != null) openPhoto(pendingIndex);
+    }, LIGHTBOX_IMAGE_TRANSITION_MS);
+    return () => window.clearTimeout(transitionTimer);
+  }, [landscapeIndices, loadedPhotoId, openPhoto, photos, selectedIndex]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -91,12 +179,18 @@ export default function Lightbox({
       if (closeTimerRef.current !== null) {
         window.clearTimeout(closeTimerRef.current);
       }
+      preloadCacheRef.current.clear();
     },
     [],
   );
 
   const photo = photos[selectedIndex];
   if (!photo) return null;
+  const isFullImageReady = loadedPhotoId === photo.id;
+  const isNavigationReady = settledPhotoId === photo.id;
+  const stageWidth = `min(${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw, ${
+    LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT * photo.aspectRatio
+  }vh)`;
 
   return (
     <div
@@ -189,15 +283,78 @@ export default function Lightbox({
         </>
       )}
 
-      <img
-        key={selectedIndex}
-        ref={imageRef}
-        src={photo.src}
-        alt={photo.alt}
-        className="relative z-10 max-w-[95vw] max-h-[95vh] object-contain rounded-lg shadow-2xl"
-        onLoad={updateCloseButton}
-        draggable="false"
-      />
+      <div
+        data-lightbox-stage="true"
+        aria-busy={!isNavigationReady}
+        className="pointer-events-none relative z-10 grid overflow-hidden rounded-lg shadow-2xl"
+        style={{
+          width: stageWidth,
+          aspectRatio: `${photo.width} / ${photo.height}`,
+        }}
+      >
+        <ResponsiveImage
+          key={photo.id}
+          imageRef={imageRef}
+          src={photo.src}
+          srcSet={photo.srcSet}
+          sources={photo.sources}
+          sizes={LIGHTBOX_IMAGE_SIZES}
+          width={photo.width}
+          height={photo.height}
+          alt={photo.alt}
+          loading="eager"
+          fetchPriority="high"
+          pictureClassName="contents"
+          className={`pointer-events-auto col-start-1 row-start-1 w-full h-full object-contain ${
+            isFullImageReady ? "opacity-100" : "opacity-0"
+          }`}
+          onLoad={() => {
+            const loadedImage = imageRef.current;
+            if (!loadedImage) return;
+            const revealLoadedImage = () => {
+              if (imageRef.current !== loadedImage) return;
+              setLoadedPhotoId(photo.id);
+              updateCloseButton();
+            };
+            if (typeof loadedImage.decode !== "function") {
+              revealLoadedImage();
+              return;
+            }
+            void loadedImage
+              .decode()
+              .catch(() => undefined)
+              .then(revealLoadedImage);
+          }}
+        />
+        {outgoingSrc && (
+          <img
+            data-lightbox-outgoing="true"
+            src={outgoingSrc}
+            width={photo.width}
+            height={photo.height}
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-250 ${
+              isFullImageReady ? "opacity-0" : "opacity-100"
+            }`}
+          />
+        )}
+        {!outgoingSrc && !isNavigationReady && (
+          <img
+            data-lightbox-preview="true"
+            src={previewSrc}
+            width={photo.width}
+            height={photo.height}
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-250 ${
+              isFullImageReady ? "opacity-0" : "opacity-100"
+            }`}
+          />
+        )}
+      </div>
     </div>
   );
 }
