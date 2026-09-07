@@ -1,5 +1,5 @@
 import { defineConfig } from "cypress";
-import viteConfig from "./vite.config.ts";
+import viteConfig from "./vite.config";
 
 export default defineConfig({
   screenshotsFolder: "cypress/screenshots",

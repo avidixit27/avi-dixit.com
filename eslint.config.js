@@ -16,7 +16,6 @@ export default tseslint.config(
       "cypress/videos/",
       "dist/",
       "node_modules/",
-      "old_website/",
       "src/imgs/",
     ],
   },

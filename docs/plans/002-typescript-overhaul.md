@@ -42,7 +42,7 @@ All active frontend source has strict TypeScript coverage and a reliable no-emit
 ## Implementation plan
 
 1. Confirm prerequisites and select mutually compatible TypeScript and React type versions without changing application runtime versions.
-2. Add strict no-emit configuration with Vite client types, bundler-aware module resolution, React JSX support, and active-source includes. Exclude build output, dependencies, and `old_website/`.
+2. Add strict no-emit configuration with Vite client types, bundler-aware module resolution, React JSX support, and active-source includes. Exclude build output and dependencies.
 3. Migrate from the leaves inward: data/helpers, controlled presentation components, feature orchestrators, application shell, and entrypoint. Keep each coherent intermediate state buildable when practical.
 4. Type actual contracts and resolve nullability and DOM access deliberately. Replace custom untyped DOM properties with owned refs or explicit maps rather than widening global DOM definitions.
 5. Add declarations for imported SVG/JPEG assets and validate the eager photo glob's module shape. Avoid assertions unless an invariant is checked and explained.
