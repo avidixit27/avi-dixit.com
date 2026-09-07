@@ -1,7 +1,8 @@
 {
-  "name": "photog-portfolio",
+  "name": "avi-dixit",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "engines": {
     "node": "^22.22.2 || ^24.0.0"
   },
@@ -20,10 +21,11 @@
     "test:e2e:run": "cypress run --e2e --browser chrome",
     "test:e2e": "npm run build && start-server-and-test preview:test http://127.0.0.1:4173 test:e2e:run",
     "security:audit": "npm audit --omit=dev --audit-level=moderate",
-    "preview": "vite preview",
+    "preview": "npm run build && wrangler dev",
     "preview:test": "vite preview --host 127.0.0.1 --port 4173",
     "check": "run-s lint format:check typecheck test:unit test:component test:e2e",
-    "prepare": "husky"
+    "prepare": "husky",
+    "deploy": "npm run build && wrangler deploy"
   },
   "lint-staged": {
     "*.{ts,tsx,mts}": [
@@ -38,6 +40,7 @@
     "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.54.4",
     "@cypress/react": "^10.0.0",
     "@eslint/js": "^9.39.5",
     "@types/node": "^22.20.1",
@@ -64,6 +67,7 @@
     "typescript-eslint": "^8.69.0",
     "vite": "^8.2.2",
     "vite-imagetools": "^12.0.1",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.0",
+    "wrangler": "^4.129.0"
   }
 }
