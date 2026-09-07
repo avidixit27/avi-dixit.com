@@ -1,43 +1,50 @@
 describe("photography portfolio", () => {
   it("serves responsive media with bounded first-view priority", () => {
+    cy.clock();
     cy.visit("/");
 
-    cy.get('[aria-label="Open hero image gallery"] img')
-      .should("have.length", 2)
-      .first()
-      .should("have.attr", "srcset")
-      .and("match", /480w.*960w.*1440w.*2160w/);
-    cy.get('[aria-label="Open hero image gallery"] img')
-      .first()
-      .should("have.attr", "fetchpriority", "high")
-      .should(($image) => {
-        expect($image.attr("width")).to.match(/^\d+$/);
-        expect($image.attr("height")).to.match(/^\d+$/);
-      });
-    cy.get('[aria-label="Open hero image gallery"] img')
-      .eq(1)
-      .should("have.attr", "fetchpriority", "low");
+    cy.get('[aria-label="Open hero image gallery"] img').should(($images) => {
+      expect($images).to.have.length(2);
 
-    cy.get('[aria-label^="Open "] img')
-      .eq(2)
-      .should("have.attr", "loading", "lazy")
-      .and("have.attr", "fetchpriority", "low")
-      .and("have.attr", "sizes")
-      .and("contain", "min-width: 1024px");
+      const first = $images.get(0) as HTMLImageElement;
+      const second = $images.get(1) as HTMLImageElement;
+
+      expect(first.getAttribute("srcset")).to.match(/480w.*960w.*1440w.*2160w/);
+
+      expect(first.getAttribute("fetchpriority")).to.equal("high");
+      expect(second.getAttribute("fetchpriority")).to.equal("low");
+
+      expect(first.getAttribute("width")).to.match(/^\d+$/);
+      expect(first.getAttribute("height")).to.match(/^\d+$/);
+
+      expect(first.currentSrc).to.match(/-[\w-]+\.(?:jpg|webp)$/);
+    });
+
+    cy.get("main button")
+      .first()
+      .find("img")
+      .should(($image) => {
+        const image = $image.get(0);
+
+        expect(image.getAttribute("loading")).to.equal("lazy");
+        expect(image.getAttribute("fetchpriority")).to.equal("low");
+        expect(image.getAttribute("sizes")).to.contain("min-width: 1024px");
+      });
+
     cy.get("main button")
       .first()
       .should(($card) => {
         const card = $card.get(0);
-        if (!card) throw new Error("Expected a rendered gallery card");
+
+        if (!card) {
+          throw new Error("Expected a rendered gallery card");
+        }
+
         const style = getComputedStyle(card);
+
         expect(style.willChange).to.equal("auto");
         expect(style.contain).not.to.contain("paint");
       });
-
-    cy.get('[aria-label="Open hero image gallery"] img')
-      .first()
-      .should("have.prop", "currentSrc")
-      .and("match", /-[\w-]+\.(?:jpg|webp)$/);
   });
 
   it("opens, navigates, and closes the gallery", () => {

@@ -16,12 +16,11 @@ export default tseslint.config(
       "cypress/videos/",
       "dist/",
       "node_modules/",
-      "old_website/",
       "src/imgs/",
     ],
   },
   {
-    files: ["**/*.{js,mjs}"],
+    files: ["**/*.{js}"],
     ...eslint.configs.recommended,
     languageOptions: {
       globals: globals.node,
@@ -29,7 +28,7 @@ export default tseslint.config(
   },
   ...tseslint.configs.recommended.map((config) => ({
     ...config,
-    files: ["**/*.{ts,tsx,mts}"],
+    files: ["**/*.{ts,tsx}"],
   })),
   {
     files: sourceFiles,

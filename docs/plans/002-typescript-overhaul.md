@@ -42,7 +42,7 @@ All active frontend source has strict TypeScript coverage and a reliable no-emit
 ## Implementation plan
 
 1. Confirm prerequisites and select mutually compatible TypeScript and React type versions without changing application runtime versions.
-2. Add strict no-emit configuration with Vite client types, bundler-aware module resolution, React JSX support, and active-source includes. Exclude build output, dependencies, and `old_website/`.
+2. Add strict no-emit configuration with Vite client types, bundler-aware module resolution, React JSX support, and active-source includes. Exclude build output and dependencies.
 3. Migrate from the leaves inward: data/helpers, controlled presentation components, feature orchestrators, application shell, and entrypoint. Keep each coherent intermediate state buildable when practical.
 4. Type actual contracts and resolve nullability and DOM access deliberately. Replace custom untyped DOM properties with owned refs or explicit maps rather than widening global DOM definitions.
 5. Add declarations for imported SVG/JPEG assets and validate the eager photo glob's module shape. Avoid assertions unless an invariant is checked and explained.
@@ -101,7 +101,7 @@ Started on 2026-09-03 from merged Plan 001 commit `8d91640` on branch `refactor/
 ### Outcome
 
 - Added TypeScript 5.9 and React 18 type packages as development dependencies, a strict no-emit `tsconfig.json`, Vite client and uppercase-JPG declarations, and `npm run typecheck`.
-- Migrated every active source module to `.ts` or `.tsx`, the application entrypoint to `main.tsx`, and the Vite configuration to the checked ESM file `vite.config.mts`. The ESM configuration also removes the prior Vite CJS Node API deprecation warning.
+- Migrated every active source module to `.ts` or `.tsx`, the application entrypoint to `main.tsx`, and the Vite configuration to the checked ESM file `vite.config.ts`. The ESM configuration also removes the prior Vite CJS Node API deprecation warning.
 - Added owner-local contracts for navigation and product catalogs, photo records and direction, component props and callbacks, cart state, nullable selections, DOM refs, browser events, timers, observers, asset modules, and the eager image glob.
 - Catalogs use `as const satisfies` to preserve literal values while checking durable interfaces. No `any`, suppression comments, broad global declarations, or unchecked runtime assertions were introduced.
 

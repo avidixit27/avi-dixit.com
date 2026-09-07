@@ -21,7 +21,7 @@
     "noImplicitReturns": true,
     "types": ["vite/client"]
   },
-  "include": ["src", "vite.config.mts", "vitest.config.mts"],
+  "include": ["src", "vite.config.ts", "vitest.config.ts"],
   "exclude": [
     "src/**/*.test.ts",
     "src/**/*.cy.tsx",
