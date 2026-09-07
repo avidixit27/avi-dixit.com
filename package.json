@@ -28,11 +28,11 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "lint-staged": {
-    "*.{ts,tsx,mts}": [
+    "*.{ts,tsx}": [
       "eslint --report-unused-disable-directives --max-warnings 0",
       "prettier --check"
     ],
-    "*.{css,html,json,md,mjs,yaml,yml}": "prettier --check"
+    "*.{css,html,json,md,yaml,yml}": "prettier --check"
   },
   "dependencies": {
     "react": "^18.2.0",

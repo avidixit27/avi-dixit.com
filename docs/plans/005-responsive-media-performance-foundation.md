@@ -110,7 +110,7 @@ Two local derivative approaches were evaluated. A custom Sharp script would prov
 
 ### Implemented behavior
 
-- `vite.config.mts` centrally defines 480, 960, 1440, and 2160 pixel responsive widths, a 1440 pixel JPEG fallback, and quality 82. `npm run build` is the derivative-generation command.
+- `vite.config.ts` centrally defines 480, 960, 1440, and 2160 pixel responsive widths, a 1440 pixel JPEG fallback, and quality 82. `npm run build` is the derivative-generation command.
 - Every catalog entry now has a stable ID, meaningful alternative text, intrinsic dimensions, aspect ratio, a JPEG `srcset`, and a WebP source. Presentation components receive URLs through this contract and do not import originals.
 - `ResponsiveImage` makes sources, sizes, dimensions, decoding, loading, and fetch priority explicit. The hero and lightbox use `100vw` and `95vw`; the grid's sizes match its one-, two-, and three-column breakpoints.
 - The hero mounts only its active and next images. Only the initial active image receives high priority, and rotation waits until the next image has loaded. Grid media is lazy and low priority; an opened lightbox image is eager and high priority.

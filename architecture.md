@@ -201,7 +201,7 @@ Use [Motion's accessibility guidance](https://motion.dev/docs/react-accessibilit
 
 ### Responsive media pipeline
 
-**Current:** `vite-imagetools` transforms portfolio editing sources during `npm run build`. `vite.config.mts` owns the responsive widths, fallback width, and quality setting. The portfolio catalog maps generated, hashed JPEG and WebP URLs into a provider-neutral `Photo` contract with stable IDs, meaningful alternative text, intrinsic dimensions, aspect ratios, and source sets. Shared image presentation consumes that contract through explicit props.
+**Current:** `vite-imagetools` transforms portfolio editing sources during `npm run build`. `vite.config.ts` owns the responsive widths, fallback width, and quality setting. The portfolio catalog maps generated, hashed JPEG and WebP URLs into a provider-neutral `Photo` contract with stable IDs, meaningful alternative text, intrinsic dimensions, aspect ratios, and source sets. Shared image presentation consumes that contract through explicit props.
 
 Keep media transformation and URL ownership at the build/catalog boundary. Components must not import an original portfolio photograph directly or know whether a source came from Vite, a future CDN, or another media service. A future hosting migration should replace the catalog adapter while retaining the component contract. Preserve originals as editing inputs unless an approved source-management plan moves them elsewhere. Validate production output size and representative photographic quality whenever widths, formats, or compression settings change.
 
