@@ -251,10 +251,10 @@ Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-c
 | Formatting                    | Prettier, separate from correctness linting                                                |
 | Type checking                 | Strict no-emit checks for application and Cypress TypeScript environments                  |
 | Local hooks                   | Husky and lint-staged check staged source and supported text                               |
-| Pure frontend logic           | Vitest unit tests                                                                          |
+| Pure frontend logic           | Vitest unit tests with 90% global statements, branches, functions, and lines thresholds    |
 | React component behavior      | Cypress Component Testing with Vite and application styles                                 |
 | Critical application journeys | Cypress end-to-end tests against the Vite production build                                 |
-| Pull-request checks           | Four independent GitHub Actions jobs                                                       |
+| Pull-request checks           | Four independent GitHub Actions jobs, including the Vitest coverage gate                   |
 | Security                      | Dependabot, dependency review, production npm audit, CodeQL, and secret scanning           |
 
 The manifest and lockfile are the source of truth for installed versions. The maintained verification baseline uses Vite 8 with Rolldown, Tailwind 4 through `@tailwindcss/vite`, Vitest 5, Cypress 16, and ESLint 9. Tailwind theme values live in the CSS-first `@theme` block in `src/index.css`; no JavaScript Tailwind or PostCSS configuration is active. ESLint remains on version 9 until the installed React Hooks and JSX accessibility plugins declare ESLint 10 support; do not override incompatible peer ranges. Cypress is the selected browser test system; do not add Playwright or a duplicate component test stack without a specific requirement.
@@ -269,7 +269,7 @@ The manifest and lockfile are the source of truth for installed versions. The ma
 - Mount components with real application styles and only the providers they require. Keep fixtures small and representative.
 - Test observable outcomes. Avoid assertions coupled to private implementation, snapshots of large component trees, and duplicate coverage across test layers.
 - Control network responses and clocks where needed. Wait on observable conditions rather than arbitrary sleeps.
-- Report coverage to identify gaps; coverage percentages do not replace meaningful assertions. Do not invent a blanket threshold before a useful baseline exists.
+- The 90% Vitest threshold applies to the declared pure TypeScript scope. Coverage does not replace meaningful assertions; do not lower the gate or expand its scope merely to improve a percentage.
 
 ### Red–green–refactor loop
 

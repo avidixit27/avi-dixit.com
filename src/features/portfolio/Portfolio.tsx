@@ -4,9 +4,9 @@ import HeroSlideshow from "./HeroSlideshow";
 import Lightbox from "./Lightbox";
 import { PHOTO_CATALOG } from "./photoCatalog";
 import { getLandscapePhotoIndices } from "./photoNavigation";
+import { HERO_PHOTO_COUNT } from "./portfolioPresentationPolicy";
 import PhotoGrid from "./PhotoGrid";
 
-const HERO_PHOTO_COUNT = 8;
 const HERO_PHOTOS = Object.freeze(PHOTO_CATALOG.slice(0, HERO_PHOTO_COUNT));
 const LANDSCAPE_PHOTO_INDICES = Object.freeze(
   getLandscapePhotoIndices(PHOTO_CATALOG),

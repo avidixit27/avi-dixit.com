@@ -3,7 +3,7 @@
 | Field          | Value                                                      |
 | -------------- | ---------------------------------------------------------- |
 | Type           | Fix                                                        |
-| Status         | In review                                                  |
+| Status         | Completed                                                  |
 | Depends on     | 007                                                        |
 | Blocks         | 009 and 010                                                |
 | Planned branch | `fix/responsive-presentation-regressions`                  |
@@ -113,6 +113,6 @@ Browser review:
 
 ## Implementation record
 
-In review. The approved TTF was converted with `fonttools ttLib.woff2 compress` into `src/assets/fonts/ZenTokyoZoo-Regular.woff2`; `OFL.txt` is retained beside it. Vite-imported branding, icons, and portfolio editing sources now live under `src/assets/`, with the wordmark lettering converted to paths generated from the supplied Zen Tokyo Zoo face. The orientation selector preserves source order, selects matching intrinsic orientations, and falls back to the full catalog when no match exists. The close control uses a 44px safe-area-aware fixed target rather than image-rectangle positioning.
+Completed in [#25](https://github.com/avidixit27/avi-dixit.com/pull/25). The approved TTF was converted with `fonttools ttLib.woff2 compress` into `src/assets/fonts/ZenTokyoZoo-Regular.woff2`; `OFL.txt` is retained beside it. Vite-imported branding, icons, and portfolio editing sources now live under `src/assets/`, with the wordmark lettering converted to paths generated from the supplied Zen Tokyo Zoo face. The orientation selector preserves source order, selects matching intrinsic orientations, and falls back to the full catalog when no match exists. The close control uses a 44px safe-area-aware fixed target rather than image-rectangle positioning.
 
 The user also requested a heavier, larger navigation mark and bold navigation labels. The outlined wordmark uses a rounded stroke and a vertically centered baseline within its existing viewBox; the navigation uses responsive logo sizing and label spacing so Home, Shop, and Contact remain visible on mobile. Local verification passed `format:check`, lint, typecheck, unit tests (8), component tests (15), production build, and E2E tests (7); pull-request CI remains the completion gate.

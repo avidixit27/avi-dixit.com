@@ -41,7 +41,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --no-audit
-      - run: npm run test:unit
+      - run: npm run test:unit:coverage
 
   component-tests:
     name: Component tests

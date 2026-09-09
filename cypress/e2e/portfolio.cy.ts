@@ -140,6 +140,24 @@ describe("photography portfolio", () => {
     cy.contains("button", "Send Message").should("be.enabled");
   });
 
+  it("keeps custom Tailwind token utilities in the production stylesheet", () => {
+    cy.visit("/contact");
+    cy.get('input[name="email"]')
+      .focus()
+      .should(($input) => {
+        expect(getComputedStyle($input.get(0)).borderBottomColor).to.equal(
+          "rgb(253, 113, 0)",
+        );
+      });
+
+    cy.visit("/shop");
+    cy.contains("p", "$149").should(($price) => {
+      expect(getComputedStyle($price.get(0)).color).to.equal(
+        "rgb(208, 53, 253)",
+      );
+    });
+  });
+
   it("keeps primary navigation and gallery access usable on mobile", () => {
     cy.viewport(390, 844);
     cy.visit("/");

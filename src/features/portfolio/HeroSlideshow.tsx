@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
 import { getHeroPhotoIndices } from "./heroOrientation";
-
-const HERO_ROTATION_DELAY_MS = 2500;
-const HERO_CROSSFADE_DURATION_MS = 700;
-const HERO_IMAGE_SIZES = "100vw";
+import {
+  HERO_CROSSFADE_DURATION_MS,
+  HERO_IMAGE_SIZES,
+  HERO_ROTATION_DELAY_MS,
+} from "./portfolioPresentationPolicy";
 
 interface SlideshowState {
   readonly activeIndex: number;

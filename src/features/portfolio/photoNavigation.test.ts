@@ -36,6 +36,15 @@ describe("getPhotoIndexByOffset", () => {
     expect(getPhotoIndexByOffset(4, landscapeIndices, 2)).toBe(1);
     expect(getPhotoIndexByOffset(4, landscapeIndices, -2)).toBe(7);
   });
+
+  it("keeps an eligible current photo for a zero offset and rejects an ineligible one", () => {
+    expect(getPhotoIndexByOffset(4, landscapeIndices, 0)).toBe(4);
+    expect(getPhotoIndexByOffset(3, landscapeIndices, 0)).toBeNull();
+  });
+
+  it("stops when movement cannot find an eligible photo", () => {
+    expect(getPhotoIndexByOffset(3, [], 1)).toBeNull();
+  });
 });
 
 describe("getSurroundingPhotoIndices", () => {
@@ -56,5 +65,15 @@ describe("getLandscapePhotoIndices", () => {
         { width: 1800, height: 1000 },
       ]),
     ).toEqual([0, 2]);
+  });
+
+  it("excludes portrait and boundary-ratio photographs", () => {
+    expect(
+      getLandscapePhotoIndices([
+        { width: 1200, height: 1000 },
+        { width: 1199, height: 1000 },
+        { width: 1000, height: 1200 },
+      ]),
+    ).toEqual([]);
   });
 });

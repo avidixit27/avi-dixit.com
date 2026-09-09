@@ -143,20 +143,32 @@ function getGeneratedSource(
   return source;
 }
 
-export const PHOTO_CATALOG = Object.freeze(
-  Object.entries(fallbackModules).map(([path, src]) => {
-    const details = getPhotoDetails(path);
-    return Object.freeze({
-      ...details,
-      src,
-      srcSet: getGeneratedSource(jpegSrcSetModules, path),
-      sources: Object.freeze([
-        Object.freeze({
-          type: "image/webp",
-          srcSet: getGeneratedSource(webpSrcSetModules, path),
-        }),
-      ]),
-      aspectRatio: details.width / details.height,
-    });
-  }),
-) satisfies readonly Photo[];
+export function buildPhotoCatalog(
+  fallbackSources: Readonly<Record<string, string>>,
+  jpegSources: Readonly<Record<string, string>>,
+  webpSources: Readonly<Record<string, string>>,
+): readonly Photo[] {
+  return Object.freeze(
+    Object.entries(fallbackSources).map(([path, src]) => {
+      const details = getPhotoDetails(path);
+      return Object.freeze({
+        ...details,
+        src,
+        srcSet: getGeneratedSource(jpegSources, path),
+        sources: Object.freeze([
+          Object.freeze({
+            type: "image/webp",
+            srcSet: getGeneratedSource(webpSources, path),
+          }),
+        ]),
+        aspectRatio: details.width / details.height,
+      });
+    }),
+  );
+}
+
+export const PHOTO_CATALOG = buildPhotoCatalog(
+  fallbackModules,
+  jpegSrcSetModules,
+  webpSrcSetModules,
+);
