@@ -6,9 +6,9 @@
   --color-slate: #8892b0;
   --color-light: #1a202c;
   --color-accent: #2d3748;
-  --color-accent-warm: #fd7100;
-  --color-accent-cool: #000afd;
-  --color-accent-vivid: #d035fd;
+  --color-accentWarm: #fd7100;
+  --color-accentCool: #000afd;
+  --color-accentVivid: #d035fd;
   --color-ink: #0a0a0a;
 
   --font-sans:
