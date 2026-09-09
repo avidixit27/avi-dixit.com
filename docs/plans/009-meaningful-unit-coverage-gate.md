@@ -1,14 +1,14 @@
 # 009 — Establish a meaningful unit coverage gate
 
-| Field          | Value                             |
-| -------------- | --------------------------------- |
-| Type           | Tooling                           |
-| Status         | In progress                       |
-| Depends on     | 008                               |
-| Blocks         | 010 and later feature work        |
-| Planned branch | `test/unit-coverage-quality-gate` |
-| PR base        | `main`                            |
-| PR             | Not opened                        |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| Type           | Tooling                                                    |
+| Status         | In progress                                                |
+| Depends on     | 008                                                        |
+| Blocks         | 010 and later feature work                                 |
+| Planned branch | `test/unit-coverage-quality-gate`                          |
+| PR base        | `main`                                                     |
+| PR             | [#26](https://github.com/avidixit27/avi-dixit.com/pull/26) |
 
 ## Outcome
 
@@ -115,4 +115,4 @@ Gate verification:
 
 ## Implementation record
 
-In progress. Baseline coverage was 62.06% statements, 64.28% branches, 69.23% functions, and 60.41% lines. The configured 90% gate currently reports 100% statements, 92.85% branches, 100% functions, and 100% lines. The focused suite covers catalog/media invariants and failure paths, site and product resource contracts, navigation boundaries, orientation policy, and exact portfolio presentation settings. Temporary mutation checks confirmed that a 93% branch threshold fails, a 2400ms hero rotation interval fails its contract test, and renaming `accentVivid` fails the production computed-style E2E test. Complete pull-request CI and the PR link remain to be recorded.
+In review at [#26](https://github.com/avidixit27/avi-dixit.com/pull/26). Baseline coverage was 62.06% statements, 64.28% branches, 69.23% functions, and 60.41% lines. The configured 90% gate currently reports 100% statements, 92.85% branches, 100% functions, and 100% lines. The focused suite covers catalog/media invariants and failure paths, site and product resource contracts, navigation boundaries, orientation policy, and exact portfolio presentation settings. Temporary mutation checks confirmed that a 93% branch threshold fails, a 2400ms hero rotation interval fails its contract test, and renaming `accentVivid` fails the production computed-style E2E test. Complete pull-request CI remains to be recorded.

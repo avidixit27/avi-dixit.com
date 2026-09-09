@@ -43,13 +43,13 @@ Completed tickets are historical records. Read one only when its outcome or impl
 
 Configuration migration, responsive regressions, and the meaningful coverage gate are independent prerequisites for resuming the dark visual system. The existing dark-system working tree is preserved but blocked until Plans 007–009 establish its clean base. Motion work follows the visual system and remains split by runtime, scroll composition, and route lifecycle risk.
 
-| Plan                                                                        | Status      | Depends on | Planned branch                      | PR base                             | PR         |
-| --------------------------------------------------------------------------- | ----------- | ---------- | ----------------------------------- | ----------------------------------- | ---------- |
-| [009 — Meaningful unit coverage gate](009-meaningful-unit-coverage-gate.md) | In progress | 008        | `test/unit-coverage-quality-gate`   | `main`                              | Not opened |
-| [010 — Dark visual system and shell](010-dark-visual-system-and-shell.md)   | Blocked     | 009        | `feat/dark-visual-system`           | `test/unit-coverage-quality-gate`   | Not opened |
-| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md)   | Planned     | 010        | `feat/motion-foundation`            | `feat/dark-visual-system`           | Not opened |
-| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md)   | Planned     | 011        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened |
-| [013 — Route and layout transitions](013-route-and-layout-transitions.md)   | Planned     | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened |
+| Plan                                                                        | Status    | Depends on | Planned branch                      | PR base                             | PR                                                         |
+| --------------------------------------------------------------------------- | --------- | ---------- | ----------------------------------- | ----------------------------------- | ---------------------------------------------------------- |
+| [009 — Meaningful unit coverage gate](009-meaningful-unit-coverage-gate.md) | In review | 008        | `test/unit-coverage-quality-gate`   | `main`                              | [#26](https://github.com/avidixit27/avi-dixit.com/pull/26) |
+| [010 — Dark visual system and shell](010-dark-visual-system-and-shell.md)   | Blocked   | 009        | `feat/dark-visual-system`           | `test/unit-coverage-quality-gate`   | Not opened                                                 |
+| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md)   | Planned   | 010        | `feat/motion-foundation`            | `feat/dark-visual-system`           | Not opened                                                 |
+| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md)   | Planned   | 011        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened                                                 |
+| [013 — Route and layout transitions](013-route-and-layout-transitions.md)   | Planned   | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened                                                 |
 
 ### Stack management
 
