@@ -39,7 +39,7 @@ export default function Portfolio({ gridMarkerRef }: PortfolioProps) {
   }, [isLightboxOpen]);
 
   return (
-    <div className="bg-primary min-h-screen">
+    <div className="min-h-screen bg-canvas">
       <HeroSlideshow photos={HERO_PHOTOS} onOpen={selectPhoto} />
       <PhotoGrid
         photos={PHOTO_CATALOG}

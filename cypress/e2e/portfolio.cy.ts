@@ -138,6 +138,10 @@ describe("photography portfolio", () => {
     cy.visit("/contact");
     cy.get('input[name="email"]').should("have.attr", "type", "email");
     cy.contains("button", "Send Message").should("be.enabled");
+    cy.get("footer")
+      .should("contain.text", "Copyright @Avi Dixit 2026")
+      .and("contain.text", "avidixit27@gmail.com");
+    cy.get(".custom-scrollbar").should("not.exist");
   });
 
   it("keeps custom Tailwind token utilities in the production stylesheet", () => {
