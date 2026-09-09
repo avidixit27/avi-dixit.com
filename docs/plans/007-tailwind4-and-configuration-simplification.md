@@ -1,14 +1,14 @@
 # 007 — Adopt Tailwind 4 and simplify configuration
 
-| Field          | Value                                   |
-| -------------- | --------------------------------------- |
-| Type           | Refactor                                |
-| Status         | Tracked in the [plan index](README.md)  |
-| Depends on     | 006                                     |
-| Blocks         | 008, 009, and 010                       |
-| Planned branch | `chore/tailwind4-config-simplification` |
-| PR base        | `main`                                  |
-| PR             | Not opened                              |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| Type           | Refactor                                                   |
+| Status         | Tracked in the [plan index](README.md)                     |
+| Depends on     | 006                                                        |
+| Blocks         | 008, 009, and 010                                          |
+| Planned branch | `chore/tailwind4-config-simplification`                    |
+| PR base        | `main`                                                     |
+| PR             | [#24](https://github.com/avidixit27/avi-dixit.com/pull/24) |
 
 ## Outcome
 
@@ -132,4 +132,4 @@ Tailwind now uses `@tailwindcss/vite`, `@import "tailwindcss"`, and one `@theme`
 
 Measured Vite settings were removed after validation. Without `assetsInclude`, the build still emitted responsive JPEG and WebP candidates for all portfolio photographs, emitted no uppercase original `.JPG`, and Wrangler found 107 deployable assets. Explicit React/router groups produced four initial JavaScript files totaling 61.87 kB gzip; Vite's default produced one 61.51 kB gzip application chunk. No measured performance benefit justified the extra chunk policy.
 
-The original Tailwind 3 baseline could not build because the shared `node_modules` had already been changed by the paused Tailwind 4 work and lacked Autoprefixer. A clean Node `22.22.2` install from the final lockfile succeeded. Local verification passed: lint, format, strict application/Cypress type checks, six Vitest unit tests, twelve Cypress component tests, six Cypress E2E journeys, production build, production dependency audit, and Wrangler dry-run. Cypress required a temporary cache because the user-level Cypress cache is root-owned; no repository configuration changed for that environment issue. PR link pending.
+The original Tailwind 3 baseline could not build because the shared `node_modules` had already been changed by the paused Tailwind 4 work and lacked Autoprefixer. A clean Node `22.22.2` install from the final lockfile succeeded. Local verification passed: lint, format, strict application/Cypress type checks, six Vitest unit tests, twelve Cypress component tests, six Cypress E2E journeys, production build, production dependency audit, and Wrangler dry-run. Cypress required a temporary cache because the user-level Cypress cache is root-owned; no repository configuration changed for that environment issue. PR [#24](https://github.com/avidixit27/avi-dixit.com/pull/24) is open; the plan remains in progress until merge.
