@@ -5,7 +5,7 @@
 | Type           | Feature                                                    |
 | Status         | Tracked in the [plan index](README.md)                     |
 | Depends on     | 004                                                        |
-| Blocks         | 006, 007, and media-heavy feature work                     |
+| Blocks         | 008, 010–013, and media-heavy feature work                 |
 | Planned branch | `feat/responsive-media-foundation`                         |
 | PR base        | `fix/dependabot-compatibility-guards`                      |
 | PR             | [#16](https://github.com/avidixit27/avi-dixit.com/pull/16) |

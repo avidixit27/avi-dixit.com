@@ -32,7 +32,7 @@ The first product milestone is the portfolio and inquiries experience. Publishin
 
 ## 3. Current repository
 
-The repository currently contains a strict TypeScript React application using Vite, Tailwind, and React Router. The manifest specifies React 18, Vite 8, Tailwind 3, React Router 7, and TypeScript 5 version ranges; these are existing dependencies, not permanent version requirements.
+The repository currently contains a strict TypeScript React application using Vite, Tailwind, and React Router. The manifest specifies React 18, Vite 8, Tailwind 4, React Router 7, and TypeScript 5 version ranges; these are existing dependencies, not permanent version requirements.
 
 | Area             | Current implementation                                                                                                                               |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,7 +42,7 @@ The repository currently contains a strict TypeScript React application using Vi
 | Navigation       | `src/app/Navigation.tsx`, which owns navigation visibility and receives the portfolio marker as an explicit prop                                     |
 | Custom scrollbar | `src/app/CustomScrollbar.tsx`, which owns its listeners, timers, drag state, and cleanup                                                             |
 | Static resources | Typed application navigation data in `src/resources/navigation.ts`; typed feature-specific product data in `src/features/shop/resources/products.ts` |
-| Styling          | `src/index.css` and `tailwind.config.js`                                                                                                             |
+| Styling          | `src/index.css` with Tailwind 4 CSS-first theme variables                                                                                            |
 | Photographs      | Twelve approximately 146 MB JPEG editing sources under `src/imgs/portfolio`; Vite produces delivery-sized JPEG/WebP variants during builds           |
 | Shop             | `src/features/shop/Shop.tsx`, with placeholder products and a component-local cart; no integrated checkout                                           |
 | Contact          | `src/features/inquiries/Contact.tsx`, with form presentation and no submission integration                                                           |
@@ -66,10 +66,10 @@ src/
   api/                   Shared HTTP transport, introduced when needed
   resources/             App-wide static copy, metadata, and typed catalogs
   styles/                Global styles and design tokens
-  assets/                Bundled branding, icons, and other static assets
+  assets/                Vite-bundled fonts, branding, icons, and photography
 ```
 
-This is an ownership map, not a scaffolding checklist. Create a directory only when its first real implementation needs it. Keep feature-specific components, hooks, types, helpers, constants, resources, and tests together. Do not move assets or add empty publishing modules merely to match the diagram.
+This is an ownership map, not a scaffolding checklist. Create a directory only when its first real implementation needs it. Keep feature-specific components, hooks, types, helpers, constants, resources, and tests together. Do not add empty publishing modules merely to match the diagram.
 
 ### Allowed dependency directions
 
@@ -151,9 +151,22 @@ Use interfaces for stable object-shaped contracts such as component props and do
 - Do not duplicate user-editable or backend-owned data into resources. Map validated external data into feature-owned models at the integration boundary.
 - Do not introduce an internationalization framework until localization is approved. Resource ownership should make a later migration possible without inventing translation keys prematurely.
 
+### Bundled assets
+
+**Agreed direction:** `src/assets/` is the single home for static binary files imported by application code. Use focused categories such as `brand/`, `fonts/`, `icons/`, and `photography/portfolio/`. Vite owns their resolved URLs, hashing, and production bundling. Keep `public/` for the smaller set of files that require stable root URLs, such as the favicon, robots directives, or a web manifest.
+
+- Do not duplicate the same asset under `src` and `public`.
+- Keep font license text beside self-hosted font files. Do not request production fonts from a third party when the approved font is bundled locally.
+- The selected display typeface is Zen Tokyo Zoo, supplied under the SIL Open Font License 1.1. It replaces Phosphate Inline throughout display and brand typography; Phosphate must not remain as a dependency or fallback because the project does not hold its commercial license.
+- Use the readable sans-serif stack for body copy. Do not synthesize unsupported Zen Tokyo Zoo weights.
+- Convert wordmark lettering used through an external SVG image to vector paths so its rendering does not depend on page font loading. Use the live self-hosted font for HTML display text.
+- Keep portfolio catalog metadata and responsive-source ownership inside the portfolio feature even though the imported photograph files live under the shared asset root.
+
 ## 6. Visual system and external components
 
 **Agreed direction:** React and Vite remain the application and build foundation. Tailwind remains the primary styling approach for layout, typography, responsive behavior, and simple hover, focus, and state transitions. Establish shared design tokens for color, typography, spacing, radii, layering, and motion. Use global CSS for genuinely global concerns and component-local styles where an effect needs them.
+
+The approved dark canvas is `#0e0e0e`. The selected display font is the locally bundled Zen Tokyo Zoo face; the body stack remains a readable sans serif. These decisions are planned until the corresponding visual and responsive tickets are implemented.
 
 Motion for React is the selected general-purpose runtime for coordinated entrances and exits, page transitions, scroll reveals, scroll-linked transforms, bounded parallax, and justified layout animation. It is planned work until installed by an implementation ticket. Native browser scrolling and CSS layout retain ownership of document flow and sticky positioning; Motion may transform presentation in response to scroll but must not emulate or hijack scrolling. Replace the current JavaScript-driven draggable scrollbar with the native browser scrollbar and, if useful, restrained CSS styling that preserves platform scrolling behavior and accessibility.
 
@@ -227,7 +240,7 @@ Search-ready collection URLs and metadata are frontend goals. Evaluate pre-rende
 
 ## 8. Engineering tooling and verification
 
-Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-commands-and-tooling-gaps) summarizes current commands and known gaps. The table distinguishes implemented checks from agreed direction. Setup work and proposed command names belong in the implementation plans.
+Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-commands-and-tooling) summarizes current commands and known gaps. The table distinguishes implemented checks from agreed direction. Setup work and proposed command names belong in the implementation plans.
 
 ### Current and planned tooling
 
@@ -244,7 +257,7 @@ Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-c
 | Pull-request checks           | Four independent GitHub Actions jobs                                                       |
 | Security                      | Dependabot, dependency review, production npm audit, CodeQL, and secret scanning           |
 
-The manifest and lockfile are the source of truth for installed versions. The maintained verification baseline uses Vite 8 with Rolldown, Vitest 5, Cypress 16, and ESLint 9. ESLint remains on version 9 until the installed React and JSX accessibility plugins declare ESLint 10 support; do not override incompatible peer ranges. Tailwind 4 migration belongs to Plan 006 because its configuration and design-token changes require visual review. Cypress is the selected browser test system; do not add Playwright or a duplicate component test stack without a specific requirement.
+The manifest and lockfile are the source of truth for installed versions. The maintained verification baseline uses Vite 8 with Rolldown, Tailwind 4 through `@tailwindcss/vite`, Vitest 5, Cypress 16, and ESLint 9. Tailwind theme values live in the CSS-first `@theme` block in `src/index.css`; no JavaScript Tailwind or PostCSS configuration is active. ESLint remains on version 9 until the installed React Hooks and JSX accessibility plugins declare ESLint 10 support; do not override incompatible peer ranges. Cypress is the selected browser test system; do not add Playwright or a duplicate component test stack without a specific requirement.
 
 ### Test boundaries
 

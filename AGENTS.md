@@ -1,86 +1,136 @@
 # Repository guidance for Codex
 
-## Start with the actual repository
+## Model roles and handoffs
 
-- Read [architecture.md](architecture.md) before structural changes, new features, or dependency decisions. Follow its distinction between current implementation, agreed direction, planned work, and open decisions.
-- Inspect existing files, dependencies, scripts, and working-tree changes before editing. Search for existing components and behavior before adding another implementation.
-- Before generating implementation code, state a three-bullet plan covering the exact files, intended behavior, and verification.
-- Complete the approved task with small reviewable changes. Seek a decision before material scope expansion, additional services, or deployment. Do not repeatedly ask permission for scoped edits and checks already authorized.
-- A roadmap entry is not authorization to implement that feature. Preserve unrelated user changes.
+- Use Sol High for architecture, design decisions, and implementation plans.
+- Use Terra Medium to implement an approved plan.
+- Use Sol Low for post-implementation pull-request review.
+- Prompt the user at each transition. Return to Sol High when a finding requires renewed planning.
+- These roles do not grant permission to change models automatically.
 
-## Find the relevant implementation plan
+## Start with the repository
 
-- Consult [docs/plans/README.md](docs/plans/README.md) for active work, dependencies, branch bases, and any explicitly approved temporary verification exception.
-- Read the relevant plan and only the dependency outcomes needed for the task. Do not load every plan or completed plan by default.
-- Treat the selected plan as the end-to-end work ticket. Before editing, ensure its outcome, prerequisites, scope, non-goals, deliverables, implementation steps, acceptance criteria, verification, risks, and definition of done are actionable. Resolve or record a material gap before proceeding.
-- Keep task scope, checklists, progress, decisions, and verification evidence in the plan and its linked PR. Keep enduring design rules in `architecture.md`.
-- Update the plan index when status or PR relationships change. A plan's existence does not authorize starting it. Apply a temporary exception only to the plans it explicitly names.
-- Name branches with a purpose-based conventional prefix such as `feat/`, `fix/`, `refactor/`, `test/`, or `chore/`, followed by a concise kebab-case description.
-- Keep the ticket accurate during implementation. At completion, record the result and evidence, link the PR, and update the index; do not leave planned language describing implemented repository state.
+- Read [architecture.md](architecture.md) before structural changes, new features, dependency decisions, or enduring convention changes.
+- Inspect existing source, dependencies, scripts, configuration, and working-tree changes before editing. Search for an existing implementation before adding one.
+- Before implementation code, state a three-bullet plan covering exact files or ownership areas, observable behavior, and proportionate verification.
+- Keep approved work small and reviewable. Seek a decision before material scope expansion, new services, deployment changes, or architectural commitments.
+- A roadmap entry is not implementation authorization. Preserve unrelated user changes.
+
+## Use the relevant implementation plan
+
+- Consult [docs/plans/README.md](docs/plans/README.md) for active work, dependencies, branch bases, and approved exceptions.
+- Read the selected plan and only the prerequisite outcomes needed for the task. Completed plans are historical records, not default context.
+- Treat the plan as the end-to-end ticket. Ensure its scope, non-goals, steps, acceptance criteria, verification, risks, and definition of done are actionable before editing.
+- Record material gaps instead of inventing requirements. Keep task progress, decisions, deviations, and evidence in the plan and PR; keep enduring rules in `architecture.md`.
+- Update the plan and index as status or PR relationships change. Do not leave planned wording for implemented repository state.
+- Name branches with a purpose-based prefix such as `feat/`, `fix/`, `refactor/`, `test/`, or `chore/` and concise kebab-case wording.
+
+## Simplicity and configuration
+
+Optimize for the fewest concepts a maintainer must understand, not the fewest lines.
+
+- Keep one obvious source of truth for each concern. Remove duplicate configuration, stale compatibility paths, dead dependencies, and unused implementations.
+- Prefer framework-native or tool-native integration when it remains clear and testable. Colocate configuration with its owning tool when no other tool needs a separate file.
+- Do not add a config file, wrapper, helper, abstraction, or dependency solely because it is conventional elsewhere or might help hypothetical future scale.
+- Do not restate defaults unless the setting documents intent, enforces a safeguard, or protects behavior that is easy to regress.
+- Preserve intentional safeguards and measured optimizations. Measure custom performance rules before removing or expanding them.
+- Inspect `package.json`, lockfile state, imports, and configuration before changing dependencies. Use `npm install` for intentional dependency changes and `npm ci` for reproducible installs; never edit `package-lock.json` manually.
+- After a migration, remove the old path and search for stale imports, files, scripts, extensions, and documentation. Do not retain parallel integrations without an explicit compatibility need.
+- Use the package's ESM convention. Add `.mjs`, `.mts`, or `.cjs` only when a specific tool requires it.
+- Classify complexity decisions as **Remove**, **Simplify**, **Keep**, or **Measure first**.
 
 ## Architecture and component design
 
-- Organize product behavior by feature; keep genuinely shared presentation and infrastructure at the top level. Create directories only when needed.
-- Routes compose features. Features use shared components and transport. Shared components must not depend on routes, feature internals, or business API requests.
-- Do not reach into another feature's internal implementation. Compose cross-feature workflows above the features or deliberately extract a shared responsibility.
-- Prefer explicit props, callbacks, children, and composition. Use Context only for a demonstrated shared state concern.
-- Keep state local where possible, derive values rather than duplicating state, and give effects, listeners, timers, and DOM mutations clear ownership and cleanup.
-- Keep feature-specific types, hooks, helpers, constants, API operations, and tests near their owners. Avoid catch-all utility or handler folders.
-- Extract code for a coherent responsibility, readability, reuse, or testability. Three uses are not a prerequisite. Do not introduce speculative factories, generic frameworks, or unnecessary wrappers.
-- Treat approximately 200 lines of hand-written source as a review signal, not a hard cap. Do not fragment a cohesive component merely to meet a number. Documentation and generated files are not subject to this signal.
-- TypeScript is configured with strict no-emit checking. Use straightforward contracts and inference, preserve the configured strictness, and do not routinely bypass checking with `any`, assertions, or suppression comments. Validate external data at integration boundaries.
+- Organize product behavior by feature. Keep genuinely shared presentation and infrastructure at the top level, and create directories only when their first implementation needs them.
+- Routes compose features. Features may use shared components and transport; shared components must not depend on routes, feature internals, or business API requests.
+- Do not reach into another feature's internals. Compose cross-feature workflows above features or deliberately extract a shared responsibility.
+- Prefer explicit props, callbacks, children, and composition. Use Context only for a demonstrated shared-state concern.
+- Keep state local where possible and derive values rather than duplicating state. Give effects, listeners, timers, observers, and DOM mutations clear ownership and cleanup.
+- Keep feature-specific types, hooks, helpers, constants, API operations, resources, and tests near their owner. Avoid catch-all utility or handler folders.
+- Extract coherent responsibilities for readability, reuse, or testability. Do not introduce speculative factories, generic frameworks, wrappers, or indirection.
+- Treat about 200 lines of hand-written source as a review signal, not a hard cap. Do not fragment cohesive code to meet a number; documentation and generated files are exempt.
+- Preserve strict TypeScript checking. Prefer straightforward contracts and inference over `any`, unchecked assertions, or suppression comments. Validate external data at integration boundaries.
 
 ## Styling and external components
 
-- Follow shared Tailwind tokens and established visual conventions. Review responsive layouts, keyboard and touch use, visible focus, and reduced motion.
-- Use the component sources listed in `architecture.md` as candidates. Inspect each selected component's code, dependencies, framework assumptions, and license before adopting it.
-- Adapt external components to project ownership, TypeScript contracts, styles, and accessibility. Preserve required attribution and record the source beside adapted code.
-- Remove demo content and unrelated functionality. Do not install an entire library, additional animation runtime, or framework solely because an example uses it.
-- Verify visual changes with representative photographs and real browser behavior. Do not claim visual verification from linting or unit tests alone.
+- Follow shared Tailwind tokens and established visual conventions. Review mobile and desktop layouts, keyboard and touch use, visible focus, and reduced motion.
+- Evaluate component sources listed in `architecture.md` individually. Inspect code, dependencies, framework assumptions, and licenses before adoption.
+- Adapt selected components to project ownership, TypeScript, styling, and accessibility. Preserve required attribution and record sources when applicable.
+- Remove demo content and unrelated behavior. Do not install an entire library, framework, animation runtime, or compatibility layer for one example.
+- Prefer existing browser, React, Vite, and Tailwind capabilities before adding dependencies.
+- Verify visual changes with representative photographs and real browser behavior. Linting and unit tests do not constitute visual review.
 
-## Red–green–refactor and review
+## Red-green-refactor and review
 
-- For new behavior, write the smallest useful test first, run it to establish the intended failure, implement the behavior, and refactor with the test passing.
-- For bug fixes, add a regression test. Before refactoring, protect the intended existing behavior; distinguish intentional changes from accidental regressions.
-- Use Vitest for pure logic and Cypress component tests for rendered React behavior once their harnesses are configured. Use Cypress end-to-end tests for critical application journeys.
-- Test observable results, not private implementation details. Avoid redundant test stacks, broad component snapshots, arbitrary sleeps, and live production dependencies.
-- Review styling visually and test affected interactions. Documentation-only changes need consistency and diff checks; application tests are unnecessary.
-- Run relevant available checks during development and the configured release checks before completing implementation. Report exact commands, failures, and checks that could not run.
-- Never weaken assertions, remove useful tests, skip failing checks, or disable lint rules merely to obtain a passing result. A rule change requires a concrete rationale.
-- Review the final diff for scope, readability, accidental files, and unresolved failures. Update architecture documentation with material architectural changes in the same PR.
+- For behavior changes, write the smallest useful failing test first when practical, implement the behavior, and refactor while it passes.
+- For reproducible bugs, add a regression test. Protect intended behavior before refactoring and distinguish intentional changes from regressions.
+- Use Vitest for pure logic, Cypress component tests for rendered React behavior, and Cypress E2E tests for critical production-build journeys.
+- Test observable results, meaningful boundaries, and durable invariants. Avoid implementation-detail assertions, broad snapshots, arbitrary sleeps, redundant test stacks, and live production dependencies.
+- Never weaken assertions, remove useful tests, add exclusions, skip relevant failures, or disable lint rules merely to pass. Policy changes need a concrete rationale.
+- Review styling visually and exercise affected interactions. Documentation-only changes need consistency, formatting, and diff checks unless they also change executable configuration.
+- Review the final diff for scope, readability, accidental files, stale references, redundant configuration, and unresolved failures. Update architecture documentation when an enduring decision changes.
+
+## Verification strategy
+
+Use the smallest check that gives reliable feedback during development:
+
+1. focused test for the changed behavior,
+2. affected unit or component suite,
+3. type checking when typed source or configuration changes,
+4. linting and formatting for changed files,
+5. production build for build-time behavior,
+6. E2E only for browser or integration behavior that lower layers cannot prove.
+
+Before pushing, run proportionate checks for likely failures. Run a local build or E2E suite when work materially affects Vite, Tailwind compilation, routing, responsive media, deployment, Cloudflare, Cypress infrastructure, browser-only behavior, or a critical journey.
+
+GitHub Actions is the authoritative complete PR gate. It runs lint/format/types, unit tests, Cypress component tests, and production build/E2E jobs. Do not routinely duplicate that matrix locally solely because it exists.
+
+Use `npm run check` for explicit requests, high-risk cross-cutting work, release investigation, CI reproduction, unavailable CI, or when the full local result is necessary before pushing.
+
+After pushing:
+
+- Check CI once when reasonable. If it is still running, continue useful work or wait instead of polling repeatedly.
+- If CI passes, do not rerun the same complete suite locally. Do not fetch successful logs without a reason.
+- If CI fails, inspect the failed job, reproduce the smallest useful command, fix the cause, and run focused verification before pushing.
+- Record commands actually run and distinguish local results from CI results.
 
 ## Current commands and tooling
 
-The source of truth is `package.json`; inspect it before selecting commands.
-
-Use Node `22.22.2` from `.nvmrc`. The source of truth remains `package.json`; these are the main developer commands:
+`package.json` is the command and dependency source of truth. Use Node `22.22.2` from `.nvmrc`.
 
 | Command                       | Purpose                                                         |
 | ----------------------------- | --------------------------------------------------------------- |
 | `npm run dev`                 | Start the Vite development server                               |
 | `npm run build`               | Build the production frontend                                   |
-| `npm run preview`             | Preview an existing build                                       |
+| `npm run preview`             | Preview through the configured Cloudflare path                  |
 | `npm run lint`                | Run ESLint and fail on warnings                                 |
-| `npm run format:check`        | Check repository formatting without editing                     |
+| `npm run format:check`        | Check formatting without editing                                |
 | `npm run format`              | Apply Prettier explicitly                                       |
 | `npm run typecheck`           | Check application and Cypress TypeScript without emitting files |
 | `npm run test:unit`           | Run Vitest once                                                 |
-| `npm run test:unit:watch`     | Run the Vitest development loop                                 |
+| `npm run test:unit:watch`     | Run Vitest in watch mode                                        |
 | `npm run test:unit:coverage`  | Produce the focused unit coverage report                        |
 | `npm run test:component`      | Run Cypress component tests in headless Chrome                  |
 | `npm run test:component:open` | Open the Cypress component runner                               |
 | `npm run test:e2e`            | Build, serve, and test critical journeys in headless Chrome     |
-| `npm run security:audit`      | Fail on moderate or higher production dependency advisories     |
+| `npm run security:audit`      | Fail on moderate or higher production advisories                |
 | `npm run check`               | Run the complete local verification sequence                    |
 
-Husky and lint-staged run fast staged-file lint and formatting checks before commits. GitHub Actions independently runs lint/format/types, unit tests, component tests, and production build/E2E jobs on pull requests and pushes to `main`.
+Husky and lint-staged check staged files before commits. GitHub Actions validates pull requests and pushes to `main`; a separate workflow runs the production audit and CodeQL. Pull requests also receive dependency review.
 
-The separate security workflow runs a production dependency audit and CodeQL on pull requests, pushes to `main`, a weekly schedule, and manual dispatch. Pull requests also receive dependency review. Dependabot checks npm and GitHub Actions dependencies weekly and opens grouped update pull requests. GitHub secret scanning and push protection are enabled at the repository level. Do not silence a security finding merely to pass; determine whether it affects production, update the dependency when possible, and record accepted risk explicitly.
+Dependabot checks npm and GitHub Actions weekly. Secret scanning and push protection are repository settings. Do not silence a security finding merely to pass; determine production impact, update when possible, and record any accepted risk.
+
+## Token and tool efficiency
+
+- Read only the files and plan dependencies needed for the current task. Search before loading large files or directories.
+- Avoid repeating commands whose result cannot have changed. Prefer focused test output during iteration.
+- Inspect failed CI jobs and relevant logs before widening an investigation.
+- Match reasoning effort to uncertainty: use higher reasoning where a wrong approach risks rework and lower reasoning for decision-complete mechanical work.
 
 ## Backend remains open
 
-- Do not treat any backend technology or service as selected. Language, framework, database, authentication, hosting, deployment, and repository location remain undecided.
-- A separate backend repository is permitted. Do not create backend directories, schemas, endpoints, or infrastructure based on earlier candidate discussions.
+- Do not treat any backend language, framework, database, authentication, hosting, deployment, or repository location as selected. A separate repository remains permitted.
+- Do not create backend directories, schemas, endpoints, or infrastructure from earlier candidate discussions.
 - Keep frontend integration behind explicit contracts and isolated transport, with deliberate loading, empty, success, error, and retry states.
-- Keep service secrets out of browser code. Mock responses support development and tests; they do not establish that a production integration works.
+- Keep secrets out of browser code. Mocks support development and tests but do not prove production integration.
 - Agree backend contracts and ownership in a separately scoped task before implementing real integrations.

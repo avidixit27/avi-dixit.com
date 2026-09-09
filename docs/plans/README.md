@@ -24,50 +24,42 @@ The ticket is the source of truth for execution. Keep it current when repository
 3. **Execute:** follow the ticket, keep acceptance criteria and the implementation record current, and mark the ticket `Blocked` in the index when a recorded dependency prevents progress.
 4. **Complete:** satisfy the definition of done, link the PR and verification evidence, change the status to `Completed`, and move the row to a completed section after merge.
 
-## Active sequence
-
-The agreed order is cleanup, TypeScript, then verification tooling. Cleanup establishes readable responsibilities; TypeScript gives them checked contracts; the verification feature makes correctness repeatably enforceable.
-
-The stack starts from `react-website-overhaul`. Branch names use a purpose-based conventional prefix. The documentation does not create branches or authorize implementation.
-
-| Plan                                                        | Status    | Depends on | Planned branch                 | PR base                  | PR                                                                                                                 |
-| ----------------------------------------------------------- | --------- | ---------- | ------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| [002 — TypeScript overhaul](002-typescript-overhaul.md)     | Completed | 001        | `refactor/typescript-overhaul` | `react-website-overhaul` | [#3](https://github.com/avidixit27/avi-dixit.com/pull/3)                                                           |
-| [003 — Verification pipeline](003-verification-pipeline.md) | Completed | 002        | `test/verification-pipeline`   | `react-website-overhaul` | [#4](https://github.com/avidixit27/avi-dixit.com/pull/4), [#5](https://github.com/avidixit27/avi-dixit.com/pull/5) |
-
 ## Completed
 
-| Plan                                      | Status    | Branch               | PR                                                       |
-| ----------------------------------------- | --------- | -------------------- | -------------------------------------------------------- |
-| [001 — Code cleanup](001-code-cleanup.md) | Completed | `codex/code-cleanup` | [#2](https://github.com/avidixit27/avi-dixit.com/pull/2) |
+Completed tickets are historical records. Read one only when its outcome or implementation decision is a prerequisite for current work.
 
-## Visual and performance sequence
+| Plan                                                                                             | Status    | Branch                             | PR                                                                                                                 |
+| ------------------------------------------------------------------------------------------------ | --------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| [001 — Code cleanup](001-code-cleanup.md)                                                        | Completed | `codex/code-cleanup`               | [#2](https://github.com/avidixit27/avi-dixit.com/pull/2)                                                           |
+| [002 — TypeScript overhaul](002-typescript-overhaul.md)                                          | Completed | `refactor/typescript-overhaul`     | [#3](https://github.com/avidixit27/avi-dixit.com/pull/3)                                                           |
+| [003 — Verification pipeline](003-verification-pipeline.md)                                      | Completed | `test/verification-pipeline`       | [#4](https://github.com/avidixit27/avi-dixit.com/pull/4), [#5](https://github.com/avidixit27/avi-dixit.com/pull/5) |
+| [004 — Toolchain security modernization](004-toolchain-security-modernization.md)                | Completed | `chore/toolchain-modernization`    | [#14](https://github.com/avidixit27/avi-dixit.com/pull/14)                                                         |
+| [005 — Responsive media and performance](005-responsive-media-performance-foundation.md)         | Completed | `feat/responsive-media-foundation` | [#16](https://github.com/avidixit27/avi-dixit.com/pull/16)                                                         |
+| [006 — Build and configuration conventions](006-simplify-build-and-configuration-conventions.md) | Completed | `chore/setup-cloudflare`           | [#23](https://github.com/avidixit27/avi-dixit.com/pull/23)                                                         |
 
-The next sequence first resolves the supported-tooling and security baseline exposed when the overhaul reached `main`. It then establishes delivery-sized photography before visual and motion work and introduces each motion class against a real use case. This keeps dependency migration, image decoding, design-system migration, scroll composition, and route lifecycle risk independently measurable. Plans are stacked in dependency order; rebase or retarget each child after its parent merges.
+## Current sequence
 
-| Plan                                                                                     | Status    | Depends on | Planned branch                      | PR base                               | PR                                                         |
-| ---------------------------------------------------------------------------------------- | --------- | ---------- | ----------------------------------- | ------------------------------------- | ---------------------------------------------------------- |
-| [004 — Toolchain security modernization](004-toolchain-security-modernization.md)        | Completed | 003        | `chore/toolchain-modernization`     | `main`                                | [#14](https://github.com/avidixit27/avi-dixit.com/pull/14) |
-| [005 — Responsive media and performance](005-responsive-media-performance-foundation.md) | Completed | 004        | `feat/responsive-media-foundation`  | `fix/dependabot-compatibility-guards` | [#16](https://github.com/avidixit27/avi-dixit.com/pull/16) |
-| [006 — Dark visual system and shell](006-dark-visual-system-and-shell.md)                | Planned   | 005        | `feat/dark-visual-system`           | `feat/responsive-media-foundation`    | Not opened                                                 |
-| [007 — Accessible Motion foundation](007-accessible-motion-foundation.md)                | Planned   | 006        | `feat/motion-foundation`            | `feat/dark-visual-system`             | Not opened                                                 |
-| [008 — Portfolio scroll composition](008-portfolio-scroll-composition.md)                | Planned   | 007        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`              | Not opened                                                 |
-| [009 — Route and layout transitions](009-route-and-layout-transitions.md)                | Planned   | 008        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition`   | Not opened                                                 |
+Configuration migration, responsive regressions, and the meaningful coverage gate are independent prerequisites for resuming the dark visual system. The existing dark-system working tree is preserved but blocked until Plans 007–009 establish its clean base. Motion work follows the visual system and remains split by runtime, scroll composition, and route lifecycle risk.
+
+| Plan                                                                                                   | Status      | Depends on | Planned branch                            | PR base                                   | PR                                                         |
+| ------------------------------------------------------------------------------------------------------ | ----------- | ---------- | ----------------------------------------- | ----------------------------------------- | ---------------------------------------------------------- |
+| [007 — Tailwind 4 and configuration simplification](007-tailwind4-and-configuration-simplification.md) | In progress | 006        | `chore/tailwind4-config-simplification`   | `main`                                    | [#24](https://github.com/avidixit27/avi-dixit.com/pull/24) |
+| [008 — Responsive presentation regressions](008-responsive-presentation-regressions.md)                | Planned     | 007        | `fix/responsive-presentation-regressions` | `chore/tailwind4-config-simplification`   | Not opened                                                 |
+| [009 — Meaningful unit coverage gate](009-meaningful-unit-coverage-gate.md)                            | Planned     | 008        | `test/unit-coverage-quality-gate`         | `fix/responsive-presentation-regressions` | Not opened                                                 |
+| [010 — Dark visual system and shell](010-dark-visual-system-and-shell.md)                              | Blocked     | 009        | `feat/dark-visual-system`                 | `test/unit-coverage-quality-gate`         | Not opened                                                 |
+| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md)                              | Planned     | 010        | `feat/motion-foundation`                  | `feat/dark-visual-system`                 | Not opened                                                 |
+| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md)                              | Planned     | 011        | `feat/portfolio-scroll-composition`       | `feat/motion-foundation`                  | Not opened                                                 |
+| [013 — Route and layout transitions](013-route-and-layout-transitions.md)                              | Planned     | 012        | `feat/route-layout-transitions`           | `feat/portfolio-scroll-composition`       | Not opened                                                 |
 
 ### Stack management
 
 - Create each child branch from the reviewed, committed state of its parent. Each PR targets its immediate parent and identifies that dependency, so its diff contains only its own layer.
 - Use purpose-based branch prefixes such as `feat/`, `fix/`, `refactor/`, `test/`, and `chore/`; keep the remainder concise and kebab-case.
-- Keep the three scopes distinct. Do not mix visual redesign, image hosting, a backend, commerce, or unrelated dependency upgrades into this stack.
-- Merge in dependency order: 001, 002, then 003. When a parent merges, update the dependent PR base and restack as necessary to avoid repeating merged changes. Do not blindly merge a child into an obsolete parent branch.
+- Keep configuration migration, responsive fixes, coverage policy, visual redesign, and each motion class in their recorded scopes.
+- Merge Plans 007–013 in dependency order. When a parent merges, update the dependent PR base and restack as necessary to avoid repeating merged changes.
+- Preserve the current Plan 010 work while Plans 007–009 proceed. Restack it onto Plan 009 only after those prerequisites are merged and reviewed.
 - Run pull-request CI for intermediate base branches as well as `main`. Introduce required-check rules only when the relevant workflow exists on the protected target.
 - Each plan remains a separately scoped task. Update current command and architecture status when its implementation changes those facts.
-
-### Temporary verification exception: plans 001 and 002 only
-
-The user explicitly chose cleanup and TypeScript migration before introducing automated tests. For these two plans, capture intended behavior before editing, perform before/after browser checks, and run production builds. Plan 002 also requires strict type checking. Record observed behavior and regression scenarios in the plan's implementation record or linked PR for plan 003 to automate.
-
-Do not claim that these checks constitute a red–green–refactor loop or that unavailable lint/test tooling passed. Keep this exception limited to the two bootstrap changes. It does not authorize unrelated new behavior or silently waive failed available checks. Plan 003 establishes the harness and regression baseline; subsequent behavior changes follow the normal TDD rules.
 
 ## Maintaining plans
 
