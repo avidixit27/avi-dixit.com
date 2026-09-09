@@ -39,7 +39,8 @@ describe("HeroSlideshow", () => {
     cy.get("img").should("have.length", 2);
     cy.get('img[alt="First test photo"]')
       .should("have.attr", "loading", "eager")
-      .and("have.attr", "fetchpriority", "high");
+      .and("have.attr", "fetchpriority", "high")
+      .and("have.css", "transition-duration", "0.7s");
     cy.get('img[alt="Second test photo"]')
       .should("have.attr", "loading", "eager")
       .and("have.attr", "fetchpriority", "low");

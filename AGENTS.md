@@ -109,14 +109,14 @@ After pushing:
 | `npm run typecheck`           | Check application and Cypress TypeScript without emitting files |
 | `npm run test:unit`           | Run Vitest once                                                 |
 | `npm run test:unit:watch`     | Run Vitest in watch mode                                        |
-| `npm run test:unit:coverage`  | Produce the focused unit coverage report                        |
+| `npm run test:unit:coverage`  | Enforce the 90% Vitest coverage gate for pure TypeScript        |
 | `npm run test:component`      | Run Cypress component tests in headless Chrome                  |
 | `npm run test:component:open` | Open the Cypress component runner                               |
 | `npm run test:e2e`            | Build, serve, and test critical journeys in headless Chrome     |
 | `npm run security:audit`      | Fail on moderate or higher production advisories                |
 | `npm run check`               | Run the complete local verification sequence                    |
 
-Husky and lint-staged check staged files before commits. GitHub Actions validates pull requests and pushes to `main`; a separate workflow runs the production audit and CodeQL. Pull requests also receive dependency review.
+Husky and lint-staged check staged files before commits. GitHub Actions validates pull requests and pushes to `main`; its unit job runs the 90% coverage gate. A separate workflow runs the production audit and CodeQL. Pull requests also receive dependency review.
 
 Dependabot checks npm and GitHub Actions weekly. Secret scanning and push protection are repository settings. Do not silence a security finding merely to pass; determine production impact, update when possible, and record any accepted risk.
 

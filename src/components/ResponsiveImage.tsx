@@ -1,4 +1,4 @@
-import type { Ref } from "react";
+import type { CSSProperties, Ref } from "react";
 
 export interface ImageSource {
   readonly type: string;
@@ -17,6 +17,7 @@ interface ResponsiveImageProps {
   readonly fetchPriority: "high" | "low" | "auto";
   readonly pictureClassName?: string;
   readonly className?: string;
+  readonly style?: CSSProperties;
   readonly imageRef?: Ref<HTMLImageElement>;
   readonly onLoad?: () => void;
 }
@@ -33,6 +34,7 @@ export default function ResponsiveImage({
   fetchPriority,
   pictureClassName = "",
   className = "",
+  style,
   imageRef,
   onLoad,
 }: ResponsiveImageProps) {
@@ -60,6 +62,7 @@ export default function ResponsiveImage({
         loading={loading}
         decoding="async"
         className={className}
+        style={style}
         onLoad={onLoad}
         draggable="false"
       />

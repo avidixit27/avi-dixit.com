@@ -23,7 +23,7 @@
     "security:audit": "npm audit --omit=dev --audit-level=moderate",
     "preview": "npm run build && wrangler dev",
     "preview:test": "vite preview --host 127.0.0.1 --port 4173",
-    "check": "npm run lint && npm run format:check && npm run typecheck && npm run test:unit && npm run test:component && npm run test:e2e",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm run test:unit:coverage && npm run test:component && npm run test:e2e",
     "prepare": "husky",
     "deploy": "npm run build && wrangler deploy"
   },
