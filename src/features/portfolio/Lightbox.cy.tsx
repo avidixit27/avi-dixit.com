@@ -2,6 +2,10 @@ import { mount } from "@cypress/react";
 import { useState } from "react";
 import Lightbox from "./Lightbox";
 import type { Photo } from "./photoCatalog";
+import {
+  LIGHTBOX_CLOSE_DURATION_MS,
+  LIGHTBOX_IMAGE_TRANSITION_MS,
+} from "./portfolioPresentationPolicy";
 
 function createPhoto(id: string, alt: string): Photo {
   return {
@@ -182,17 +186,22 @@ describe("Lightbox", () => {
 
     cy.get('[data-lightbox-preview="true"]')
       .should("have.attr", "src", "/already-visible.jpg")
-      .and("have.class", "opacity-100");
+      .and("have.class", "opacity-100")
+      .and(
+        "have.css",
+        "transition-duration",
+        `${LIGHTBOX_IMAGE_TRANSITION_MS / 1000}s`,
+      );
     cy.get('img[alt="First test photo"]')
       .should("have.class", "opacity-0")
       .trigger("load")
       .should("have.class", "opacity-100")
       .click();
     cy.get('[data-lightbox-preview="true"]').should("have.class", "opacity-0");
-    cy.tick(150);
+    cy.tick(LIGHTBOX_CLOSE_DURATION_MS);
     cy.get("@onClosed").should("not.have.been.called");
     cy.get('[aria-label="Close photo viewer"]').click("topLeft");
-    cy.tick(150);
+    cy.tick(LIGHTBOX_CLOSE_DURATION_MS);
     cy.get("@onClosed").should("have.been.calledOnce");
   });
 
@@ -351,7 +360,7 @@ describe("Lightbox", () => {
 
     pressKey("Escape");
     cy.get('[role="dialog"]').should("have.class", "opacity-0");
-    cy.tick(150);
+    cy.tick(LIGHTBOX_CLOSE_DURATION_MS);
     cy.get("@onClosed").should("have.been.calledOnce");
   });
 

@@ -8,14 +8,13 @@ import {
 } from "./photoNavigation";
 import {
   LIGHTBOX_IMAGE_SIZES,
+  LIGHTBOX_CLOSE_DURATION_MS,
   LIGHTBOX_IMAGE_TRANSITION_MS,
   LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT,
   LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT,
   LIGHTBOX_PRELOAD_BACKWARD_COUNT,
   LIGHTBOX_PRELOAD_FORWARD_COUNT,
 } from "./portfolioPresentationPolicy";
-
-const CLOSE_DURATION_MS = 150;
 
 interface LightboxProps {
   photos: readonly Photo[];
@@ -50,7 +49,7 @@ export default function Lightbox({
     closeTimerRef.current = window.setTimeout(() => {
       closeTimerRef.current = null;
       onClosed();
-    }, CLOSE_DURATION_MS);
+    }, LIGHTBOX_CLOSE_DURATION_MS);
   }, [onClosed]);
 
   const openPhoto = useCallback(
@@ -178,7 +177,7 @@ export default function Lightbox({
     <div
       className={`fixed inset-0 bg-black/95 z-[100] overflow-hidden flex items-center justify-center
                   transition-opacity ${isClosing ? "opacity-0" : "opacity-100"}`}
-      style={{ transitionDuration: `${CLOSE_DURATION_MS}ms` }}
+      style={{ transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS}ms` }}
       role="dialog"
       aria-modal="true"
       aria-label="Photo viewer"
@@ -317,9 +316,10 @@ export default function Lightbox({
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-250 ${
+            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity ${
               isFullImageReady ? "opacity-0" : "opacity-100"
             }`}
+            style={{ transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms` }}
           />
         )}
         {!outgoingSrc && !isNavigationReady && (
@@ -331,9 +331,10 @@ export default function Lightbox({
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity duration-250 ${
+            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity ${
               isFullImageReady ? "opacity-0" : "opacity-100"
             }`}
+            style={{ transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms` }}
           />
         )}
       </div>

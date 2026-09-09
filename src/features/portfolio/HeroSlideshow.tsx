@@ -127,9 +127,10 @@ export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
             fetchPriority={isInitialHero ? "high" : "low"}
             imageRef={isActive ? activeImageRef : null}
             onLoad={() => markPhotoLoaded(photo.id)}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity ${
               isActive ? "opacity-100" : "opacity-0"
             }`}
+            style={{ transitionDuration: `${HERO_CROSSFADE_DURATION_MS}ms` }}
           />
         );
       })}
