@@ -29,7 +29,7 @@ The development and CI toolchain runs on mutually supported releases, installs u
 - Evaluate ESLint 10 against every installed React, Hooks, refresh, TypeScript, and accessibility plugin. Do not force an invalid peer graph; retain the newest compatible ESLint major only when the blocker and follow-up are recorded.
 - Recreate the lockfile through normal package resolution, inspect every major migration, and remove dependencies made obsolete by upgrades.
 - Migrate configuration only where required while preserving strict TypeScript, lint, accessibility, component, E2E, hook, and CI behavior.
-- Decide whether Tailwind 4 belongs here or in Plan 006’s visual-token migration before editing Tailwind configuration; do not perform the upgrade twice.
+- Decide whether Tailwind 4 belongs here or in the separately planned migration before editing Tailwind configuration; do not perform the upgrade twice.
 - Resolve all safely fixable critical/high development advisories and retain production audit enforcement.
 
 ## Non-goals
@@ -81,13 +81,13 @@ The development and CI toolchain runs on mutually supported releases, installs u
 
 ## Risks and recovery
 
-| Risk                                               | Mitigation or recovery                                                                                 |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Several major upgrades obscure the failing owner   | Upgrade and verify one compatible tool group at a time with separate commits where useful.             |
-| ESLint plugins lag ESLint core                     | Keep the newest supported core temporarily; document the peer blocker instead of forcing installation. |
-| Cypress/Vitest migration changes discovery         | Verify exact collected specs and test counts before and after.                                         |
-| Tailwind major changes visual output               | Assign it once to this ticket or Plan 006 and compare browser output before accepting.                 |
-| Audit suggests destructive or nonsensical versions | Inspect dependency ownership and upstream releases; never apply `--force` blindly.                     |
+| Risk                                               | Mitigation or recovery                                                                                         |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Several major upgrades obscure the failing owner   | Upgrade and verify one compatible tool group at a time with separate commits where useful.                     |
+| ESLint plugins lag ESLint core                     | Keep the newest supported core temporarily; document the peer blocker instead of forcing installation.         |
+| Cypress/Vitest migration changes discovery         | Verify exact collected specs and test counts before and after.                                                 |
+| Tailwind major changes visual output               | Assign it once to this ticket or the separately planned migration and compare browser output before accepting. |
+| Audit suggests destructive or nonsensical versions | Inspect dependency ownership and upstream releases; never apply `--force` blindly.                             |
 
 ## Definition of done
 
@@ -106,7 +106,7 @@ Started on `chore/toolchain-modernization` from merged `main` at `aba77c6`.
 - Cypress moved from `14.5.4` to `16.0.0`; `@cypress/react` remains at its current `10.0.0` release. The component and E2E spec patterns, test counts, screenshots, real styles, and Chrome execution remain intact.
 - PostCSS `8.5.28`, Autoprefixer `10.5.5`, and eslint-plugin-react `7.37.5` are explicit maintained ranges. A clean lockfile refresh also updates patched Browserslist and transitive releases.
 - ESLint remains at `9.39.5`. The current `eslint-plugin-react` and `eslint-plugin-jsx-a11y` peer ranges accept ESLint 9 but reject ESLint 10, so forcing core 10 would create an invalid graph. Upgrade ESLint when both plugins publish compatible releases. This leaves an install-time deprecation notice but no audit finding.
-- Tailwind 4 is assigned to Plan 006. Its CSS-first configuration and design-token migration belong with the protected visual-system change rather than being performed twice.
+- Tailwind 4 was deferred from this ticket and is now assigned to Plan 007 so its CSS-first configuration can reach parity before later visual changes.
 
 - A final clean `npm ci --no-audit` on Node `22.23.2` completed without `EBADENGINE`; its only warning is the recorded ESLint 9 deprecation. An offline Node `23.6.1` dry run emits `EBADENGINE` for the root project and incompatible tools, proving the manifest no longer claims Node 23 support.
 - Final `npm run check` passes lint, formatting, strict application/Cypress types, 3 unit tests, 7 component tests, the Vite 8 production build, and 4 E2E journeys in Chrome 152. `npm run test:unit:coverage` passes; Vitest 5 reports 100% statement/line coverage for `photoNavigation.ts` and 20% statements across the deliberately broad configured source include.

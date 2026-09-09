@@ -1,7 +1,6 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import autoprefixer from "autoprefixer";
-import tailwindcss from "tailwindcss";
 import { defineConfig } from "vite";
 import { imagetools } from "vite-imagetools";
 
@@ -12,6 +11,7 @@ const PORTFOLIO_IMAGE_QUALITY = "82";
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
 
     imagetools({
       include: /\.(?:avif|gif|heif|jpe?g|png|tiff|webp)(?:\?.*)?$/i,
@@ -33,33 +33,4 @@ export default defineConfig({
 
     cloudflare(),
   ],
-
-  css: {
-    postcss: {
-      plugins: [tailwindcss(), autoprefixer()],
-    },
-  },
-
-  assetsInclude: ["**/*.JPG"],
-
-  build: {
-    sourcemap: false,
-
-    rolldownOptions: {
-      output: {
-        codeSplitting: {
-          groups: [
-            {
-              name: "react",
-              test: /node_modules\/react(?:-dom)?\//,
-            },
-            {
-              name: "router",
-              test: /node_modules\/react-router(?:-dom)?\//,
-            },
-          ],
-        },
-      },
-    },
-  },
 });

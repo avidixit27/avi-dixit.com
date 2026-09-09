@@ -1,11 +1,11 @@
-# 008 — Build the portfolio scroll composition
+# 012 — Build the portfolio scroll composition
 
 | Field          | Value                                  |
 | -------------- | -------------------------------------- |
 | Type           | Feature                                |
 | Status         | Tracked in the [plan index](README.md) |
-| Depends on     | 007                                    |
-| Blocks         | 009 and homepage refinement            |
+| Depends on     | 011                                    |
+| Blocks         | 013 and homepage refinement            |
 | Planned branch | `feat/portfolio-scroll-composition`    |
 | PR base        | `feat/motion-foundation`               |
 | PR             | Not opened                             |
@@ -16,9 +16,9 @@ The home portfolio demonstrates the approved cinematic direction with real photo
 
 ## Prerequisites and current state
 
-- Plans 005–007 provide responsive media, semantic visual tokens, and the accessible Motion boundary.
+- Plans 005, 010, and 011 provide responsive media, semantic visual tokens, and the accessible Motion boundary.
 - Approve the representative photograph sequence and editorial copy before implementation. Store fixed copy in feature resources.
-- Plan 006 removes the JavaScript-driven draggable scrollbar and restores native browser scrolling before scroll-linked effects are introduced.
+- Plan 010 removes the JavaScript-driven draggable scrollbar and restores native browser scrolling before scroll-linked effects are introduced.
 
 ## Scope
 
