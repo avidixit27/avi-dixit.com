@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logoSmall from "../imgs/header/avi_dixit_logo.svg";
+import logoSmall from "../assets/brand/avi-dixit-wordmark.svg";
 import { NAVIGATION_ITEMS, ROUTES } from "../resources/navigation";
 
 const NAV_FALLBACK_HEIGHT_PX = 64;
@@ -167,16 +167,23 @@ export default function Navigation({ portfolioGridElement }: NavigationProps) {
                   transition-transform duration-500 ease-out
                   ${isHidden ? "-translate-y-full" : "translate-y-0"}`}
     >
-      <div className="flex items-center justify-between h-16 px-8">
+      <div className="flex h-16 items-center justify-between px-4 md:px-8">
         <Link
           to={ROUTES.home}
           aria-label="Home"
           onClick={() => setIsHidden(false)}
         >
-          <img src={logoSmall} alt="Logo" className="h-10 w-auto" />
+          <img
+            src={logoSmall}
+            alt="Avi Dixit"
+            className="h-12 w-auto md:h-14"
+          />
         </Link>
 
-        <div ref={linksWrapRef} className="relative flex gap-8 text-base">
+        <div
+          ref={linksWrapRef}
+          className="relative flex gap-4 text-sm md:gap-8 md:text-base"
+        >
           <span
             className={`absolute bottom-0 h-[1px] bg-ink transition-[transform,width] duration-250 ease-[cubic-bezier(.22,.61,.36,1)]
                         ${indicator.visible ? "opacity-100" : "opacity-0"}`}
@@ -197,10 +204,8 @@ export default function Navigation({ portfolioGridElement }: NavigationProps) {
                 }}
                 to={item.path}
                 onClick={() => setIsHidden(false)}
-                className={`pb-1 font-['Phosphate-Inline'] ${
-                  isActive
-                    ? "text-ink font-extrabold"
-                    : "text-ink/55 hover:text-accentWarm"
+                className={`pb-1 font-display font-bold ${
+                  isActive ? "text-ink" : "text-ink/55 hover:text-accentWarm"
                 }`}
               >
                 {item.label}

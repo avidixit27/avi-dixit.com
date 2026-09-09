@@ -93,14 +93,17 @@ const PHOTO_DETAILS = {
   },
 } as const satisfies Record<string, PhotoDetails>;
 
-const fallbackModules = import.meta.glob<string>("../../imgs/portfolio/*.JPG", {
-  eager: true,
-  import: "default",
-  query: "?portfolio-fallback&format=jpg",
-});
+const fallbackModules = import.meta.glob<string>(
+  "../../assets/photography/portfolio/*.JPG",
+  {
+    eager: true,
+    import: "default",
+    query: "?portfolio-fallback&format=jpg",
+  },
+);
 
 const jpegSrcSetModules = import.meta.glob<string>(
-  "../../imgs/portfolio/*.JPG",
+  "../../assets/photography/portfolio/*.JPG",
   {
     eager: true,
     import: "default",
@@ -109,7 +112,7 @@ const jpegSrcSetModules = import.meta.glob<string>(
 );
 
 const webpSrcSetModules = import.meta.glob<string>(
-  "../../imgs/portfolio/*.JPG",
+  "../../assets/photography/portfolio/*.JPG",
   {
     eager: true,
     import: "default",

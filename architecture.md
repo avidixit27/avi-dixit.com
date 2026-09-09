@@ -34,19 +34,19 @@ The first product milestone is the portfolio and inquiries experience. Publishin
 
 The repository currently contains a strict TypeScript React application using Vite, Tailwind, and React Router. The manifest specifies React 18, Vite 8, Tailwind 4, React Router 7, and TypeScript 5 version ranges; these are existing dependencies, not permanent version requirements.
 
-| Area             | Current implementation                                                                                                                               |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Entry and shell  | `src/main.tsx` initializes React; `src/app/App.tsx` composes the router, navigation, routes, and custom scrollbar                                    |
-| Routes           | `/`, `/shop`, and `/contact`, declared in `src/app/App.tsx`                                                                                          |
-| Portfolio        | `src/features/portfolio/`, with separate orchestration, slideshow, grid, lightbox, typed photo catalog, and navigation policy modules                |
-| Navigation       | `src/app/Navigation.tsx`, which owns navigation visibility and receives the portfolio marker as an explicit prop                                     |
-| Custom scrollbar | `src/app/CustomScrollbar.tsx`, which owns its listeners, timers, drag state, and cleanup                                                             |
-| Static resources | Typed application navigation data in `src/resources/navigation.ts`; typed feature-specific product data in `src/features/shop/resources/products.ts` |
-| Styling          | `src/index.css` with Tailwind 4 CSS-first theme variables                                                                                            |
-| Photographs      | Twelve approximately 146 MB JPEG editing sources under `src/imgs/portfolio`; Vite produces delivery-sized JPEG/WebP variants during builds           |
-| Shop             | `src/features/shop/Shop.tsx`, with placeholder products and a component-local cart; no integrated checkout                                           |
-| Contact          | `src/features/inquiries/Contact.tsx`, with form presentation and no submission integration                                                           |
-| Verification     | ESLint, Prettier, strict TypeScript, Vitest, Cypress component and E2E tests, Husky/lint-staged, and pull-request CI are configured                  |
+| Area             | Current implementation                                                                                                                                   |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entry and shell  | `src/main.tsx` initializes React; `src/app/App.tsx` composes the router, navigation, routes, and custom scrollbar                                        |
+| Routes           | `/`, `/shop`, and `/contact`, declared in `src/app/App.tsx`                                                                                              |
+| Portfolio        | `src/features/portfolio/`, with separate orchestration, slideshow, grid, lightbox, typed photo catalog, and navigation policy modules                    |
+| Navigation       | `src/app/Navigation.tsx`, which owns navigation visibility and receives the portfolio marker as an explicit prop                                         |
+| Custom scrollbar | `src/app/CustomScrollbar.tsx`, which owns its listeners, timers, drag state, and cleanup                                                                 |
+| Static resources | Typed application navigation data in `src/resources/navigation.ts`; typed feature-specific product data in `src/features/shop/resources/products.ts`     |
+| Styling          | `src/index.css` with Tailwind 4 CSS-first theme variables                                                                                                |
+| Photographs      | Twelve approximately 146 MB JPEG editing sources under `src/assets/photography/portfolio`; Vite produces delivery-sized JPEG/WebP variants during builds |
+| Shop             | `src/features/shop/Shop.tsx`, with placeholder products and a component-local cart; no integrated checkout                                               |
+| Contact          | `src/features/inquiries/Contact.tsx`, with form presentation and no submission integration                                                               |
+| Verification     | ESLint, Prettier, strict TypeScript, Vitest, Cypress component and E2E tests, Husky/lint-staged, and pull-request CI are configured                      |
 
 The application shell and portfolio now have explicit feature-oriented ownership, cross-component DOM coordination uses an explicit element reference, and affected global effects have local cleanup paths. Automated regression coverage protects photo navigation, gallery timers and listeners, route links, contact-form presentation, shop cart behavior, and core desktop/mobile gallery journeys. The responsive catalog supplies intrinsic dimensions and generated sources without exposing original photographs to browsers. The lightbox opens with the source already rendered in the selected hero or grid item, upgrades after its larger source loads, and maintains a bounded rolling cache of decoded responsive neighbors. Large editing sources remain in Git, while placeholder commerce and incomplete gallery focus management remain known limitations for later plans.
 
@@ -153,7 +153,7 @@ Use interfaces for stable object-shaped contracts such as component props and do
 
 ### Bundled assets
 
-**Agreed direction:** `src/assets/` is the single home for static binary files imported by application code. Use focused categories such as `brand/`, `fonts/`, `icons/`, and `photography/portfolio/`. Vite owns their resolved URLs, hashing, and production bundling. Keep `public/` for the smaller set of files that require stable root URLs, such as the favicon, robots directives, or a web manifest.
+**Current:** `src/assets/` is the single home for static binary files imported by application code. It uses focused `brand/`, `fonts/`, `icons/`, and `photography/portfolio/` categories. Vite owns resolved URLs, hashing, and production bundling. Keep `public/` for the smaller set of files that require stable root URLs, such as the favicon, robots directives, or a web manifest.
 
 - Do not duplicate the same asset under `src` and `public`.
 - Keep font license text beside self-hosted font files. Do not request production fonts from a third party when the approved font is bundled locally.
@@ -166,7 +166,7 @@ Use interfaces for stable object-shaped contracts such as component props and do
 
 **Agreed direction:** React and Vite remain the application and build foundation. Tailwind remains the primary styling approach for layout, typography, responsive behavior, and simple hover, focus, and state transitions. Establish shared design tokens for color, typography, spacing, radii, layering, and motion. Use global CSS for genuinely global concerns and component-local styles where an effect needs them.
 
-The approved dark canvas is `#0e0e0e`. The selected display font is the locally bundled Zen Tokyo Zoo face; the body stack remains a readable sans serif. These decisions are planned until the corresponding visual and responsive tickets are implemented.
+The approved dark canvas is `#0e0e0e` and remains planned. The locally bundled Zen Tokyo Zoo face is the current display font; the body stack remains a readable sans serif.
 
 Motion for React is the selected general-purpose runtime for coordinated entrances and exits, page transitions, scroll reveals, scroll-linked transforms, bounded parallax, and justified layout animation. It is planned work until installed by an implementation ticket. Native browser scrolling and CSS layout retain ownership of document flow and sticky positioning; Motion may transform presentation in response to scroll but must not emulate or hijack scrolling. Replace the current JavaScript-driven draggable scrollbar with the native browser scrollbar and, if useful, restrained CSS styling that preserves platform scrolling behavior and accessibility.
 
