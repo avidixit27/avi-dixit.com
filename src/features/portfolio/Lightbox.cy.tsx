@@ -59,6 +59,39 @@ function StatefulLightbox({
 }
 
 describe("Lightbox", () => {
+  it("keeps the close control outside the image stage on a small viewport", () => {
+    cy.viewport(390, 844);
+    mount(
+      <Lightbox
+        photos={photos}
+        selectedIndex={0}
+        previewSrc="/first-preview.jpg"
+        landscapeIndices={[0, 2]}
+        onSelect={cy.stub()}
+        onClosed={cy.stub()}
+      />,
+    );
+
+    cy.get('[aria-label="Close"]').then(($button) => {
+      const button = $button.get(0);
+      if (!button) throw new Error("Expected a close control");
+      const buttonRect = button.getBoundingClientRect();
+      expect(buttonRect.width).to.be.at.least(44);
+      expect(buttonRect.height).to.be.at.least(44);
+
+      cy.get('[data-lightbox-stage="true"]').then(($stage) => {
+        const stageRect = $stage.get(0)?.getBoundingClientRect();
+        if (!stageRect) throw new Error("Expected a lightbox stage");
+        const intersects =
+          buttonRect.left < stageRect.right &&
+          buttonRect.right > stageRect.left &&
+          buttonRect.top < stageRect.bottom &&
+          buttonRect.bottom > stageRect.top;
+        expect(intersects).to.equal(false);
+      });
+    });
+  });
+
   it("preloads and decodes a bounded responsive navigation window", () => {
     const preloadedImages: HTMLImageElement[] = [];
     const preloadPhotos = Array.from({ length: 6 }, (_, index) =>

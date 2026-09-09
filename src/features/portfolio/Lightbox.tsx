@@ -8,8 +8,6 @@ import {
 } from "./photoNavigation";
 
 const CLOSE_DURATION_MS = 150;
-const CLOSE_BUTTON_TOP_OFFSET_PX = 12;
-const DEFAULT_CLOSE_BUTTON_TOP_PX = 24;
 const LIGHTBOX_IMAGE_TRANSITION_MS = 250;
 const LIGHTBOX_PRELOAD_FORWARD_COUNT = 3;
 const LIGHTBOX_PRELOAD_BACKWARD_COUNT = 2;
@@ -43,15 +41,6 @@ export default function Lightbox({
   const [loadedPhotoId, setLoadedPhotoId] = useState<string | null>(null);
   const [settledPhotoId, setSettledPhotoId] = useState<string | null>(null);
   const [outgoingSrc, setOutgoingSrc] = useState<string | null>(null);
-  const [closeButtonTop, setCloseButtonTop] = useState(
-    DEFAULT_CLOSE_BUTTON_TOP_PX,
-  );
-
-  const updateCloseButton = useCallback(() => {
-    if (!imageRef.current) return;
-    const imageRect = imageRef.current.getBoundingClientRect();
-    setCloseButtonTop(imageRect.top - CLOSE_BUTTON_TOP_OFFSET_PX);
-  }, []);
 
   const requestClose = useCallback(() => {
     if (closeTimerRef.current) return;
@@ -126,15 +115,6 @@ export default function Lightbox({
       }
     });
   }, [landscapeIndices, photos, selectedIndex]);
-
-  useEffect(() => {
-    updateCloseButton();
-  }, [selectedIndex, updateCloseButton]);
-
-  useEffect(() => {
-    window.addEventListener("resize", updateCloseButton);
-    return () => window.removeEventListener("resize", updateCloseButton);
-  }, [updateCloseButton]);
 
   useEffect(() => {
     const selectedPhoto = photos[selectedIndex];
@@ -217,11 +197,12 @@ export default function Lightbox({
           event.stopPropagation();
           requestClose();
         }}
-        className="fixed right-8 z-[200] text-white text-4xl font-light
+        className="fixed top-[max(0.75rem,env(safe-area-inset-top))]
+                   right-[max(0.75rem,env(safe-area-inset-right))]
+                   z-[200] grid h-11 w-11 place-items-center text-4xl font-light text-white
                    drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]
                    opacity-90 hover:opacity-100 hover:text-accentWarm
                    transition-colors transition-opacity"
-        style={{ top: `${closeButtonTop}px` }}
         aria-label="Close"
       >
         ×
@@ -314,7 +295,6 @@ export default function Lightbox({
             const revealLoadedImage = () => {
               if (imageRef.current !== loadedImage) return;
               setLoadedPhotoId(photo.id);
-              updateCloseButton();
             };
             if (typeof loadedImage.decode !== "function") {
               revealLoadedImage();

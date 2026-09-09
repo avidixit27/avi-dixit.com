@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
+import { getHeroPhotoIndices } from "./heroOrientation";
 
 const HERO_ROTATION_DELAY_MS = 2500;
 const HERO_CROSSFADE_DURATION_MS = 700;
@@ -17,6 +18,13 @@ interface HeroSlideshowProps {
 }
 
 export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
+  const [isLandscapeViewport, setIsLandscapeViewport] = useState(
+    () => window.matchMedia("(orientation: landscape)").matches,
+  );
+  const heroPhotoIndices = useMemo(
+    () => getHeroPhotoIndices(photos, isLandscapeViewport),
+    [isLandscapeViewport, photos],
+  );
   const [slideshow, setSlideshow] = useState<SlideshowState>({
     activeIndex: 0,
     outgoingIndex: null,
@@ -29,11 +37,23 @@ export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
   }, []);
 
   useEffect(() => {
-    if (photos.length === 0) return undefined;
+    const mediaQuery = window.matchMedia("(orientation: landscape)");
+    const updateOrientation = () => {
+      setIsLandscapeViewport(mediaQuery.matches);
+      setSlideshow({ activeIndex: 0, outgoingIndex: null });
+    };
+    mediaQuery.addEventListener("change", updateOrientation);
+    return () => mediaQuery.removeEventListener("change", updateOrientation);
+  }, []);
+
+  useEffect(() => {
+    if (heroPhotoIndices.length === 0) return undefined;
     const interval = setInterval(() => {
       setSlideshow((current) => {
-        const nextIndex = (current.activeIndex + 1) % photos.length;
-        const nextPhoto = photos[nextIndex];
+        const nextIndex = (current.activeIndex + 1) % heroPhotoIndices.length;
+        const nextPhotoIndex = heroPhotoIndices[nextIndex];
+        const nextPhoto =
+          nextPhotoIndex == null ? undefined : photos[nextPhotoIndex];
         return nextPhoto && loadedPhotoIdsRef.current.has(nextPhoto.id)
           ? {
               activeIndex: nextIndex,
@@ -43,7 +63,7 @@ export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
       });
     }, HERO_ROTATION_DELAY_MS);
     return () => clearInterval(interval);
-  }, [photos]);
+  }, [heroPhotoIndices, photos]);
 
   useEffect(() => {
     if (slideshow.outgoingIndex == null) return undefined;
@@ -58,12 +78,14 @@ export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
     return () => window.clearTimeout(timeout);
   }, [slideshow.outgoingIndex]);
 
-  if (photos.length === 0) return null;
+  if (heroPhotoIndices.length === 0) return null;
 
   const activeIndex = slideshow.activeIndex;
-  const activePhoto = photos[activeIndex];
-  if (!activePhoto) return null;
-  const nextIndex = (activeIndex + 1) % photos.length;
+  const activePhotoIndex = heroPhotoIndices[activeIndex];
+  const activePhoto =
+    activePhotoIndex == null ? undefined : photos[activePhotoIndex];
+  if (activePhotoIndex == null || !activePhoto) return null;
+  const nextIndex = (activeIndex + 1) % heroPhotoIndices.length;
   const visibleIndices = Array.from(
     new Set(
       [slideshow.outgoingIndex, activeIndex, nextIndex].filter(
@@ -78,14 +100,15 @@ export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
       className="relative block h-[100svh] w-full cursor-pointer"
       onClick={() =>
         onOpen(
-          activeIndex,
+          activePhotoIndex,
           activeImageRef.current?.currentSrc || activePhoto.src,
         )
       }
       aria-label="Open hero image gallery"
     >
       {visibleIndices.map((index) => {
-        const photo = photos[index];
+        const photoIndex = heroPhotoIndices[index];
+        const photo = photoIndex == null ? undefined : photos[photoIndex];
         if (!photo) return null;
         const isActive = index === activeIndex;
         const isInitialHero = isActive && index === 0;

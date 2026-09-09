@@ -7,7 +7,7 @@
 | Depends on     | 007                                       |
 | Blocks         | 009 and 010                               |
 | Planned branch | `fix/responsive-presentation-regressions` |
-| PR base        | `chore/tailwind4-config-simplification`   |
+| PR base        | `main`                                    |
 | PR             | Not opened                                |
 
 ## Outcome
@@ -25,7 +25,7 @@ Brand typography, the full-screen hero, and lightbox controls render intentional
 
 ## Scope
 
-- Make Zen Tokyo Zoo the sole project display typeface. Remove all Phosphate references and prevent synthetic bolding of the single supplied regular face.
+- Make Zen Tokyo Zoo the sole project display typeface. Remove all Phosphate references and avoid unsupported display weights, except for the user-approved bold navigation-label treatment.
 - Convert the source TTF to WOFF2 for browser delivery, preserve `OFL.txt`, define one global `@font-face`, and point the Tailwind `font-display` token at it. Use `font-display: swap` and a deliberate fallback.
 - Convert the `avi dixit` SVG wordmark lettering to Zen Tokyo Zoo vector paths so the imported SVG is independent of runtime font availability.
 - Consolidate Vite-imported media under `src/assets/`: `brand/`, `fonts/`, `icons/`, and `photography/portfolio/`. Update imports, image globs, lint ignores, preload references, tests, and documentation once; leave root-addressed files such as `public/favicon.ico` in `public/`.
@@ -113,4 +113,6 @@ Browser review:
 
 ## Implementation record
 
-Not started. Record reproduction sizes, asset moves, font conversion command and license, outline method, orientation policy, close-control geometry, browser evidence, checks, CI, and the PR link.
+In progress. The approved TTF was converted with `fonttools ttLib.woff2 compress` into `src/assets/fonts/ZenTokyoZoo-Regular.woff2`; `OFL.txt` is retained beside it. Vite-imported branding, icons, and portfolio editing sources now live under `src/assets/`, with the wordmark lettering converted to paths generated from the supplied Zen Tokyo Zoo face. The orientation selector preserves source order, selects matching intrinsic orientations, and falls back to the full catalog when no match exists. The close control uses a 44px safe-area-aware fixed target rather than image-rectangle positioning.
+
+The user also requested a heavier, larger navigation mark and bold navigation labels. The outlined wordmark uses a rounded stroke and a vertically centered baseline within its existing viewBox; the navigation uses responsive logo sizing and label spacing so Home, Shop, and Contact remain visible on mobile. Record final browser evidence, checks, CI, and PR link before completion.

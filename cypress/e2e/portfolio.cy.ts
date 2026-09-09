@@ -151,6 +151,44 @@ describe("photography portfolio", () => {
       .should("be.visible");
   });
 
+  it("uses portrait hero media and a separate accessible close target on mobile", () => {
+    cy.viewport(390, 844);
+    cy.visit("/");
+
+    cy.get('[aria-label="Open hero image gallery"] img')
+      .first()
+      .should(
+        "have.attr",
+        "alt",
+        "A person photographing their reflection in a tall mirror outdoors",
+      )
+      .click();
+
+    cy.get('[aria-label="Close"]')
+      .should("be.visible")
+      .then(($close) => {
+        const close = $close.get(0);
+        const stage = Cypress.$('[data-lightbox-stage="true"]').get(0);
+        if (!close || !stage) {
+          throw new Error("Expected lightbox close target and stage");
+        }
+
+        const closeRect = close.getBoundingClientRect();
+        const stageRect = stage.getBoundingClientRect();
+        expect(closeRect.width).to.be.at.least(44);
+        expect(closeRect.height).to.be.at.least(44);
+        expect(
+          closeRect.right <= stageRect.left ||
+            closeRect.left >= stageRect.right ||
+            closeRect.bottom <= stageRect.top ||
+            closeRect.top >= stageRect.bottom,
+        ).to.equal(true);
+      })
+      .click();
+
+    cy.get('[role="dialog"]').should("not.exist");
+  });
+
   it("renders content when reduced motion is requested", () => {
     Cypress.automation("remote:debugger:protocol", {
       command: "Emulation.setEmulatedMedia",
