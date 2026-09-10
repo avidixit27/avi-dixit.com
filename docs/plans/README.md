@@ -44,12 +44,12 @@ Completed tickets are historical records. Read one only when its outcome or impl
 
 Plans 007–009 established the clean base for the dark visual system. Motion work follows the visual system and remains split by runtime, scroll composition, and route lifecycle risk.
 
-| Plan                                                                      | Status      | Depends on | Planned branch                      | PR base                             | PR                                                         |
-| ------------------------------------------------------------------------- | ----------- | ---------- | ----------------------------------- | ----------------------------------- | ---------------------------------------------------------- |
-| [010 — Dark visual system and shell](010-dark-visual-system-and-shell.md) | In progress | 009        | `feat/dark-visual-system`           | `main`                              | [#27](https://github.com/avidixit27/avi-dixit.com/pull/27) |
-| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md) | Planned     | 010        | `feat/motion-foundation`            | `feat/dark-visual-system`           | Not opened                                                 |
-| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md) | Planned     | 011        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened                                                 |
-| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | Planned     | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened                                                 |
+| Plan                                                                      | Status    | Depends on | Planned branch                      | PR base                             | PR                                                         |
+| ------------------------------------------------------------------------- | --------- | ---------- | ----------------------------------- | ----------------------------------- | ---------------------------------------------------------- |
+| [010 — Dark visual system and shell](010-dark-visual-system-and-shell.md) | In review | 009        | `feat/dark-visual-system`           | `main`                              | [#27](https://github.com/avidixit27/avi-dixit.com/pull/27) |
+| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md) | Planned   | 010        | `feat/motion-foundation`            | `feat/dark-visual-system`           | Not opened                                                 |
+| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md) | Planned   | 011        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened                                                 |
+| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | Planned   | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened                                                 |
 
 ### Stack management
 

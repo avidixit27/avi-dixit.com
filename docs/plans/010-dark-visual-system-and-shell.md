@@ -3,7 +3,7 @@
 | Field          | Value                                                      |
 | -------------- | ---------------------------------------------------------- |
 | Type           | Feature                                                    |
-| Status         | In progress                                                |
+| Status         | In review                                                  |
 | Depends on     | 009                                                        |
 | Blocks         | 011 and visual feature work                                |
 | Planned branch | `feat/dark-visual-system`                                  |
@@ -19,14 +19,13 @@ The application has a coherent dark-first visual language derived from the Avi D
 - Plans 007–009 provide Tailwind 4, the final asset/font conventions, responsive regression protection, and the meaningful unit-coverage gate.
 - The branch now has semantic dark-theme roles for the approved canvas, surfaces, text, borders, focus, and restrained logo accents.
 - The orange, blue, and violet logo colors remain controlled accents rather than default large surfaces.
-- The footer now contains email and Instagram links that duplicate the Contact route. The approved follow-up is to render only `Copyright @Avi Dixit 2026` in the footer while retaining the shared destinations for Contact.
+- The footer renders only `Copyright @Avi Dixit 2026`; Contact retains the shared email and Instagram destinations.
 - The branch has removed the JavaScript draggable scrollbar and restored native scrolling with restrained CSS styling.
 - The approved canvas color is `#0e0e0e`.
 - The footer uses `src/assets/icons/avi-signature-logo.svg` from Plan 008 in `#FFE193`, subject only to a documented lighter contrast adjustment if browser review requires it.
-- The first implementation uses a native CSS fixed layer on desktop. Product review now requires the footer to move at a slower rate than the document during its reveal rather than remain stationary.
-- The first implementation deliberately crops the signature beyond the left and lower footer edges. Visual review showed that this hides too much of the mark; the complete SVG must fit inside the footer.
-- Zen Tokyo Zoo is currently the display face. The supplied Zina Regular package replaces it globally at its designed Regular weight without synthetic bold; the supplied Inter Regular face is used for the footer copyright.
-- An existing development session reported eleven `vite-imagetools cannot find image with requested id` messages. Every named ID exists in `node_modules/.cache/imagetools`, the production build and E2E suite pass, and a clean Vite server on port 4174 loaded the portfolio without those messages. The leading diagnosis is stale Vite/browser state after branch or image-config changes, but implementation must verify this before choosing a permanent change.
+- The 16rem footer is fixed behind the application surface and moves through a bounded Motion transform at a slower rate than native document scrolling. Its complete signature remains visible without horizontal overflow.
+- Zina Regular supplies display and brand typography without synthetic bold. Inter Regular supplies the footer copyright and the approved supporting copy and links on Contact and Shop.
+- Eleven `vite-imagetools cannot find image with requested id` messages did not reproduce from a fresh Vite process and browser session. The evidence supports stale development-session state, so no permanent configuration workaround was added.
 
 ## Scope
 
@@ -48,7 +47,7 @@ The application has a coherent dark-first visual language derived from the Avi D
 - Do not add entrance, route, gallery, or general layout animation. The footer parallax is the only Motion behavior admitted to this PR.
 - Do not redesign every feature’s information architecture.
 - Do not choose a backend, hosting provider, CMS, checkout, or contact-delivery service.
-- Do not convert or modify Zina font software, synthesize an unavailable Zina weight, or broaden Inter beyond the footer copyright in this task.
+- Do not convert or modify Zina font software, synthesize an unavailable Zina weight, or broaden Inter beyond the approved footer, Contact, and Shop copy in this task.
 
 ## Deliverables
 
@@ -66,8 +65,8 @@ The application has a coherent dark-first visual language derived from the Avi D
 
 1. Inventory current colors, hard-coded values, typography, widths, layers, and interactive states. Extract the logo palette and test candidate text/background pairings for contrast.
 2. Define semantic CSS variables through the Tailwind 4 CSS-first theme, using `#0e0e0e` for the canvas and roles rather than raw brand colors in components.
-3. Add tests that initially fail for Zina display ownership, the footer's copyright-only content, 12px Inter treatment, approved parallax policy, and reduced motion. Protect signature containment and a clean image-transform session at the browser level, where those behaviors are observable.
-4. Copy the official `Zina-Regular.otf`, Zina FFL, `Inter-Regular.woff2`, and Inter OFL into `src/assets/fonts/` with unambiguous names. Update the display token globally to Zina and add a footer-only Inter token. Remove Zen Tokyo Zoo and its license only after all imports and fallbacks are gone.
+3. Add tests that initially fail for Zina display ownership, the footer's copyright-only content, 10px Inter treatment, approved parallax policy, and reduced motion. Protect signature containment and a clean image-transform session at the browser level, where those behaviors are observable.
+4. Copy the official `Zina-Regular.otf`, Zina FFL, `Inter-Regular.woff2`, and Inter OFL into `src/assets/fonts/` with unambiguous names. Update the display token globally to Zina and add an Inter token for the footer and approved Contact and Shop supporting copy. Remove Zen Tokyo Zoo and its license only after all imports and fallbacks are gone.
 5. Rebuild the wordmark text as Zina Regular vector outlines while preserving the circular photographic mark, dimensions, accessible image label, and intrinsic aspect ratio. Set the wordmark to the muted navigation color `#BBB4A9`, align its lettering with the navigation-label line, keep active navigation on the existing focus token `#FFE193`, and keep inactive navigation muted with the focus token on hover/focus. Apply `#BBB4A9` directly to the wordmark paths so the external SVG does not depend on page CSS.
 6. Preserve email and Instagram in `SITE_DETAILS` for Contact, remove both links from `Footer`, and anchor the copyright at the bottom-right safe edge in Inter Regular. Define `--text-footer-copy: 0.625rem` in `src/index.css` as the single 10px source of truth.
 7. Adjust the signature geometry and presentation so its entire SVG view box remains visible within the footer at mobile through wide desktop widths. Remove the intentional negative bottom/left cropping and protect horizontal overflow.
@@ -86,6 +85,7 @@ The application has a coherent dark-first visual language derived from the Avi D
 - All HTML display text and the outlined wordmark use Zina Regular without synthesized bold; no Zen Tokyo Zoo import, file, fallback, or license remains. The official Zina OTF and FFL are preserved without modification.
 - Wordmark text uses the muted navigation color `#BBB4A9` and aligns with the navigation-label line. Active navigation uses `#FFE193` through the focus semantic role. Inactive navigation remains muted and changes to the same focus color on hover or keyboard focus. The circular photographic portion of the wordmark remains unchanged.
 - The footer renders no email or Instagram link. Its only text is `Copyright @Avi Dixit 2026`, set in Inter Regular at 10px and aligned to the bottom-right safe edge.
+- Contact supporting copy, email, and Instagram and the Shop supporting summary use Inter Regular.
 - The complete signature is visible within the footer from 390px through wide desktop layouts and introduces no horizontal scrolling.
 - The footer moves perceptibly slower than the native scrolling surface during reveal from 390px mobile through wide desktop, reaches its intended final position, reverses smoothly, and does not jump during route or viewport changes.
 - `FOOTER_PARALLAX_RATE` is the single documented footer speed control. The page continues at native browser speed and has no separate background-rate constant.
@@ -129,8 +129,10 @@ The application has a coherent dark-first visual language derived from the Avi D
 
 ## Implementation record
 
-Restacked onto `main` after Plans 007–009 merged. The dark canvas is `#0e0e0e`; semantic tokens now own surfaces, text, borders, focus, and controlled warm/cool/vivid accents. The JavaScript scrollbar was removed in favor of the visible platform scrollbar. The first footer iteration used a CSS fixed layer behind the scroll surface with a 13rem reserved reveal space.
+Restacked onto `main` after Plans 007–009 merged. The implementation establishes the `#0e0e0e` canvas and semantic surface, text, border, focus, spacing, and accent tokens. It removes the JavaScript scrollbar in favor of native scrolling and applies the shared visual system across the current routes.
 
-Product review on September 10 reopened the ticket before merge. Terra implementation must replace Zen Tokyo Zoo with licensed Zina Regular without synthesized bold, use Inter Regular for the copyright-only footer, use the muted navigation color and label-line alignment for the outlined wordmark, fit the complete signature, introduce a bounded tunable footer parallax across viewport sizes, and resolve or document the local imagetools cache failure. Reduced motion disables the scroll-linked transform. The initial fixed footer and intentional signature cropping are superseded.
+Zina Regular now owns display and brand typography, including the outlined wordmark. Inter Regular owns the 10px footer copyright and the approved Contact and Shop supporting copy and links. The wordmark uses `#BBB4A9`, aligns with the navigation labels, and retains the original circular photograph. The 16rem footer shows the complete signature, clears the native scrollbar and safe-area edge, and uses `FOOTER_PARALLAX_RATE = 0.3` for its bounded Motion transform. Reduced motion removes that transform. A fresh development process and browser session did not reproduce the reported imagetools IDs, so no configuration workaround was introduced.
 
-The first implementation passed `npm run check` (19 unit tests at 100% statements/functions/lines and 92.85% branches, 16 component tests, and 10 production browser tests) and `npm run security:audit` (zero production vulnerabilities). Product review superseded its stationary-footer assertions, content, typography, and signature geometry; Terra must replace those tests and record a fresh complete verification run before [#27](https://github.com/avidixit27/avi-dixit.com/pull/27) returns to review. Manual Firefox/Safari review remains to be recorded.
+The accepted direct Motion implementation increased the production entry bundle from 185.33 KB / 61.62 KB gzip to 314.09 KB / 103.21 KB gzip, a 128.76 KB / 41.59 KB gzip delta. Plan 011 owns the `LazyMotion` and feature-loading audit; this measured follow-up does not block Plan 010. Product review approved representative local desktop and mobile layouts. Automated browser coverage currently runs in Chrome; dedicated Firefox and Safari matrix coverage remains future hardening.
+
+Final verification at commit `ca1cc60` passed `npm run check` (21 unit tests with 100% statements/functions/lines and 92.85% branches, 18 component tests, and 10 production browser tests), `npm run security:audit` with zero production vulnerabilities, and `npm run build`. All GitHub checks passed, including lint/format/types, unit, component, production build/browser tests, production audit, dependency review, CodeQL, and the Cloudflare Workers build.
