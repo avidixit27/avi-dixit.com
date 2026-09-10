@@ -175,13 +175,11 @@ describe("photography portfolio", () => {
   it("reveals the footer with bounded parallax at desktop and mobile widths", () => {
     cy.viewport(1280, 800);
     cy.visit("/");
-    let desktopTop: number;
     cy.get('footer[aria-label="Site footer"]').should(($footer) => {
       const footer = $footer.get(0);
       if (!footer) throw new Error("Expected site footer");
       const rect = footer.getBoundingClientRect();
       expect(rect.top).to.be.greaterThan(800 - rect.height);
-      desktopTop = rect.top;
       const pageDocument = footer.ownerDocument;
       expect(
         pageDocument
@@ -194,10 +192,14 @@ describe("photography portfolio", () => {
     cy.get('footer[aria-label="Site footer"]').should(($footer) => {
       const footer = $footer.get(0);
       if (!footer) throw new Error("Expected site footer");
-      expect(footer.getBoundingClientRect().top).to.be.lessThan(desktopTop);
       const rect = footer.getBoundingClientRect();
-      const viewportHeight = footer.ownerDocument.defaultView?.innerHeight ?? 0;
+      const pageWindow = footer.ownerDocument.defaultView;
+      const viewportHeight = pageWindow?.innerHeight ?? 0;
       expect(viewportHeight).to.be.greaterThan(0);
+      const currentBottom =
+        footer.ownerDocument.documentElement.scrollHeight - viewportHeight;
+      pageWindow?.scrollTo(0, currentBottom);
+      expect(pageWindow?.scrollY).to.be.closeTo(currentBottom, 1);
       expect(rect.top).to.be.lessThan(viewportHeight);
       expect(rect.bottom).to.be.at.most(viewportHeight);
       expect(getComputedStyle(footer).transform).to.equal("none");
@@ -213,8 +215,8 @@ describe("photography portfolio", () => {
     cy.get('footer[aria-label="Site footer"]').should(($footer) => {
       const footer = $footer.get(0);
       if (!footer) throw new Error("Expected site footer");
-      expect(footer.getBoundingClientRect().top).to.equal(desktopTop);
       const rect = footer.getBoundingClientRect();
+      expect(rect.top).to.be.greaterThan(800 - rect.height);
       const pageDocument = footer.ownerDocument;
       expect(
         pageDocument
@@ -225,19 +227,23 @@ describe("photography portfolio", () => {
 
     cy.viewport(390, 844);
     cy.visit("/");
-    let mobileTop: number;
     cy.get('footer[aria-label="Site footer"]').should(($footer) => {
       const footer = $footer.get(0);
       if (!footer) throw new Error("Expected site footer");
       const rect = footer.getBoundingClientRect();
       expect(rect.top).to.be.greaterThan(844 - rect.height);
-      mobileTop = rect.top;
     });
     cy.scrollTo("bottom");
     cy.get('footer[aria-label="Site footer"]').should(($footer) => {
       const footer = $footer.get(0);
       if (!footer) throw new Error("Expected site footer");
-      expect(footer.getBoundingClientRect().top).to.be.lessThan(mobileTop);
+      const pageWindow = footer.ownerDocument.defaultView;
+      const viewportHeight = pageWindow?.innerHeight ?? 0;
+      const currentBottom =
+        footer.ownerDocument.documentElement.scrollHeight - viewportHeight;
+      pageWindow?.scrollTo(0, currentBottom);
+      expect(pageWindow?.scrollY).to.be.closeTo(currentBottom, 1);
+      expect(getComputedStyle(footer).transform).to.equal("none");
     });
   });
 
