@@ -1,14 +1,14 @@
 # 010 — Establish the dark visual system and application shell
 
-| Field          | Value                       |
-| -------------- | --------------------------- |
-| Type           | Feature                     |
-| Status         | In progress                 |
-| Depends on     | 009                         |
-| Blocks         | 011 and visual feature work |
-| Planned branch | `feat/dark-visual-system`   |
-| PR base        | `main`                      |
-| PR             | Not opened                  |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| Type           | Feature                                                    |
+| Status         | In progress                                                |
+| Depends on     | 009                                                        |
+| Blocks         | 011 and visual feature work                                |
+| Planned branch | `feat/dark-visual-system`                                  |
+| PR base        | `main`                                                     |
+| PR             | [#27](https://github.com/avidixit27/avi-dixit.com/pull/27) |
 
 ## Outcome
 
@@ -111,4 +111,4 @@ The application has a coherent dark-first visual language derived from the Avi D
 
 Restacked onto `main` after Plans 007–009 merged. The dark canvas is `#0e0e0e`; semantic tokens now own surfaces, text, borders, focus, and controlled warm/cool/vivid accents. The JavaScript scrollbar was removed in favor of the visible platform scrollbar. The desktop footer is a CSS fixed layer behind the scroll surface, with a 13rem reserved reveal space; CSS `sticky` exposed a following footer before the end of the document, so it was not suitable for the required behavior. Mobile remains normal flow. The signature uses the supplied `#FFE193` artwork, with its left edge intentionally offset and browser coverage protecting horizontal overflow.
 
-Local verification passed `npm run check` (19 unit tests at 100% statements/functions/lines and 92.85% branches, 16 component tests, and 10 production browser tests) and `npm run security:audit` (zero production vulnerabilities). The browser tests cover the semantic canvas, footer semantics, stationary reveal, reverse scroll coverage, and horizontal overflow. Pull-request CI and manual Firefox/Safari review remain to be recorded.
+In review at [#27](https://github.com/avidixit27/avi-dixit.com/pull/27). Local verification passed `npm run check` (19 unit tests at 100% statements/functions/lines and 92.85% branches, 16 component tests, and 10 production browser tests) and `npm run security:audit` (zero production vulnerabilities). The browser tests cover the semantic canvas, footer semantics, stationary reveal, reverse scroll coverage, and horizontal overflow. Pull-request CI and manual Firefox/Safari review remain to be recorded.
