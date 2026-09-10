@@ -202,8 +202,8 @@ export default function Lightbox({
                    right-[max(0.75rem,env(safe-area-inset-right))]
                    z-[200] grid h-11 w-11 place-items-center text-4xl font-light text-text
                    drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]
-                   opacity-90 hover:text-focus hover:opacity-100
-                   transition-colors transition-opacity"
+                   opacity-90 hover:text-brand-warm hover:opacity-100 focus-visible:text-brand-warm
+                   active:text-brand-warm transition-colors transition-opacity motion-reduce:transition-none"
         aria-label="Close"
       >
         ×

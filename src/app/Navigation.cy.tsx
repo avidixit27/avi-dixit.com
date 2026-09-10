@@ -13,8 +13,9 @@ describe("Navigation", () => {
     cy.contains("a", "HOME").should("have.attr", "href", "/");
     cy.contains("a", "SHOP")
       .should("have.attr", "href", "/shop")
-      .and("have.class", "text-focus")
+      .and("have.class", "text-brand-warm")
       .and("not.have.class", "font-bold");
+    cy.get("nav span").should("have.class", "bg-brand-vivid");
     cy.contains("a", "CONTACT").should("have.attr", "href", "/contact");
   });
 

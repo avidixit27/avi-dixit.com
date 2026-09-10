@@ -45,11 +45,11 @@ Completed tickets are historical records. Read one only when its outcome or impl
 
 Plans 007–010 established the configuration, regression, coverage, and dark visual-system base. Motion work now continues from `main` and remains split by runtime, scroll composition, and route lifecycle risk.
 
-| Plan                                                                      | Status  | Depends on | Planned branch                      | PR base                             | PR         |
-| ------------------------------------------------------------------------- | ------- | ---------- | ----------------------------------- | ----------------------------------- | ---------- |
-| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md) | Planned | 010        | `feat/motion-foundation`            | `main`                              | Not opened |
-| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md) | Planned | 011        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened |
-| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | Planned | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened |
+| Plan                                                                      | Status      | Depends on | Planned branch                      | PR base                             | PR         |
+| ------------------------------------------------------------------------- | ----------- | ---------- | ----------------------------------- | ----------------------------------- | ---------- |
+| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md) | In progress | 010        | `feat/motion-foundation`            | `main`                              | Not opened |
+| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md) | Planned     | 011        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened |
+| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | Planned     | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened |
 
 ### Stack management
 
