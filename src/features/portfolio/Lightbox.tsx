@@ -175,7 +175,7 @@ export default function Lightbox({
 
   return (
     <div
-      className={`fixed inset-0 bg-black/95 z-[100] overflow-hidden flex items-center justify-center
+      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas/95
                   transition-opacity ${isClosing ? "opacity-0" : "opacity-100"}`}
       style={{ transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS}ms` }}
       role="dialog"
@@ -200,9 +200,9 @@ export default function Lightbox({
         }}
         className="fixed top-[max(0.75rem,env(safe-area-inset-top))]
                    right-[max(0.75rem,env(safe-area-inset-right))]
-                   z-[200] grid h-11 w-11 place-items-center text-4xl font-light text-white
+                   z-[200] grid h-11 w-11 place-items-center text-4xl font-light text-text
                    drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]
-                   opacity-90 hover:opacity-100 hover:text-accentWarm
+                   opacity-90 hover:text-focus hover:opacity-100
                    transition-colors transition-opacity"
         aria-label="Close"
       >
@@ -220,7 +220,7 @@ export default function Lightbox({
             }}
             className="fixed left-4 top-1/2 -translate-y-1/2 z-[200]
                        grid place-items-center w-12 h-12 md:w-14 md:h-14
-                       rounded-full bg-white/10 hover:bg-white/20"
+                       rounded-full bg-surface-muted/80 hover:bg-surface"
             aria-label="Previous image"
           >
             <svg
@@ -246,7 +246,7 @@ export default function Lightbox({
             }}
             className="fixed right-4 top-1/2 -translate-y-1/2 z-[200]
                        grid place-items-center w-12 h-12 md:w-14 md:h-14
-                       rounded-full bg-white/10 hover:bg-white/20"
+                       rounded-full bg-surface-muted/80 hover:bg-surface"
             aria-label="Next image"
           >
             <svg

@@ -38,18 +38,18 @@ Completed tickets are historical records. Read one only when its outcome or impl
 | [006 — Build and configuration conventions](006-simplify-build-and-configuration-conventions.md)       | Completed | `chore/setup-cloudflare`                  | [#23](https://github.com/avidixit27/avi-dixit.com/pull/23)                                                         |
 | [007 — Tailwind 4 and configuration simplification](007-tailwind4-and-configuration-simplification.md) | Completed | `chore/tailwind4-config-simplification`   | [#24](https://github.com/avidixit27/avi-dixit.com/pull/24)                                                         |
 | [008 — Responsive presentation regressions](008-responsive-presentation-regressions.md)                | Completed | `fix/responsive-presentation-regressions` | [#25](https://github.com/avidixit27/avi-dixit.com/pull/25)                                                         |
+| [009 — Meaningful unit coverage gate](009-meaningful-unit-coverage-gate.md)                            | Completed | `test/unit-coverage-quality-gate`         | [#26](https://github.com/avidixit27/avi-dixit.com/pull/26)                                                         |
 
 ## Current sequence
 
-Configuration migration, responsive regressions, and the meaningful coverage gate are independent prerequisites for resuming the dark visual system. The existing dark-system working tree is preserved but blocked until Plans 007–009 establish its clean base. Motion work follows the visual system and remains split by runtime, scroll composition, and route lifecycle risk.
+Plans 007–009 established the clean base for the dark visual system. Motion work follows the visual system and remains split by runtime, scroll composition, and route lifecycle risk.
 
-| Plan                                                                        | Status    | Depends on | Planned branch                      | PR base                             | PR                                                         |
-| --------------------------------------------------------------------------- | --------- | ---------- | ----------------------------------- | ----------------------------------- | ---------------------------------------------------------- |
-| [009 — Meaningful unit coverage gate](009-meaningful-unit-coverage-gate.md) | In review | 008        | `test/unit-coverage-quality-gate`   | `main`                              | [#26](https://github.com/avidixit27/avi-dixit.com/pull/26) |
-| [010 — Dark visual system and shell](010-dark-visual-system-and-shell.md)   | Blocked   | 009        | `feat/dark-visual-system`           | `test/unit-coverage-quality-gate`   | Not opened                                                 |
-| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md)   | Planned   | 010        | `feat/motion-foundation`            | `feat/dark-visual-system`           | Not opened                                                 |
-| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md)   | Planned   | 011        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened                                                 |
-| [013 — Route and layout transitions](013-route-and-layout-transitions.md)   | Planned   | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened                                                 |
+| Plan                                                                      | Status    | Depends on | Planned branch                      | PR base                             | PR                                                         |
+| ------------------------------------------------------------------------- | --------- | ---------- | ----------------------------------- | ----------------------------------- | ---------------------------------------------------------- |
+| [010 — Dark visual system and shell](010-dark-visual-system-and-shell.md) | In review | 009        | `feat/dark-visual-system`           | `main`                              | [#27](https://github.com/avidixit27/avi-dixit.com/pull/27) |
+| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md) | Planned   | 010        | `feat/motion-foundation`            | `feat/dark-visual-system`           | Not opened                                                 |
+| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md) | Planned   | 011        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened                                                 |
+| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | Planned   | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened                                                 |
 
 ### Stack management
 
@@ -57,7 +57,7 @@ Configuration migration, responsive regressions, and the meaningful coverage gat
 - Use purpose-based branch prefixes such as `feat/`, `fix/`, `refactor/`, `test/`, and `chore/`; keep the remainder concise and kebab-case.
 - Keep configuration migration, responsive fixes, coverage policy, visual redesign, and each motion class in their recorded scopes.
 - Merge Plans 007–013 in dependency order. When a parent merges, update the dependent PR base and restack as necessary to avoid repeating merged changes.
-- Preserve the current Plan 010 work while Plans 007–009 proceed. Restack it onto Plan 009 only after those prerequisites are merged and reviewed.
+- Keep dependent work based on the reviewed parent branch until that parent merges; then update its base to avoid repeating merged changes.
 - Run pull-request CI for intermediate base branches as well as `main`. Introduce required-check rules only when the relevant workflow exists on the protected target.
 - Each plan remains a separately scoped task. Update current command and architecture status when its implementation changes those facts.
 

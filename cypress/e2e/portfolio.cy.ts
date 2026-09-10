@@ -138,23 +138,112 @@ describe("photography portfolio", () => {
     cy.visit("/contact");
     cy.get('input[name="email"]').should("have.attr", "type", "email");
     cy.contains("button", "Send Message").should("be.enabled");
+    cy.get("footer")
+      .should("contain.text", "Copyright @Avi Dixit 2026")
+      .and("not.contain.text", "avidixit27@gmail.com")
+      .and("not.contain.text", "Instagram");
+    cy.get(".custom-scrollbar").should("not.exist");
   });
 
-  it("keeps custom Tailwind token utilities in the production stylesheet", () => {
+  it("keeps semantic color utilities in the production stylesheet", () => {
     cy.visit("/contact");
     cy.get('input[name="email"]')
       .focus()
       .should(($input) => {
         expect(getComputedStyle($input.get(0)).borderBottomColor).to.equal(
-          "rgb(253, 113, 0)",
+          "rgb(255, 225, 147)",
         );
       });
 
     cy.visit("/shop");
     cy.contains("p", "$149").should(($price) => {
       expect(getComputedStyle($price.get(0)).color).to.equal(
-        "rgb(208, 53, 253)",
+        "rgb(230, 173, 255)",
       );
+    });
+  });
+
+  it("uses the approved dark canvas across the application shell", () => {
+    cy.visit("/contact");
+    cy.get("body").should(($body) => {
+      expect(getComputedStyle($body.get(0)).backgroundColor).to.equal(
+        "rgb(14, 14, 14)",
+      );
+    });
+  });
+
+  it("reveals the footer with bounded parallax at desktop and mobile widths", () => {
+    cy.viewport(1280, 800);
+    cy.visit("/");
+    cy.get('footer[aria-label="Site footer"]').should(($footer) => {
+      const footer = $footer.get(0);
+      if (!footer) throw new Error("Expected site footer");
+      const rect = footer.getBoundingClientRect();
+      expect(rect.top).to.be.greaterThan(800 - rect.height);
+      const pageDocument = footer.ownerDocument;
+      expect(
+        pageDocument
+          .elementFromPoint(rect.left + rect.width / 2, rect.top + 16)
+          ?.closest("footer"),
+      ).not.to.equal(footer);
+    });
+
+    cy.scrollTo("bottom");
+    cy.get('footer[aria-label="Site footer"]').should(($footer) => {
+      const footer = $footer.get(0);
+      if (!footer) throw new Error("Expected site footer");
+      const rect = footer.getBoundingClientRect();
+      const pageWindow = footer.ownerDocument.defaultView;
+      const viewportHeight = pageWindow?.innerHeight ?? 0;
+      expect(viewportHeight).to.be.greaterThan(0);
+      const currentBottom =
+        footer.ownerDocument.documentElement.scrollHeight - viewportHeight;
+      pageWindow?.scrollTo(0, currentBottom);
+      expect(pageWindow?.scrollY).to.be.closeTo(currentBottom, 1);
+      expect(rect.top).to.be.lessThan(viewportHeight);
+      expect(rect.bottom).to.be.at.most(viewportHeight);
+      expect(getComputedStyle(footer).transform).to.equal("none");
+    });
+    cy.contains("Copyright @Avi Dixit 2026").should("be.visible");
+    cy.document().should((pageDocument) => {
+      expect(pageDocument.documentElement.scrollWidth).to.equal(
+        pageDocument.documentElement.clientWidth,
+      );
+    });
+
+    cy.scrollTo("top");
+    cy.get('footer[aria-label="Site footer"]').should(($footer) => {
+      const footer = $footer.get(0);
+      if (!footer) throw new Error("Expected site footer");
+      const rect = footer.getBoundingClientRect();
+      expect(rect.top).to.be.greaterThan(800 - rect.height);
+      const pageDocument = footer.ownerDocument;
+      expect(
+        pageDocument
+          .elementFromPoint(rect.left + rect.width / 2, rect.top + 16)
+          ?.closest("footer"),
+      ).not.to.equal(footer);
+    });
+
+    cy.viewport(390, 844);
+    cy.visit("/");
+    cy.get('footer[aria-label="Site footer"]').should(($footer) => {
+      const footer = $footer.get(0);
+      if (!footer) throw new Error("Expected site footer");
+      const rect = footer.getBoundingClientRect();
+      expect(rect.top).to.be.greaterThan(844 - rect.height);
+    });
+    cy.scrollTo("bottom");
+    cy.get('footer[aria-label="Site footer"]').should(($footer) => {
+      const footer = $footer.get(0);
+      if (!footer) throw new Error("Expected site footer");
+      const pageWindow = footer.ownerDocument.defaultView;
+      const viewportHeight = pageWindow?.innerHeight ?? 0;
+      const currentBottom =
+        footer.ownerDocument.documentElement.scrollHeight - viewportHeight;
+      pageWindow?.scrollTo(0, currentBottom);
+      expect(pageWindow?.scrollY).to.be.closeTo(currentBottom, 1);
+      expect(getComputedStyle(footer).transform).to.equal("none");
     });
   });
 
@@ -216,5 +305,10 @@ describe("photography portfolio", () => {
     });
     cy.visit("/");
     cy.get('[aria-label="Open hero image gallery"]').should("be.visible");
+    cy.get('footer[aria-label="Site footer"]').should(
+      "have.css",
+      "transform",
+      "none",
+    );
   });
 });

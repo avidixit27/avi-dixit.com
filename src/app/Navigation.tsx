@@ -163,7 +163,7 @@ export default function Navigation({ portfolioGridElement }: NavigationProps) {
   return (
     <nav
       ref={navRef}
-      className={`fixed top-0 left-0 right-0 z-[90] bg-primary/95 backdrop-blur-xl border-b border-secondary/20
+      className={`fixed top-0 left-0 right-0 z-[90] border-b border-border bg-canvas/95 backdrop-blur-xl
                   transition-transform duration-500 ease-out
                   ${isHidden ? "-translate-y-full" : "translate-y-0"}`}
     >
@@ -185,7 +185,7 @@ export default function Navigation({ portfolioGridElement }: NavigationProps) {
           className="relative flex gap-4 text-sm md:gap-8 md:text-base"
         >
           <span
-            className={`absolute bottom-0 h-[1px] bg-ink transition-[transform,width] duration-250 ease-[cubic-bezier(.22,.61,.36,1)]
+            className={`absolute bottom-0 h-[1px] bg-focus transition-[transform,width] duration-250 ease-[cubic-bezier(.22,.61,.36,1)]
                         ${indicator.visible ? "opacity-100" : "opacity-0"}`}
             style={{
               transform: `translateX(${indicator.left}px)`,
@@ -204,8 +204,8 @@ export default function Navigation({ portfolioGridElement }: NavigationProps) {
                 }}
                 to={item.path}
                 onClick={() => setIsHidden(false)}
-                className={`pb-1 font-display font-bold ${
-                  isActive ? "text-ink" : "text-ink/55 hover:text-accentWarm"
+                className={`pb-1 font-display ${
+                  isActive ? "text-focus" : "text-text-muted hover:text-focus"
                 }`}
               >
                 {item.label}

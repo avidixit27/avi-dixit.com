@@ -12,18 +12,18 @@
 
 ## Outcome
 
-Motion for React becomes the single general-purpose runtime animation system, with deferred feature loading, global reduced-motion behavior, shared timing policy, and one real production use that proves the integration without establishing speculative abstractions.
+The narrow footer Motion use from Plan 010 becomes an application-level animation foundation with deferred feature loading, global reduced-motion behavior, shared timing policy, and one additional production transition that proves the integration without establishing speculative abstractions.
 
 ## Prerequisites and current state
 
 - React 18.2+ and Vite are compatible with Motion without special Vite configuration according to the official [installation guide](https://motion.dev/docs/react-installation).
 - Plan 010 supplies stable visual tokens; Plan 005 supplies delivery-sized images so decode cost does not distort motion profiling.
-- Existing hero and lightbox transitions use CSS and timers. Tailwind remains appropriate for simple hover and focus feedback.
+- Plan 010 installs Motion for bounded footer parallax and handles reduced motion locally. Existing hero and lightbox transitions use CSS and timers. Tailwind remains appropriate for simple hover and focus feedback.
 - Verify the maintained `motion` release, its production audit, and bundle effect at implementation time. Follow Motion's current [bundle-size](https://motion.dev/docs/react-reduce-bundle-size) and [accessibility](https://motion.dev/docs/react-accessibility) guidance rather than copying stale API examples.
 
 ## Scope
 
-- Install `motion` and record the exact locked version.
+- Confirm and record the exact locked `motion` version introduced by Plan 010.
 - Add one application-level Motion configuration that respects the operating-system preference with `reducedMotion="user"`.
 - Use strict `LazyMotion` with dynamically loaded `domAnimation` features and the slim `m` components. Do not load `domMax` until an implemented layout or drag interaction requires it.
 - Define a small shared duration/easing policy using existing token ownership.
@@ -33,7 +33,7 @@ Motion for React becomes the single general-purpose runtime animation system, wi
 
 ## Non-goals
 
-- Do not add parallax, sticky storytelling, page transitions, shared-element transitions, drag gestures, GSAP, WebGL, or scroll hijacking.
+- Do not add parallax beyond Plan 010's footer, sticky storytelling, page transitions, shared-element transitions, drag gestures, GSAP, WebGL, or scroll hijacking.
 - Do not convert simple CSS hover/focus transitions to Motion.
 - Do not create a catalog of wrappers, variants, or hooks for hypothetical future effects.
 
@@ -48,7 +48,7 @@ Motion for React becomes the single general-purpose runtime animation system, wi
 ## Implementation plan
 
 1. Capture the production JavaScript baseline and current hero transition behavior, including timer cleanup and reduced-motion expectations.
-2. Install the maintained Motion package and run the production security audit.
+2. Audit the installed Motion package and the isolated footer import before broadening its application ownership.
 3. Add the strict `LazyMotion`/`MotionConfig` boundary. Keep the feature-loader module narrow and dynamically import `domAnimation`.
 4. Migrate the selected crossfade using `m` and `AnimatePresence` or a simpler declarative animation where that produces clearer ownership. Preserve click targets, image decode handling, and slideshow timing.
 5. Implement an opacity-only reduced-motion path with no large transform, automatic parallax, or hidden content.

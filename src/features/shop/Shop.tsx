@@ -30,69 +30,79 @@ export default function Shop() {
   );
 
   return (
-    <main className="min-h-screen bg-primary text-light">
-      <div className="page-content active">
-        <div className="max-w-7xl mx-auto px-8 pt-36 animate-fadeIn">
-          <div className="flex flex-col lg:flex-row gap-8">
-            <section className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {PRODUCT_CATALOG.map((product) => (
-                <article
-                  key={product.id}
-                  className="bg-slate-800 rounded-lg overflow-hidden hover:shadow-xl transition-shadow"
-                >
-                  <div className="aspect-square bg-slate-700" />
-                  <div className="p-4">
-                    <h3 className="text-xl font-semibold mb-2">
-                      {product.title}
-                    </h3>
-                    <p className="text-accentVivid text-lg mb-4">
-                      ${product.price}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => addToCart(product)}
-                      className="w-full py-2 bg-accent hover:bg-accentWarm text-white font-bold transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </section>
+    <main className="min-h-screen bg-canvas text-text">
+      <div className="page-container pt-page-content pb-20 sm:pt-page-content-sm sm:pb-24">
+        <header className="mb-10 max-w-2xl">
+          <p className="text-sm font-semibold tracking-[0.18em] text-brand-vivid uppercase">
+            Selected work
+          </p>
+          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">
+            Print shop
+          </h1>
+          <p className="mt-4 font-inter leading-7 text-text-muted">
+            Explore the current print collections and prepare a selection.
+          </p>
+        </header>
 
-            <aside className="w-full lg:w-80 bg-slate-800 p-6 rounded-lg h-fit lg:sticky lg:top-36">
-              <h2 className="text-2xl font-bold mb-6">Cart ({totalItems})</h2>
-
-              <div className="space-y-4 mb-8">
-                {cart.length === 0 && (
-                  <p className="text-slate-400">Your cart is empty</p>
-                )}
-                {cart.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between items-center"
+        <div className="flex flex-col gap-8 lg:flex-row">
+          <section className="grid flex-1 grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {PRODUCT_CATALOG.map((product) => (
+              <article
+                key={product.id}
+                className="overflow-hidden rounded-panel border border-border bg-surface shadow-panel transition-colors hover:border-border-strong"
+              >
+                <div className="aspect-square bg-surface-muted" />
+                <div className="p-5">
+                  <h2 className="mb-2 text-xl font-semibold">
+                    {product.title}
+                  </h2>
+                  <p className="mb-5 text-lg text-brand-vivid">
+                    ${product.price}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => addToCart(product)}
+                    className="w-full rounded-control bg-brand-warm py-2.5 font-semibold text-canvas transition-colors hover:bg-focus"
                   >
-                    <span>{item.title}</span>
-                    <span>x{item.quantity}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="border-t border-slate-700 pt-4">
-                <div className="flex justify-between mb-4">
-                  <span>Total:</span>
-                  <span className="font-bold">${totalPrice.toFixed(2)}</span>
+                    Add to Cart
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  className="w-full py-3 bg-accent hover:bg-accentWarm text-white font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={cart.length === 0}
+              </article>
+            ))}
+          </section>
+
+          <aside className="h-fit w-full rounded-panel border border-border bg-panel p-6 shadow-panel lg:sticky lg:top-24 lg:w-80">
+            <h2 className="mb-6 text-2xl font-semibold">Cart ({totalItems})</h2>
+
+            <div className="mb-8 space-y-4">
+              {cart.length === 0 && (
+                <p className="text-text-muted">Your cart is empty</p>
+              )}
+              {cart.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between gap-4"
                 >
-                  Checkout
-                </button>
+                  <span>{item.title}</span>
+                  <span className="text-text-muted">×{item.quantity}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-border pt-4">
+              <div className="mb-4 flex justify-between">
+                <span>Total:</span>
+                <span className="font-semibold">${totalPrice.toFixed(2)}</span>
               </div>
-            </aside>
-          </div>
+              <button
+                type="button"
+                className="w-full rounded-control bg-brand-warm py-3 font-semibold text-canvas transition-colors hover:bg-focus disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-text-muted"
+                disabled={cart.length === 0}
+              >
+                Checkout
+              </button>
+            </div>
+          </aside>
         </div>
       </div>
     </main>
