@@ -204,8 +204,8 @@ export default function Navigation({ portfolioGridElement }: NavigationProps) {
                 }}
                 to={item.path}
                 onClick={() => setIsHidden(false)}
-                className={`pb-1 font-display font-bold ${
-                  isActive ? "text-text" : "text-text-muted hover:text-focus"
+                className={`pb-1 font-display ${
+                  isActive ? "text-focus" : "text-text-muted hover:text-focus"
                 }`}
               >
                 {item.label}

@@ -1,0 +1,2 @@
+export const FOOTER_PARALLAX_RATE = 0.3;
+export const FOOTER_PARALLAX_REVEAL_START = 0.8;

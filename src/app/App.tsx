@@ -15,7 +15,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="relative min-h-screen bg-panel text-text">
-        <div className="relative z-10 min-h-screen bg-canvas shadow-[0_18px_40px_rgb(0_0_0_/_0.22)] lg:mb-52">
+        <div className="relative z-10 mb-footer min-h-screen bg-canvas shadow-[0_18px_40px_rgb(0_0_0_/_0.22)]">
           <Navigation portfolioGridElement={portfolioGridElement} />
           <Suspense fallback={null}>
             <Routes>

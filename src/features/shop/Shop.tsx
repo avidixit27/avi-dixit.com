@@ -31,7 +31,7 @@ export default function Shop() {
 
   return (
     <main className="min-h-screen bg-canvas text-text">
-      <div className="page-container pt-32 pb-20 sm:pt-36 sm:pb-24">
+      <div className="page-container pt-page-content pb-20 sm:pt-page-content-sm sm:pb-24">
         <header className="mb-10 max-w-2xl">
           <p className="text-sm font-semibold tracking-[0.18em] text-brand-vivid uppercase">
             Selected work
@@ -39,7 +39,7 @@ export default function Shop() {
           <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">
             Print shop
           </h1>
-          <p className="mt-4 leading-7 text-text-muted">
+          <p className="mt-4 font-inter leading-7 text-text-muted">
             Explore the current print collections and prepare a selection.
           </p>
         </header>

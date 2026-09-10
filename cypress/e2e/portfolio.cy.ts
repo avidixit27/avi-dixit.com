@@ -140,7 +140,8 @@ describe("photography portfolio", () => {
     cy.contains("button", "Send Message").should("be.enabled");
     cy.get("footer")
       .should("contain.text", "Copyright @Avi Dixit 2026")
-      .and("contain.text", "avidixit27@gmail.com");
+      .and("not.contain.text", "avidixit27@gmail.com")
+      .and("not.contain.text", "Instagram");
     cy.get(".custom-scrollbar").should("not.exist");
   });
 
@@ -171,12 +172,14 @@ describe("photography portfolio", () => {
     });
   });
 
-  it("reveals the stationary desktop footer at the document end without horizontal overflow", () => {
+  it("reveals the footer with bounded parallax at desktop and mobile widths", () => {
     cy.viewport(1280, 800);
     cy.visit("/");
+    let desktopTop: number;
     cy.get('footer[aria-label="Site footer"]').then(($footer) => {
       const footer = $footer.get(0);
       if (!footer) throw new Error("Expected site footer");
+      desktopTop = footer.getBoundingClientRect().top;
       const rect = footer.getBoundingClientRect();
       const pageDocument = footer.ownerDocument;
       expect(
@@ -187,9 +190,10 @@ describe("photography portfolio", () => {
     });
 
     cy.scrollTo("bottom");
-    cy.get('footer[aria-label="Site footer"]').then(($footer) => {
+    cy.get('footer[aria-label="Site footer"]').should(($footer) => {
       const footer = $footer.get(0);
       if (!footer) throw new Error("Expected site footer");
+      expect(footer.getBoundingClientRect().top).to.be.lessThan(desktopTop);
       const rect = footer.getBoundingClientRect();
       const pageDocument = footer.ownerDocument;
       expect(
@@ -205,9 +209,10 @@ describe("photography portfolio", () => {
     });
 
     cy.scrollTo("top");
-    cy.get('footer[aria-label="Site footer"]').then(($footer) => {
+    cy.get('footer[aria-label="Site footer"]').should(($footer) => {
       const footer = $footer.get(0);
       if (!footer) throw new Error("Expected site footer");
+      expect(footer.getBoundingClientRect().top).to.equal(desktopTop);
       const rect = footer.getBoundingClientRect();
       const pageDocument = footer.ownerDocument;
       expect(
@@ -215,6 +220,21 @@ describe("photography portfolio", () => {
           .elementFromPoint(rect.left + rect.width / 2, rect.top + 16)
           ?.closest("footer"),
       ).not.to.equal(footer);
+    });
+
+    cy.viewport(390, 844);
+    cy.visit("/");
+    let mobileTop: number;
+    cy.get('footer[aria-label="Site footer"]').then(($footer) => {
+      const footer = $footer.get(0);
+      if (!footer) throw new Error("Expected site footer");
+      mobileTop = footer.getBoundingClientRect().top;
+    });
+    cy.scrollTo("bottom");
+    cy.get('footer[aria-label="Site footer"]').should(($footer) => {
+      const footer = $footer.get(0);
+      if (!footer) throw new Error("Expected site footer");
+      expect(footer.getBoundingClientRect().top).to.be.lessThan(mobileTop);
     });
   });
 
@@ -276,5 +296,10 @@ describe("photography portfolio", () => {
     });
     cy.visit("/");
     cy.get('[aria-label="Open hero image gallery"]').should("be.visible");
+    cy.get('footer[aria-label="Site footer"]').should(
+      "have.css",
+      "transform",
+      "none",
+    );
   });
 });

@@ -2,14 +2,14 @@ import { SITE_DETAILS } from "../../resources/site";
 
 export default function Contact() {
   return (
-    <main className="reading-container pt-32 pb-20 sm:pt-36 sm:pb-24">
+    <main className="reading-container pt-page-content pb-20 sm:pt-page-content-sm sm:pb-24">
       <p className="text-sm font-semibold tracking-[0.18em] text-brand-warm uppercase">
         Inquiries
       </p>
       <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-text md:text-5xl">
         Contact
       </h1>
-      <p className="mt-5 max-w-2xl text-base leading-7 text-text-muted sm:text-lg">
+      <p className="mt-5 max-w-2xl font-inter text-base leading-7 text-text-muted sm:text-lg">
         I’m available for commissions, prints, and collaborations. For
         inquiries, feel free to reach out below.
       </p>
@@ -59,7 +59,7 @@ export default function Contact() {
       <div className="mt-12 flex flex-col gap-3 border-t border-border pt-8 text-text-muted sm:flex-row sm:gap-8">
         <a
           href={`mailto:${SITE_DETAILS.email}`}
-          className="rounded-sm transition-colors hover:text-brand-warm"
+          className="rounded-sm font-inter transition-colors hover:text-brand-warm"
         >
           {SITE_DETAILS.email}
         </a>
@@ -67,7 +67,7 @@ export default function Contact() {
           href={SITE_DETAILS.instagramUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-sm transition-colors hover:text-brand-vivid"
+          className="rounded-sm font-inter transition-colors hover:text-brand-vivid"
         >
           Instagram
         </a>

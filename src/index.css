@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: "Zen Tokyo Zoo";
-  src: url("./assets/fonts/ZenTokyoZoo-Regular.woff2") format("woff2");
+  font-family: "Zina";
+  src: url("./assets/fonts/Zina-Regular.otf") format("opentype");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("./assets/fonts/Inter-Regular.woff2") format("woff2");
   font-display: swap;
   font-style: normal;
   font-weight: 400;
@@ -23,9 +31,14 @@
   --color-brand-vivid: #e6adff;
 
   --font-sans:
-    Inter, ui-sans-serif, system-ui, "Segoe UI", "Helvetica Neue", Arial,
-    sans-serif;
-  --font-display: "Zen Tokyo Zoo", ui-sans-serif, system-ui, sans-serif;
+    ui-sans-serif, system-ui, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Zina", ui-sans-serif, system-ui, sans-serif;
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-footer: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --text-footer-copy: 0.625rem;
+  --spacing-footer: 16rem;
+  --spacing-page-content: 7rem;
+  --spacing-page-content-sm: 7.5rem;
 
   --shadow-panel: 0 18px 40px rgb(0 0 0 / 0.22);
   --radius-control: 0.5rem;
@@ -39,6 +52,7 @@
     background: var(--color-canvas);
     color-scheme: dark;
     font-family: var(--font-sans);
+    font-synthesis: none;
     scrollbar-color: var(--color-border-strong) var(--color-canvas);
   }
 
