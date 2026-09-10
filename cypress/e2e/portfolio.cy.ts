@@ -205,7 +205,7 @@ describe("photography portfolio", () => {
     cy.contains("Copyright @Avi Dixit 2026").should("be.visible");
     cy.document().should((pageDocument) => {
       expect(pageDocument.documentElement.scrollWidth).to.equal(
-        pageDocument.defaultView?.innerWidth,
+        pageDocument.documentElement.clientWidth,
       );
     });
 
