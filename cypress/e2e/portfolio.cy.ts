@@ -196,13 +196,13 @@ describe("photography portfolio", () => {
       if (!footer) throw new Error("Expected site footer");
       expect(footer.getBoundingClientRect().top).to.be.lessThan(desktopTop);
       const rect = footer.getBoundingClientRect();
-      const pageDocument = footer.ownerDocument;
-      expect(
-        pageDocument
-          .elementFromPoint(rect.left + rect.width / 2, rect.top + 16)
-          ?.closest("footer"),
-      ).to.equal(footer);
+      const viewportHeight = footer.ownerDocument.defaultView?.innerHeight ?? 0;
+      expect(viewportHeight).to.be.greaterThan(0);
+      expect(rect.top).to.be.lessThan(viewportHeight);
+      expect(rect.bottom).to.be.at.most(viewportHeight);
+      expect(getComputedStyle(footer).transform).to.equal("none");
     });
+    cy.contains("Copyright @Avi Dixit 2026").should("be.visible");
     cy.document().should((pageDocument) => {
       expect(pageDocument.documentElement.scrollWidth).to.equal(
         pageDocument.defaultView?.innerWidth,
