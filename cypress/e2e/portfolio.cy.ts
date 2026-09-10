@@ -176,11 +176,12 @@ describe("photography portfolio", () => {
     cy.viewport(1280, 800);
     cy.visit("/");
     let desktopTop: number;
-    cy.get('footer[aria-label="Site footer"]').then(($footer) => {
+    cy.get('footer[aria-label="Site footer"]').should(($footer) => {
       const footer = $footer.get(0);
       if (!footer) throw new Error("Expected site footer");
-      desktopTop = footer.getBoundingClientRect().top;
       const rect = footer.getBoundingClientRect();
+      expect(rect.top).to.be.greaterThan(800 - rect.height);
+      desktopTop = rect.top;
       const pageDocument = footer.ownerDocument;
       expect(
         pageDocument
@@ -225,10 +226,12 @@ describe("photography portfolio", () => {
     cy.viewport(390, 844);
     cy.visit("/");
     let mobileTop: number;
-    cy.get('footer[aria-label="Site footer"]').then(($footer) => {
+    cy.get('footer[aria-label="Site footer"]').should(($footer) => {
       const footer = $footer.get(0);
       if (!footer) throw new Error("Expected site footer");
-      mobileTop = footer.getBoundingClientRect().top;
+      const rect = footer.getBoundingClientRect();
+      expect(rect.top).to.be.greaterThan(844 - rect.height);
+      mobileTop = rect.top;
     });
     cy.scrollTo("bottom");
     cy.get('footer[aria-label="Site footer"]').should(($footer) => {
