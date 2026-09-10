@@ -144,21 +144,77 @@ describe("photography portfolio", () => {
     cy.get(".custom-scrollbar").should("not.exist");
   });
 
-  it("keeps custom Tailwind token utilities in the production stylesheet", () => {
+  it("keeps semantic color utilities in the production stylesheet", () => {
     cy.visit("/contact");
     cy.get('input[name="email"]')
       .focus()
       .should(($input) => {
         expect(getComputedStyle($input.get(0)).borderBottomColor).to.equal(
-          "rgb(253, 113, 0)",
+          "rgb(255, 225, 147)",
         );
       });
 
     cy.visit("/shop");
     cy.contains("p", "$149").should(($price) => {
       expect(getComputedStyle($price.get(0)).color).to.equal(
-        "rgb(208, 53, 253)",
+        "rgb(230, 173, 255)",
       );
+    });
+  });
+
+  it("uses the approved dark canvas across the application shell", () => {
+    cy.visit("/contact");
+    cy.get("body").should(($body) => {
+      expect(getComputedStyle($body.get(0)).backgroundColor).to.equal(
+        "rgb(14, 14, 14)",
+      );
+    });
+  });
+
+  it("reveals the stationary desktop footer at the document end without horizontal overflow", () => {
+    cy.viewport(1280, 800);
+    cy.visit("/");
+    cy.get('footer[aria-label="Site footer"]').then(($footer) => {
+      const footer = $footer.get(0);
+      if (!footer) throw new Error("Expected site footer");
+      const rect = footer.getBoundingClientRect();
+      const pageDocument = footer.ownerDocument;
+      expect(
+        pageDocument
+          .elementFromPoint(rect.left + rect.width / 2, rect.top + 16)
+          ?.closest("footer"),
+      ).not.to.equal(footer);
+    });
+
+    cy.scrollTo("bottom");
+    cy.get('footer[aria-label="Site footer"]').then(($footer) => {
+      const footer = $footer.get(0);
+      if (!footer) throw new Error("Expected site footer");
+      const rect = footer.getBoundingClientRect();
+      const pageDocument = footer.ownerDocument;
+      expect(
+        pageDocument
+          .elementFromPoint(rect.left + rect.width / 2, rect.top + 16)
+          ?.closest("footer"),
+      ).to.equal(footer);
+    });
+    cy.document().should((pageDocument) => {
+      expect(pageDocument.documentElement.scrollWidth).to.equal(
+        pageDocument.defaultView?.innerWidth,
+      );
+    });
+
+    cy.scrollTo("top");
+    cy.get('footer[aria-label="Site footer"]').then(($footer) => {
+      const footer = $footer.get(0);
+      if (!footer) throw new Error("Expected site footer");
+      const rect = footer.getBoundingClientRect();
+      const pageDocument = footer.ownerDocument;
+      expect(
+        pageDocument
+          .elementFromPoint(rect.left + rect.width / 2, rect.top + 16)
+          ?.closest("footer"),
+      ).not.to.equal(footer);
     });
   });
 

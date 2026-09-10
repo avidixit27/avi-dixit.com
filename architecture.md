@@ -164,16 +164,16 @@ Use interfaces for stable object-shaped contracts such as component props and do
 
 ## 6. Visual system and external components
 
-**Agreed direction:** React and Vite remain the application and build foundation. Tailwind remains the primary styling approach for layout, typography, responsive behavior, and simple hover, focus, and state transitions. Establish shared design tokens for color, typography, spacing, radii, layering, and motion. Use global CSS for genuinely global concerns and component-local styles where an effect needs them.
+**Current:** React and Vite remain the application and build foundation. Tailwind remains the primary styling approach for layout, typography, responsive behavior, and simple hover, focus, and state transitions. `src/index.css` defines semantic colors, typography, radii, shadow, and shared width primitives. Use global CSS for genuinely global concerns and component-local styles where an effect needs them.
 
-The approved dark canvas is `#0e0e0e` and remains planned. The locally bundled Zen Tokyo Zoo face is the current display font; the body stack remains a readable sans serif.
+The dark canvas is `#0e0e0e`. The locally bundled Zen Tokyo Zoo face is the display font; the body stack remains a readable sans serif. On desktop, the shared footer is a CSS fixed layer behind the scrolling application surface; the document reserves its height so the footer is revealed at the end of a page and recedes when the user scrolls away. Mobile uses the footer in normal flow.
 
-Motion for React is the selected general-purpose runtime for coordinated entrances and exits, page transitions, scroll reveals, scroll-linked transforms, bounded parallax, and justified layout animation. It is planned work until installed by an implementation ticket. Native browser scrolling and CSS layout retain ownership of document flow and sticky positioning; Motion may transform presentation in response to scroll but must not emulate or hijack scrolling. Replace the current JavaScript-driven draggable scrollbar with the native browser scrollbar and, if useful, restrained CSS styling that preserves platform scrolling behavior and accessibility.
+Motion for React is the selected general-purpose runtime for coordinated entrances and exits, page transitions, scroll reveals, scroll-linked transforms, bounded parallax, and justified layout animation. It is planned work until installed by an implementation ticket. Native browser scrolling and CSS layout retain ownership of document flow and stationary layout treatments; Motion may transform presentation in response to scroll but must not emulate or hijack scrolling. The platform scrollbar remains visible with restrained CSS styling that preserves platform scrolling behavior and accessibility.
 
 | Layer            | Ownership                                                                                                                   |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | React + Vite     | Component composition, state, routing integration, code splitting, and production bundling                                  |
-| Tailwind + CSS   | Layout, typography, responsive styling, design tokens, native sticky behavior, and simple interaction transitions           |
+| Tailwind + CSS   | Layout, typography, responsive styling, design tokens, stationary footer treatment, and simple interaction transitions      |
 | Motion for React | Coordinated enter/exit behavior, reveals, scroll-linked transforms, parallax, page transitions, and proven layout animation |
 
 Prefer strict `LazyMotion` with the slim `m` components and the smallest feature bundle that supports implemented behavior. Load animation features after semantic content can render, measure bundle cost, and avoid a full `motion` import that defeats lazy loading. Start with `domAnimation`; add layout or gesture features only when an accepted interaction requires them. Introduce another animation runtime only with a concrete, measured justification.

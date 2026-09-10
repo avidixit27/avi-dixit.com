@@ -1,14 +1,14 @@
 # 010 — Establish the dark visual system and application shell
 
-| Field          | Value                                  |
-| -------------- | -------------------------------------- |
-| Type           | Feature                                |
-| Status         | Tracked in the [plan index](README.md) |
-| Depends on     | 009                                    |
-| Blocks         | 011 and visual feature work            |
-| Planned branch | `feat/dark-visual-system`              |
-| PR base        | `test/unit-coverage-quality-gate`      |
-| PR             | Not opened                             |
+| Field          | Value                       |
+| -------------- | --------------------------- |
+| Type           | Feature                     |
+| Status         | In progress                 |
+| Depends on     | 009                         |
+| Blocks         | 011 and visual feature work |
+| Planned branch | `feat/dark-visual-system`   |
+| PR base        | `main`                      |
+| PR             | Not opened                  |
 
 ## Outcome
 
@@ -22,8 +22,8 @@ The application has a coherent dark-first visual language derived from the Avi D
 - Approved initial footer resources are `avidixit27@gmail.com`, [Instagram](https://www.instagram.com/_avid.photography_/), and the display copy `Copyright @Avi Dixit 2026`. No legal links are required in this initial footer.
 - The current shell hides the native browser scrollbar and renders a JavaScript-driven draggable substitute. The approved direction is to remove that component and restore native scrolling with optional restrained CSS styling.
 - The approved canvas color is `#0e0e0e`.
-- The footer uses `src/assets/brand/avi-signature-logo.svg` from Plan 008 in `#FFE193`, subject only to a documented lighter contrast adjustment if browser review requires it.
-- The approved footer behavior is a native sticky reveal: the footer remains stationary beneath the scrolling page surface, is revealed as content scrolls past it, and recedes naturally when the user scrolls away.
+- The footer uses `src/assets/icons/avi-signature-logo.svg` from Plan 008 in `#FFE193`, subject only to a documented lighter contrast adjustment if browser review requires it.
+- The footer is a native CSS fixed layer on desktop: it remains beneath the scrolling page surface, is revealed after the page reaches its reserved footer space, and recedes naturally when the user scrolls away. Mobile retains normal flow.
 
 ## Scope
 
@@ -35,7 +35,7 @@ The application has a coherent dark-first visual language derived from the Avi D
 - Remove the custom draggable scrollbar and the CSS that hides the platform scrollbar. Preserve ordinary keyboard, pointer, touch, and assistive-technology scrolling; style the native scrollbar only where browser support and contrast remain sound.
 - Add the shared footer using the approved email, Instagram destination, and copyright copy, storing immutable copy and destinations in the appropriate resource catalog.
 - Make the footer approximately 2.25 times its current height. Scale the signature to use the available footer height and offset its leftmost diagonal stroke beyond the left viewport edge without causing horizontal document overflow.
-- Implement the footer reveal with native layout/sticky positioning and normal document scrolling. Preserve readable normal flow where constrained mobile layouts cannot support the full effect.
+- Implement the footer reveal with native CSS fixed positioning and normal document scrolling. Preserve readable normal flow where constrained mobile layouts cannot support the full effect.
 - Document where saturated orange, blue, or violet surfaces are appropriate and where neutral presentation should dominate.
 
 ## Non-goals
@@ -50,7 +50,7 @@ The application has a coherent dark-first visual language derived from the Avi D
 - Semantic Tailwind/CSS tokens and documented usage rules.
 - Updated global base styles, focus treatment, shared layout primitives, and application shell.
 - Responsive visual treatment for current portfolio, shop, and contact states.
-- A shared sticky-reveal footer with approved content and signature artwork.
+- A shared stationary-reveal footer with approved content and signature artwork.
 - Native document scrolling without the JavaScript draggable scrollbar.
 - Cypress coverage for navigation/footer semantics and visual review evidence.
 
@@ -61,7 +61,7 @@ The application has a coherent dark-first visual language derived from the Avi D
 3. Establish display/body/meta typography, spacing, containers, section rhythm, border, focus, radius, shadow, and layer tokens while preserving Plan 008's Zen Tokyo Zoo display token.
 4. Remove `CustomScrollbar` from the application shell and restore the native scrollbar. Remove its listeners, timers, DOM writes, and hidden-scrollbar rules; add only restrained native scrollbar styling that preserves visibility and platform behavior.
 5. Migrate global styles and the remaining application shell, then update current routes in coherent slices. Preserve behavior while replacing touched floating values.
-6. Implement the footer from approved resource data as a native sticky reveal beneath the scrolling page surface. Ensure keyboard order, visible focus, email/Instagram behavior, external-link security attributes, and small-screen wrapping are deliberate.
+6. Implement the footer from approved resource data as a native fixed-layer reveal beneath the scrolling page surface. Ensure keyboard order, visible focus, email/Instagram behavior, external-link security attributes, and small-screen wrapping are deliberate.
 7. Size the footer to approximately 2.25 times its prior height. Render the signature at the left in `#FFE193`, use the footer height, offset the first diagonal stroke beyond the viewport, and prevent horizontal overflow. Compare a lighter signature only if `#FFE193` lacks sufficient contrast in context.
 8. Add component assertions for semantics and state classes where useful, then review real images, scrolling behavior, and content at representative sizes and supported browsers.
 
@@ -90,15 +90,15 @@ The application has a coherent dark-first visual language derived from the Avi D
 
 ## Risks and recovery
 
-| Risk                                              | Mitigation or recovery                                                                                                             |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Dark styling obscures image detail or controls    | Review representative bright and dark photographs and strengthen local contrast where needed.                                      |
-| Tokens become a second utility framework          | Keep only recurring semantic roles and use Tailwind’s existing scale for ordinary values.                                          |
-| Footer destinations drift                         | Keep approved values in one typed resource catalog and update them through a scoped change.                                        |
-| Native scrollbar styling reduces usability        | Prefer platform defaults; remove styling that weakens visibility, contrast, or input behavior.                                     |
-| Broad restyling masks behavior regressions        | Migrate by owner and keep existing component/E2E journeys passing.                                                                 |
-| Sticky reveal obscures content or fails on mobile | Keep normal document flow semantic, reserve sufficient page/footer space, and fall back to normal flow at constrained breakpoints. |
-| Oversized signature causes horizontal overflow    | Clip within the footer presentation boundary and test narrow and wide viewport scroll widths.                                      |
+| Risk                                                  | Mitigation or recovery                                                                                                             |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Dark styling obscures image detail or controls        | Review representative bright and dark photographs and strengthen local contrast where needed.                                      |
+| Tokens become a second utility framework              | Keep only recurring semantic roles and use Tailwind’s existing scale for ordinary values.                                          |
+| Footer destinations drift                             | Keep approved values in one typed resource catalog and update them through a scoped change.                                        |
+| Native scrollbar styling reduces usability            | Prefer platform defaults; remove styling that weakens visibility, contrast, or input behavior.                                     |
+| Broad restyling masks behavior regressions            | Migrate by owner and keep existing component/E2E journeys passing.                                                                 |
+| Stationary reveal obscures content or fails on mobile | Keep normal document flow semantic, reserve sufficient page/footer space, and fall back to normal flow at constrained breakpoints. |
+| Oversized signature causes horizontal overflow        | Clip within the footer presentation boundary and test narrow and wide viewport scroll widths.                                      |
 
 ## Definition of done
 
@@ -109,4 +109,6 @@ The application has a coherent dark-first visual language derived from the Avi D
 
 ## Implementation record
 
-Started September 6, 2026, from the merged Plan 005 baseline on `main`, then paused for Plans 007–009 after PR #23 changed the build baseline. The working implementation is preserved for restacking. Record final tokens, contrast decisions, scrollbar removal, footer reveal/signature treatment, cross-browser review, commands, CI evidence, limitations, and PR link.
+Restacked onto `main` after Plans 007–009 merged. The dark canvas is `#0e0e0e`; semantic tokens now own surfaces, text, borders, focus, and controlled warm/cool/vivid accents. The JavaScript scrollbar was removed in favor of the visible platform scrollbar. The desktop footer is a CSS fixed layer behind the scroll surface, with a 13rem reserved reveal space; CSS `sticky` exposed a following footer before the end of the document, so it was not suitable for the required behavior. Mobile remains normal flow. The signature uses the supplied `#FFE193` artwork, with its left edge intentionally offset and browser coverage protecting horizontal overflow.
+
+Local verification passed `npm run check` (19 unit tests at 100% statements/functions/lines and 92.85% branches, 16 component tests, and 10 production browser tests) and `npm run security:audit` (zero production vulnerabilities). The browser tests cover the semantic canvas, footer semantics, stationary reveal, reverse scroll coverage, and horizontal overflow. Pull-request CI and manual Firefox/Safari review remain to be recorded.

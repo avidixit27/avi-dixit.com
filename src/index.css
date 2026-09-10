@@ -9,93 +9,91 @@
 }
 
 @theme {
-  --color-primary: #f0f4f8;
-  --color-secondary: #64ffda;
-  --color-slate: #8892b0;
-  --color-light: #1a202c;
-  --color-accent: #2d3748;
-  --color-accentWarm: #fd7100;
-  --color-accentCool: #000afd;
-  --color-accentVivid: #d035fd;
-  --color-ink: #0a0a0a;
+  --color-canvas: #0e0e0e;
+  --color-surface: #171717;
+  --color-surface-muted: #242424;
+  --color-panel: #111111;
+  --color-text: #f6f1e8;
+  --color-text-muted: #bbb4a9;
+  --color-border: #3c3934;
+  --color-border-strong: #777066;
+  --color-focus: #ffe193;
+  --color-brand-warm: #fd7100;
+  --color-brand-cool: #93a0ff;
+  --color-brand-vivid: #e6adff;
 
   --font-sans:
     Inter, ui-sans-serif, system-ui, "Segoe UI", "Helvetica Neue", Arial,
     sans-serif;
   --font-display: "Zen Tokyo Zoo", ui-sans-serif, system-ui, sans-serif;
 
-  --shadow-card: 0 2px 18px rgb(0 0 0 / 0.06);
-  --shadow-hairline: 0 1px 0 rgb(0 0 0 / 0.06);
-  --radius-soft: 0.625rem;
-  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --ease-gentle: cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-panel: 0 18px 40px rgb(0 0 0 / 0.22);
+  --radius-control: 0.5rem;
+  --radius-panel: 0.875rem;
 }
 
-/* --------------------------------------------------
-   GLOBAL SCROLLBAR (NO GUTTER) + LAYOUT
--------------------------------------------------- */
 @layer base {
   html {
-    /* Normal page scrolling */
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: clip;
+    overflow-y: scroll;
+    background: var(--color-canvas);
+    color-scheme: dark;
     font-family: var(--font-sans);
-
-    /* Hide scrollbar in Firefox */
-    scrollbar-width: none;
+    scrollbar-color: var(--color-border-strong) var(--color-canvas);
   }
 
-  /* Disable page scroll while fullscreen modal is open */
   html.modal-open {
-    overflow: hidden !important;
+    overflow: hidden;
   }
 
   body {
-    @apply bg-primary text-ink;
-    margin: 0;
+    min-width: 20rem;
     min-height: 100vh;
-    overflow-x: hidden;
+    margin: 0;
+    overflow-x: clip;
+    background: var(--color-canvas);
+    color: var(--color-text);
   }
 
-  /* ---- Hide scrollbar completely in WebKit browsers ---- */
   html::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
+    width: 0.75rem;
   }
 
   html::-webkit-scrollbar-track {
-    background: transparent !important;
+    background: var(--color-canvas);
   }
 
   html::-webkit-scrollbar-thumb {
-    background: transparent !important;
-    border-radius: 0;
+    border: 0.2rem solid var(--color-canvas);
+    border-radius: 999px;
+    background: var(--color-border-strong);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
   }
 }
 
-/* --------------------------------------------------
-   CUSTOM SCROLL INDICATOR BAR 
--------------------------------------------------- */
+@layer components {
+  .page-container {
+    width: min(100% - 2rem, 80rem);
+    margin-inline: auto;
+  }
 
-.custom-scrollbar {
-  position: fixed;
-  top: 0; /* will be updated via JS */
-  right: 4px;
-  width: 0.6rem; /* a bit wider for grabbing */
-  height: 10rem; /* FIXED HEIGHT THUMB */
-  background: #fd7100; /* accentWarm */
-  border-radius: 999px;
-  opacity: 0;
-  pointer-events: auto; /* allow clicking/dragging */
-  cursor: grab;
-  transition: opacity 0.35s ease;
-  z-index: 9999; /* above everything */
-}
+  .reading-container {
+    width: min(100% - 2rem, 48rem);
+    margin-inline: auto;
+  }
 
-.custom-scrollbar.dragging {
-  cursor: grabbing;
-}
+  @media (min-width: 48rem) {
+    .page-container,
+    .reading-container {
+      width: min(100% - 4rem, 80rem);
+    }
 
-.custom-scrollbar:hover {
-  opacity: 1 !important; /* override the inline hidden state */
+    .reading-container {
+      width: min(100% - 4rem, 48rem);
+    }
+  }
 }
