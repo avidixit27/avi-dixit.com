@@ -31,6 +31,7 @@ The narrow footer Motion use from Plan 010 becomes an application-level animatio
 - Evolve the existing footer reveal into a subtle eased end-of-page landing. Create the perception of deceleration with a bounded scroll-linked transform, spacing, opacity, or layered motion while preserving the browser's exact scroll position and input response.
 - Keep the settling effect narrow, responsive, and restrained on mobile. Apply no scroll-linked transform when reduced motion is requested; the complete final section and footer remain immediately available.
 - Change the active route label to the existing warm-orange token, the active underline to the existing vivid-violet token, and the footer signature artwork to the same warm orange. Keep inactive labels muted and preserve the separate accessible focus treatment.
+- Give the enlarged-image close glyph a short CSS color-fill transition from the neutral text color to the same warm orange on hover and `focus-visible`, with an immediate orange pressed state. Disable the transition duration for reduced motion while preserving the state change.
 - Record Motion’s isolated JavaScript contribution before and after the proof integration.
 
 ## Non-goals
@@ -46,6 +47,7 @@ The narrow footer Motion use from Plan 010 becomes an application-level animatio
 - Global reduced-motion configuration and shared timing policy.
 - One tested end-of-page landing effect with an immediate reduced-motion equivalent.
 - Warm-orange active navigation and footer signature accents with a vivid-violet active underline.
+- A warm-orange fill interaction for the lightbox close control.
 - Bundle-size and browser-profile evidence.
 - Updated architecture and agent guidance.
 
@@ -57,8 +59,9 @@ The narrow footer Motion use from Plan 010 becomes an application-level animatio
 4. Protect the current footer content, native scroll ownership, and reduced-motion result with regression tests. Add focused policy tests for any approved easing, distance, or opacity constants rather than asserting animation-frame timing.
 5. Refine the existing footer transform into a short eased visual settlement near the end of the page. Prefer one owner-local mapping over new observers, listeners, wrappers, or scroll state. Keep movement small on mobile and ensure content remains readable throughout.
 6. Apply the color trial through the existing semantic tokens: warm orange for the active route label and signature, vivid violet for the active underline, muted text for inactive labels, and the established focus token for visible keyboard focus. Keep the external signature SVG self-contained and protect its approved fill in a focused asset test.
-7. Verify that wheel, trackpad, Page Up/Down, Home/End, arrow-key, and touch scrolling remain 1:1 native interactions. Review normal and reduced motion at representative mobile and desktop widths, including rapid reversals near the page end.
-8. Measure the new route chunk and profile the landing effect in the production build. Remove unnecessary Motion imports that defeat lazy loading.
+7. Add the close-glyph color-fill transition with existing Tailwind/CSS utilities. Keep its accessible name, 44px target, safe-area placement, backdrop behavior, and Escape-key behavior unchanged. Cover focus and activation behavior in the existing lightbox component test; review hover and touch states in a real browser.
+8. Verify that wheel, trackpad, Page Up/Down, Home/End, arrow-key, and touch scrolling remain 1:1 native interactions. Review normal and reduced motion at representative mobile and desktop widths, including rapid reversals near the page end.
+9. Measure the new route chunk and profile the landing effect in the production build. Remove unnecessary Motion imports that defeat lazy loading.
 
 ## Acceptance criteria
 
@@ -70,6 +73,7 @@ The narrow footer Motion use from Plan 010 becomes an application-level animatio
 - The landing remains restrained and responsive on mobile, introduces no horizontal overflow, and never obscures or delays footer content.
 - Reduced-motion users receive the complete final section and footer without scroll-linked transform motion.
 - The active route label uses warm orange, its underline uses vivid violet, and the footer signature uses the same warm orange. Inactive labels remain muted and keyboard focus stays clearly visible.
+- The lightbox close glyph fills with warm orange on hover and keyboard focus and shows orange while pressed on touch/pointer input. Its state remains clear with reduced motion, and its hit target, placement, and closing behavior do not change.
 - The proof animation remains usable and never hides content when features load slowly or fail to animate.
 - Existing hero timing, gallery opening, keyboard behavior, native scrolling, and cleanup tests continue to pass.
 - Bundle growth is measured and recorded rather than assumed.
@@ -83,6 +87,7 @@ The narrow footer Motion use from Plan 010 becomes an application-level animatio
 - Review normal and reduced motion, slow CPU, rapid scroll reversal, navigation away, and back/forward restoration.
 - Manually exercise wheel, trackpad, keyboard, and touch scrolling on desktop and mobile; confirm every input remains immediate while the ending visually settles.
 - Review the orange active label and signature and violet underline against `#0e0e0e` for contrast, balance, and focus-state clarity before final approval.
+- Open the lightbox on desktop and mobile and review the close control with pointer hover, keyboard focus, press/tap, reduced motion, safe-area insets, and both bright and dark photographs.
 
 ## Risks and recovery
 
@@ -91,7 +96,7 @@ The narrow footer Motion use from Plan 010 becomes an application-level animatio
 | A normal `motion` import defeats lazy loading | Use strict `LazyMotion`, lint/review imports, and fail tests on provider errors.        |
 | Deferred features flash or hide content       | Render semantic content by default and treat animation as enhancement.                  |
 | Landing motion makes native scroll feel heavy | Transform presentation only, keep the distance short, and test rapid input reversals.   |
-| Color accents overwhelm the photographs       | Limit orange and violet to the three approved roles and review them with varied images. |
+| Color accents overwhelm the photographs       | Limit orange and violet to the approved roles and review them with varied images.       |
 | Motion adds cost without product value        | Keep one proof use, measure it, and revert the dependency if the result is unjustified. |
 
 ## Definition of done
@@ -103,4 +108,4 @@ The narrow footer Motion use from Plan 010 becomes an application-level animatio
 
 ## Implementation record
 
-Not started. Record package/version, feature-loading choice, landing behavior, native-input review, color approval, test-first evidence, bundle delta, profiling, CI, remaining limitations, and PR link.
+Not started. Record package/version, feature-loading choice, landing behavior, native-input review, shell and lightbox color approval, test-first evidence, bundle delta, profiling, CI, remaining limitations, and PR link.
