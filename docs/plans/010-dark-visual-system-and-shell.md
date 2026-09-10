@@ -3,7 +3,7 @@
 | Field          | Value                                                      |
 | -------------- | ---------------------------------------------------------- |
 | Type           | Feature                                                    |
-| Status         | In review                                                  |
+| Status         | Completed                                                  |
 | Depends on     | 009                                                        |
 | Blocks         | 011 and visual feature work                                |
 | Planned branch | `feat/dark-visual-system`                                  |
