@@ -36,11 +36,11 @@ The repository currently contains a strict TypeScript React application using Vi
 
 | Area             | Current implementation                                                                                                                                   |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Entry and shell  | `src/main.tsx` initializes React; `src/app/App.tsx` composes the router, navigation, routes, and custom scrollbar                                        |
+| Entry and shell  | `src/main.tsx` initializes React; `src/app/App.tsx` composes the router, navigation, routes, and footer                                                  |
 | Routes           | `/`, `/shop`, and `/contact`, declared in `src/app/App.tsx`                                                                                              |
 | Portfolio        | `src/features/portfolio/`, with separate orchestration, slideshow, grid, lightbox, typed photo catalog, and navigation policy modules                    |
 | Navigation       | `src/app/Navigation.tsx`, which owns navigation visibility and receives the portfolio marker as an explicit prop                                         |
-| Custom scrollbar | `src/app/CustomScrollbar.tsx`, which owns its listeners, timers, drag state, and cleanup                                                                 |
+| Scrolling        | Native document scrolling and a visible platform scrollbar with restrained CSS styling                                                                   |
 | Static resources | Typed application navigation data in `src/resources/navigation.ts`; typed feature-specific product data in `src/features/shop/resources/products.ts`     |
 | Styling          | `src/index.css` with Tailwind 4 CSS-first theme variables                                                                                                |
 | Photographs      | Twelve approximately 146 MB JPEG editing sources under `src/assets/photography/portfolio`; Vite produces delivery-sized JPEG/WebP variants during builds |
@@ -157,8 +157,8 @@ Use interfaces for stable object-shaped contracts such as component props and do
 
 - Do not duplicate the same asset under `src` and `public`.
 - Keep font license text beside self-hosted font files. Do not request production fonts from a third party when the approved font is bundled locally.
-- The selected display typeface is Zen Tokyo Zoo, supplied under the SIL Open Font License 1.1. It replaces Phosphate Inline throughout display and brand typography; Phosphate must not remain as a dependency or fallback because the project does not hold its commercial license.
-- Use the readable sans-serif stack for body copy. Do not synthesize unsupported Zen Tokyo Zoo weights.
+- **Current:** Zen Tokyo Zoo supplies display and brand typography. **Agreed direction:** Plan 010 replaces it globally with the supplied Zina Regular face. Use the designed Regular weight without synthesized bold. The official Zina OTF may be self-hosted directly under its ITF Free Font License; do not convert, subset, rename, or otherwise modify the font file because that license prohibits derivative font software.
+- Use the readable sans-serif stack for body copy. The supplied Inter Regular webfont is reserved for the footer copyright treatment. Do not synthesize unsupported Zina weights.
 - Convert wordmark lettering used through an external SVG image to vector paths so its rendering does not depend on page font loading. Use the live self-hosted font for HTML display text.
 - Keep portfolio catalog metadata and responsive-source ownership inside the portfolio feature even though the imported photograph files live under the shared asset root.
 
@@ -166,14 +166,14 @@ Use interfaces for stable object-shaped contracts such as component props and do
 
 **Current:** React and Vite remain the application and build foundation. Tailwind remains the primary styling approach for layout, typography, responsive behavior, and simple hover, focus, and state transitions. `src/index.css` defines semantic colors, typography, radii, shadow, and shared width primitives. Use global CSS for genuinely global concerns and component-local styles where an effect needs them.
 
-The dark canvas is `#0e0e0e`. The locally bundled Zen Tokyo Zoo face is the display font; the body stack remains a readable sans serif. On desktop, the shared footer is a CSS fixed layer behind the scrolling application surface; the document reserves its height so the footer is revealed at the end of a page and recedes when the user scrolls away. Mobile uses the footer in normal flow.
+The dark canvas is `#0e0e0e`. Zen Tokyo Zoo currently supplies the display face; Zina Regular is the agreed replacement for all display and brand typography. The wordmark and active navigation state use the focus color `#FFE193`; inactive navigation remains muted and gains the focus color on hover or keyboard focus. The body stack remains a readable sans serif, while the footer copyright uses Inter Regular at 12px. The current desktop footer is a CSS fixed layer behind the scrolling application surface. Plan 010 replaces its stationary reveal with a bounded scroll-linked parallax treatment across viewport sizes while preserving native document scrolling. Reduced-motion users receive the complete static footer without the scroll-linked transform.
 
-Motion for React is the selected general-purpose runtime for coordinated entrances and exits, page transitions, scroll reveals, scroll-linked transforms, bounded parallax, and justified layout animation. It is planned work until installed by an implementation ticket. Native browser scrolling and CSS layout retain ownership of document flow and stationary layout treatments; Motion may transform presentation in response to scroll but must not emulate or hijack scrolling. The platform scrollbar remains visible with restrained CSS styling that preserves platform scrolling behavior and accessibility.
+Motion for React is the selected general-purpose runtime for coordinated entrances and exits, page transitions, scroll reveals, scroll-linked transforms, bounded parallax, and justified layout animation. Plan 010 introduces its first narrow use for footer parallax; Plan 011 establishes the broader application provider and proof transition. Native browser scrolling and CSS layout retain ownership of document flow; Motion may transform presentation in response to scroll but must not emulate or hijack scrolling. The platform scrollbar remains visible with restrained CSS styling that preserves platform scrolling behavior and accessibility.
 
 | Layer            | Ownership                                                                                                                   |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | React + Vite     | Component composition, state, routing integration, code splitting, and production bundling                                  |
-| Tailwind + CSS   | Layout, typography, responsive styling, design tokens, stationary footer treatment, and simple interaction transitions      |
+| Tailwind + CSS   | Layout, typography, responsive styling, design tokens, footer geometry, and simple interaction transitions                  |
 | Motion for React | Coordinated enter/exit behavior, reveals, scroll-linked transforms, parallax, page transitions, and proven layout animation |
 
 Prefer strict `LazyMotion` with the slim `m` components and the smallest feature bundle that supports implemented behavior. Load animation features after semantic content can render, measure bundle cost, and avoid a full `motion` import that defeats lazy loading. Start with `domAnimation`; add layout or gesture features only when an accepted interaction requires them. Introduce another animation runtime only with a concrete, measured justification.
