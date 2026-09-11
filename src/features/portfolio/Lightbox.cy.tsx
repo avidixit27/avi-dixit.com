@@ -96,6 +96,25 @@ describe("Lightbox", () => {
     });
   });
 
+  it("gives the close control an accessible warm-orange fill interaction", () => {
+    mount(
+      <Lightbox
+        photos={photos}
+        selectedIndex={0}
+        previewSrc="/first-preview.jpg"
+        landscapeIndices={[0, 2]}
+        onSelect={cy.stub()}
+        onClosed={cy.stub()}
+      />,
+    );
+
+    cy.get('[aria-label="Close"]')
+      .should("have.class", "hover:text-brand-warm")
+      .and("have.class", "focus-visible:text-brand-warm")
+      .and("have.class", "active:text-brand-warm")
+      .and("have.class", "motion-reduce:transition-none");
+  });
+
   it("preloads and decodes a bounded responsive navigation window", () => {
     const preloadedImages: HTMLImageElement[] = [];
     const preloadPhotos = Array.from({ length: 6 }, (_, index) =>
