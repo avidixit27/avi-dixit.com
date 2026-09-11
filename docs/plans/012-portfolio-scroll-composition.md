@@ -1,14 +1,14 @@
 # 012 — Build the portfolio scroll composition
 
-| Field          | Value                                  |
-| -------------- | -------------------------------------- |
-| Type           | Feature                                |
-| Status         | Tracked in the [plan index](README.md) |
-| Depends on     | 011                                    |
-| Blocks         | 013 and homepage refinement            |
-| Planned branch | `feat/portfolio-scroll-composition`    |
-| PR base        | `main`                                 |
-| PR             | Not opened                             |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| Type           | Feature                                                    |
+| Status         | Tracked in the [plan index](README.md)                     |
+| Depends on     | 011                                                        |
+| Blocks         | 013 and homepage refinement                                |
+| Planned branch | `feat/portfolio-scroll-composition`                        |
+| PR base        | `main`                                                     |
+| PR             | [#30](https://github.com/avidixit27/avi-dixit.com/pull/30) |
 
 ## Outcome
 
@@ -92,4 +92,4 @@ The home portfolio demonstrates the approved cinematic direction with real photo
 
 ## Implementation record
 
-In progress. `PortfolioScrollComposition` owns the four approved editorial chapters and feature-owned copy, while `Portfolio` composes it between the existing hero and photo grid. The first and second editorial photographs use element-scoped, transform-only Motion values; their cards overscan to avoid exposed edges. CSS owns the sticky media and two stacking transitions. Both stacking effects are constrained to local wrapper boundaries after an initial global sticky implementation incorrectly left the color release beneath the gallery. Reduced-motion users receive static stacked sections and no image transforms. Visual review approved the final hover, image-drift, and stacking behavior. `npm run check` passed: lint, format, TypeScript, 31 unit tests (100% statements, lines, and functions; 94.54% branches), 20 Cypress component tests, production build, and 11 Cypress E2E journeys. `npm run security:audit` found zero production vulnerabilities. PR link and CI result will be added after opening and review.
+In progress. `PortfolioScrollComposition` owns the four approved editorial chapters and feature-owned copy, while `Portfolio` composes it between the existing hero and photo grid. The first and second editorial photographs use element-scoped, transform-only Motion values; their cards overscan to avoid exposed edges. CSS owns the sticky media and two stacking transitions. Both stacking effects are constrained to local wrapper boundaries after an initial global sticky implementation incorrectly left the color release beneath the gallery. Reduced-motion users receive static stacked sections and no image transforms. Visual review approved the final hover, image-drift, and stacking behavior. `npm run check` passed: lint, format, TypeScript, 31 unit tests (100% statements, lines, and functions; 94.54% branches), 20 Cypress component tests, production build, and 11 Cypress E2E journeys. `npm run security:audit` found zero production vulnerabilities. [PR #30](https://github.com/avidixit27/avi-dixit.com/pull/30) is open; CI result will be recorded after review.

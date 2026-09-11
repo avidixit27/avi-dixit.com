@@ -46,10 +46,10 @@ Completed tickets are historical records. Read one only when its outcome or impl
 
 Plans 007–011 established the configuration, regression, coverage, dark visual system, and Motion runtime base. Scroll composition now continues from `main`; route transitions remain a separate lifecycle-risk task.
 
-| Plan                                                                      | Status      | Depends on | Planned branch                      | PR base                             | PR         |
-| ------------------------------------------------------------------------- | ----------- | ---------- | ----------------------------------- | ----------------------------------- | ---------- |
-| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md) | In progress | 011        | `feat/portfolio-scroll-composition` | `main`                              | Not opened |
-| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | Planned     | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened |
+| Plan                                                                      | Status      | Depends on | Planned branch                      | PR base                             | PR                                                         |
+| ------------------------------------------------------------------------- | ----------- | ---------- | ----------------------------------- | ----------------------------------- | ---------------------------------------------------------- |
+| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md) | In progress | 011        | `feat/portfolio-scroll-composition` | `main`                              | [#30](https://github.com/avidixit27/avi-dixit.com/pull/30) |
+| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | Planned     | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened                                                 |
 
 ### Stack management
 
