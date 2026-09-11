@@ -40,16 +40,16 @@ Completed tickets are historical records. Read one only when its outcome or impl
 | [008 — Responsive presentation regressions](008-responsive-presentation-regressions.md)                | Completed | `fix/responsive-presentation-regressions` | [#25](https://github.com/avidixit27/avi-dixit.com/pull/25)                                                         |
 | [009 — Meaningful unit coverage gate](009-meaningful-unit-coverage-gate.md)                            | Completed | `test/unit-coverage-quality-gate`         | [#26](https://github.com/avidixit27/avi-dixit.com/pull/26)                                                         |
 | [010 — Dark visual system and shell](010-dark-visual-system-and-shell.md)                              | Completed | `feat/dark-visual-system`                 | [#27](https://github.com/avidixit27/avi-dixit.com/pull/27)                                                         |
+| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md)                              | Completed | `feat/motion-foundation`                  | [#29](https://github.com/avidixit27/avi-dixit.com/pull/29)                                                         |
 
 ## Current sequence
 
-Plans 007–010 established the configuration, regression, coverage, and dark visual-system base. Motion work now continues from `main` and remains split by runtime, scroll composition, and route lifecycle risk.
+Plans 007–011 established the configuration, regression, coverage, dark visual system, and Motion runtime base. Scroll composition now continues from `main`; route transitions remain a separate lifecycle-risk task.
 
-| Plan                                                                      | Status      | Depends on | Planned branch                      | PR base                             | PR                                                         |
-| ------------------------------------------------------------------------- | ----------- | ---------- | ----------------------------------- | ----------------------------------- | ---------------------------------------------------------- |
-| [011 — Accessible Motion foundation](011-accessible-motion-foundation.md) | In progress | 010        | `feat/motion-foundation`            | `main`                              | [#29](https://github.com/avidixit27/avi-dixit.com/pull/29) |
-| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md) | Planned     | 011        | `feat/portfolio-scroll-composition` | `feat/motion-foundation`            | Not opened                                                 |
-| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | Planned     | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened                                                 |
+| Plan                                                                      | Status      | Depends on | Planned branch                      | PR base                             | PR         |
+| ------------------------------------------------------------------------- | ----------- | ---------- | ----------------------------------- | ----------------------------------- | ---------- |
+| [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md) | In progress | 011        | `feat/portfolio-scroll-composition` | `main`                              | Not opened |
+| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | Planned     | 012        | `feat/route-layout-transitions`     | `feat/portfolio-scroll-composition` | Not opened |
 
 ### Stack management
 

@@ -7,12 +7,12 @@
 | Depends on     | 011                                    |
 | Blocks         | 013 and homepage refinement            |
 | Planned branch | `feat/portfolio-scroll-composition`    |
-| PR base        | `feat/motion-foundation`               |
+| PR base        | `main`                                 |
 | PR             | Not opened                             |
 
 ## Outcome
 
-The home portfolio demonstrates the approved cinematic direction with real photography, restrained reveals, one native-sticky story, bounded parallax, and an intentional saturated-color release. Motion strengthens hierarchy while normal scrolling, content access, and media performance remain stable.
+The home portfolio demonstrates the approved cinematic direction with real photography, restrained reveals, one native-sticky story, bounded image drift, two locally bounded stacked-section transitions, and an intentional saturated-color release. Motion strengthens hierarchy while normal scrolling, content access, and media performance remain stable.
 
 ## Prerequisites and current state
 
@@ -25,7 +25,8 @@ The home portfolio demonstrates the approved cinematic direction with real photo
 - Compose one home-route sequence using real portfolio assets and approved text.
 - Add restrained viewport reveal and stagger behavior only where repeated composition needs justify shared primitives.
 - Build one native CSS `position: sticky` media/text section.
-- Add one bounded parallax treatment driven by Motion values from `useScroll`/`useTransform`, without per-frame React state.
+- Add bounded editorial image drift driven by Motion values from `useScroll`/`useTransform`, without per-frame React state.
+- Add locally bounded CSS stacking between the introductory and sticky story, and between the final editorial image and color release.
 - Add one purposeful orange, blue, or violet color-release section between darker sequences.
 - Disable parallax and large transforms for reduced motion and simplify sticky behavior on constrained layouts when needed.
 - Profile fast/reverse scrolling, resize, image decode, and sticky entry/exit in production.
@@ -39,7 +40,7 @@ The home portfolio demonstrates the approved cinematic direction with real photo
 ## Deliverables
 
 - Approved portfolio composition and feature-owned static content.
-- Justified reveal/stagger implementation, one sticky section, and one parallax treatment.
+- Justified reveal/stagger implementation, one sticky section, bounded image drift, and locally bounded stacking treatments.
 - Reduced-motion and responsive alternatives.
 - Component/E2E coverage plus before/after performance evidence.
 
@@ -57,7 +58,8 @@ The home portfolio demonstrates the approved cinematic direction with real photo
 
 - Normal browser scrolling remains authoritative; no wheel, touch, or scroll-position hijacking exists.
 - Sticky positioning is CSS-owned and enters/exits correctly in both directions.
-- Parallax uses Motion values and transforms without continuous React scroll-state updates.
+- Image drift uses Motion values and transforms without continuous React scroll-state updates.
+- Stacked sections are constrained to their local document groups and cannot remain pinned beneath later portfolio content.
 - Reduced motion removes parallax and large transforms while preserving all content.
 - Mobile/touch layouts remain readable and may use normal flow instead of sticky behavior.
 - Initial media loading stays within Plan 005’s established policy and budget.
@@ -90,4 +92,4 @@ The home portfolio demonstrates the approved cinematic direction with real photo
 
 ## Implementation record
 
-Not started. Record approved content, component ownership, red/green evidence, profiling results, visual review, CI, removed effects, limitations, and PR link.
+In progress. `PortfolioScrollComposition` owns the four approved editorial chapters and feature-owned copy, while `Portfolio` composes it between the existing hero and photo grid. The first and second editorial photographs use element-scoped, transform-only Motion values; their cards overscan to avoid exposed edges. CSS owns the sticky media and two stacking transitions. Both stacking effects are constrained to local wrapper boundaries after an initial global sticky implementation incorrectly left the color release beneath the gallery. Reduced-motion users receive static stacked sections and no image transforms. Visual review approved the final hover, image-drift, and stacking behavior. `npm run check` passed: lint, format, TypeScript, 31 unit tests (100% statements, lines, and functions; 94.54% branches), 20 Cypress component tests, production build, and 11 Cypress E2E journeys. `npm run security:audit` found zero production vulnerabilities. PR link and CI result will be added after opening and review.

@@ -6,6 +6,7 @@ import { PHOTO_CATALOG } from "./photoCatalog";
 import { getLandscapePhotoIndices } from "./photoNavigation";
 import { HERO_PHOTO_COUNT } from "./portfolioPresentationPolicy";
 import PhotoGrid from "./PhotoGrid";
+import PortfolioScrollComposition from "./PortfolioScrollComposition";
 
 const HERO_PHOTOS = Object.freeze(PHOTO_CATALOG.slice(0, HERO_PHOTO_COUNT));
 const LANDSCAPE_PHOTO_INDICES = Object.freeze(
@@ -41,6 +42,7 @@ export default function Portfolio({ gridMarkerRef }: PortfolioProps) {
   return (
     <div className="min-h-screen bg-canvas">
       <HeroSlideshow photos={HERO_PHOTOS} onOpen={selectPhoto} />
+      <PortfolioScrollComposition photos={PHOTO_CATALOG} onOpen={selectPhoto} />
       <PhotoGrid
         photos={PHOTO_CATALOG}
         gridMarkerRef={gridMarkerRef}

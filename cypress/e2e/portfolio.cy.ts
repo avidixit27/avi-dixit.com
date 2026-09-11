@@ -172,6 +172,37 @@ describe("photography portfolio", () => {
     });
   });
 
+  it("composes the home portfolio with sticky, parallax, and color-release chapters", () => {
+    cy.viewport(1280, 800);
+    cy.visit("/");
+
+    cy.contains("h2", /all I could see was mayhem/).should("be.visible");
+    cy.get('[data-portfolio-sticky="true"]')
+      .should("have.class", "md:sticky")
+      .find(
+        'img[alt="A seated person looking into a small mirror on the ground"]',
+      )
+      .should("be.visible");
+    cy.get('[data-portfolio-parallax="true"]')
+      .find(
+        'img[alt="A crouching figure partially reflected in a small outdoor mirror"]',
+      )
+      .should("be.visible");
+    cy.contains("h2", "Something delightful and endlessly intriguing.")
+      .closest("section")
+      .should("have.class", "bg-brand-vivid")
+      .and("have.class", "text-canvas");
+
+    cy.viewport(390, 844);
+    cy.visit("/");
+    cy.get('[data-portfolio-sticky="true"]').should(($sticky) => {
+      expect(getComputedStyle($sticky.get(0)).position).to.equal("static");
+    });
+    cy.get('[data-portfolio-parallax="true"]')
+      .scrollIntoView()
+      .should("be.visible");
+  });
+
   it("reveals the footer with bounded parallax at desktop and mobile widths", () => {
     cy.viewport(1280, 800);
     cy.visit("/");
@@ -309,6 +340,10 @@ describe("photography portfolio", () => {
     });
     cy.visit("/");
     cy.get('[aria-label="Open hero image gallery"]').should("be.visible");
+    cy.get('[data-portfolio-parallax-content="true"]').should(
+      "not.have.attr",
+      "style",
+    );
     cy.get('footer[aria-label="Site footer"]').should(
       "have.css",
       "transform",
