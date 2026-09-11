@@ -1,14 +1,14 @@
 # 011 — Introduce an accessible Motion foundation
 
-| Field          | Value                                  |
-| -------------- | -------------------------------------- |
-| Type           | Feature                                |
-| Status         | Tracked in the [plan index](README.md) |
-| Depends on     | 010                                    |
-| Blocks         | 012 and 013                            |
-| Planned branch | `feat/motion-foundation`               |
-| PR base        | `main`                                 |
-| PR             | Not opened                             |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| Type           | Feature                                                    |
+| Status         | Tracked in the [plan index](README.md)                     |
+| Depends on     | 010                                                        |
+| Blocks         | 012 and 013                                                |
+| Planned branch | `feat/motion-foundation`                                   |
+| PR base        | `main`                                                     |
+| PR             | [#29](https://github.com/avidixit27/avi-dixit.com/pull/29) |
 
 ## Outcome
 
@@ -50,7 +50,7 @@ The narrow footer Motion use from Plan 010 becomes an application-level animatio
 - Warm-orange active navigation with a vivid-violet active underline and a cream footer signature.
 - A warm-orange fill interaction for the lightbox close control.
 - Bundle-size and browser-profile evidence.
-- Updated architecture and agent guidance.
+- Updated architecture documentation; existing repository agent guidance reviewed for continued applicability.
 
 ## Implementation plan
 
@@ -118,5 +118,6 @@ The narrow footer Motion use from Plan 010 becomes an application-level animatio
 - The desktop landing controller normalizes wheel units, batches ordinary distance once per animation frame, and eases only the final viewport toward an accumulated target with `FOOTER_LANDING_TIME_CONSTANT_MS = 75`. Upward, modified, horizontal, modal, touch, keyboard, and reduced-motion paths remain outside the effect.
 - Navigation uses warm orange for the active label and vivid violet for its underline. The signature remains cream. The lightbox close glyph uses the warm-orange hover, focus-visible, and pressed treatment without changing its accessible target or dismissal behavior.
 - Focused unit and Cypress component coverage protects the provider policy, footer math and cleanup, navigation colors, signature fill, and lightbox close states. The implementation was developed through repeated browser review with slow, fast, from-top, and reverse scrolling; the final desktop treatment and responsive visuals were approved on 2026-09-10.
-- Plan 010's direct Motion import produced a 314.09 KB / 103.21 KB gzip entry chunk. The initial Plan 011 production measurement reduced the entry to 238.08 KB / 80.17 KB gzip and deferred `domAnimation` to a 33.55 KB / 12.59 KB gzip chunk. Record the final build figures and CI result in the PR.
+- Plan 010's direct Motion import produced a 314.09 KB / 103.21 KB gzip entry chunk. The final Plan 011 production build reduces the entry to 239.23 KB / 80.48 KB gzip and defers `domAnimation` to a 33.55 KB / 12.59 KB gzip chunk.
 - The global non-passive desktop wheel listener moves wheel scrolling onto a constant-time main-thread path and may add up to one animation frame of input latency above the landing zone. It performs no React state updates and runs no permanent animation loop. Image loading, decoding, responsive sources, and gallery caching are unchanged. Remove the controller while retaining the visual reveal if profiling or production feedback shows missed frames or perceptible general-page lag.
+- Local verification passed focused policy tests, lint, type checking, formatting, 100% statement/line/function and 94.54% branch unit coverage, all 19 Cypress component tests, and all 10 production E2E journeys. The footer E2E regression now derives the runtime viewport and contains no hard-coded viewport-height assumption, arbitrary delay, or DOM mutation inside a retry callback. PR #29 passed lint/format/types, unit, component, production build/E2E, dependency review, production audit, CodeQL, and Cloudflare build checks on 2026-09-11.
