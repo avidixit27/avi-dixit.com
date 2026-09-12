@@ -118,7 +118,7 @@ After pushing:
 
 Husky and lint-staged check staged files before commits. GitHub Actions validates pull requests and pushes to `main`; its unit job runs the 90% coverage gate. A separate workflow runs the production audit and CodeQL. Pull requests also receive dependency review.
 
-Dependabot checks npm and GitHub Actions weekly. Secret scanning and push protection are repository settings. Do not silence a security finding merely to pass; determine production impact, update when possible, and record any accepted risk.
+Dependabot checks npm and GitHub Actions weekly. For dependency maintenance, use `.agents/commands/dependency-maintenance.md` and record the result under `docs/vulnerabilities/`. Secret scanning and push protection are repository settings. Do not silence a security finding merely to pass; determine production impact, update when possible, and record any accepted risk.
 
 ## Token and tool efficiency
 

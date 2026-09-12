@@ -42,14 +42,11 @@ Completed tickets are historical records. Read one only when its outcome or impl
 | [010 — Dark visual system and shell](010-dark-visual-system-and-shell.md)                              | Completed | `feat/dark-visual-system`                 | [#27](https://github.com/avidixit27/avi-dixit.com/pull/27)                                                         |
 | [011 — Accessible Motion foundation](011-accessible-motion-foundation.md)                              | Completed | `feat/motion-foundation`                  | [#29](https://github.com/avidixit27/avi-dixit.com/pull/29)                                                         |
 | [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md)                              | Completed | `feat/portfolio-scroll-composition`       | [#30](https://github.com/avidixit27/avi-dixit.com/pull/30)                                                         |
+| [013 — Route and layout transitions](013-route-and-layout-transitions.md)                              | Completed | `feat/route-layout-transitions`           | [#31](https://github.com/avidixit27/avi-dixit.com/pull/31)                                                         |
 
 ## Current sequence
 
-Plans 007–011 established the configuration, regression, coverage, dark visual system, and Motion runtime base. Scroll composition now continues from `main`; route transitions remain a separate lifecycle-risk task.
-
-| Plan                                                                      | Status      | Depends on | Planned branch                  | PR base | PR                                                         |
-| ------------------------------------------------------------------------- | ----------- | ---------- | ------------------------------- | ------- | ---------------------------------------------------------- |
-| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | In progress | 012        | `feat/route-layout-transitions` | `main`  | [#31](https://github.com/avidixit27/avi-dixit.com/pull/31) |
+Plans 007–013 established the configuration, regression, coverage, dark visual system, Motion runtime, scroll composition, and route-transition foundation. No feature plan is currently in progress.
 
 ### Stack management
 

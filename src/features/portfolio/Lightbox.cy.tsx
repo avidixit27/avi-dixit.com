@@ -32,9 +32,7 @@ const photos = [
 ] as const satisfies readonly Photo[];
 
 function pressKey(key: string) {
-  cy.window().then((window) => {
-    window.dispatchEvent(new KeyboardEvent("keydown", { key }));
-  });
+  cy.get("body").trigger("keydown", { key });
 }
 
 function StatefulLightbox({

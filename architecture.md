@@ -32,7 +32,7 @@ The first product milestone is the portfolio and inquiries experience. Publishin
 
 ## 3. Current repository
 
-The repository currently contains a strict TypeScript React application using Vite, Tailwind, and React Router. The manifest specifies React 18, Vite 8, Tailwind 4, React Router 7, and TypeScript 5 version ranges; these are existing dependencies, not permanent version requirements.
+The repository currently contains a strict TypeScript React application using Vite, Tailwind, and React Router. The manifest specifies React 19, Vite 8, Tailwind 4, React Router 7, and TypeScript 5 version ranges; these are existing dependencies, not permanent version requirements.
 
 | Area             | Current implementation                                                                                                                                   |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -258,6 +258,8 @@ Installed scripts are defined in `package.json`; [AGENTS.md](AGENTS.md#current-c
 | Security                      | Dependabot, dependency review, production npm audit, CodeQL, and secret scanning           |
 
 The manifest and lockfile are the source of truth for installed versions. The maintained verification baseline uses Vite 8 with Rolldown, Tailwind 4 through `@tailwindcss/vite`, Vitest 5, Cypress 16, and ESLint 9. Tailwind theme values live in the CSS-first `@theme` block in `src/index.css`; no JavaScript Tailwind or PostCSS configuration is active. ESLint remains on version 9 until the installed React Hooks and JSX accessibility plugins declare ESLint 10 support; do not override incompatible peer ranges. Cypress is the selected browser test system; do not add Playwright or a duplicate component test stack without a specific requirement.
+
+Dependency maintenance records live in [docs/vulnerabilities/](docs/vulnerabilities/README.md), separate from feature plans. Each maintenance run records alerts, upgrades, deferrals, verification, and a post-upgrade configuration audit classified as Remove, Simplify, Keep, or Measure first. The repository-local prompt at `.agents/commands/dependency-maintenance.md` provides the repeatable weekly workflow without turning this architecture guide into a dependency changelog.
 
 ### Test boundaries
 
