@@ -145,6 +145,80 @@ describe("photography portfolio", () => {
     cy.get(".custom-scrollbar").should("not.exist");
   });
 
+  it("updates routes immediately with deliberate focus and scroll behavior", () => {
+    cy.visit("/");
+    cy.scrollTo(0, 1200);
+    cy.window().its("scrollY").should("be.greaterThan", 0);
+
+    cy.contains("a", "SHOP").click();
+    cy.location("pathname").should("eq", "/shop");
+    cy.window().its("scrollY").should("equal", 0);
+    cy.get('[data-route-content="true"]:not([aria-hidden="true"])')
+      .should("have.attr", "aria-label", "Print shop")
+      .and("have.focus");
+    cy.contains("h1", "Print shop").should("be.visible");
+
+    cy.contains("a", "CONTACT").click();
+    cy.location("pathname").should("eq", "/contact");
+    cy.get('[data-route-content="true"]:not([aria-hidden="true"])')
+      .should("have.attr", "aria-label", "Contact")
+      .and("have.focus");
+    cy.contains("h1", "Contact").should("be.visible");
+
+    cy.go("back");
+    cy.location("pathname").should("eq", "/shop");
+    cy.contains("h1", "Print shop").should("be.visible");
+
+    cy.go("back");
+    cy.location("pathname").should("eq", "/");
+    cy.window().its("scrollY").should("be.greaterThan", 0);
+  });
+
+  it("keeps an unknown route informative and reachable", () => {
+    cy.viewport(555, 844);
+    cy.visit("/unknown-route");
+    cy.contains("h1", "Page not found")
+      .should("be.visible")
+      .then(($heading) => {
+        expect(
+          parseFloat(getComputedStyle($heading.get(0)).fontSize),
+        ).to.be.greaterThan(48);
+      });
+    cy.get("main > div").then(($content) => {
+      const content = $content.get(0)?.getBoundingClientRect();
+      if (!content) throw new Error("Expected centered 404 content");
+
+      const layoutViewportWidth =
+        $content.get(0)?.ownerDocument.documentElement.clientWidth;
+      if (!layoutViewportWidth) {
+        throw new Error("Expected a measurable layout viewport");
+      }
+      const availableCenterY = 64 + (844 - 64) / 2;
+      expect(content.left + content.width / 2).to.be.closeTo(
+        layoutViewportWidth / 2,
+        1,
+      );
+      expect(content.top + content.height / 2).to.be.closeTo(
+        availableCenterY,
+        1,
+      );
+
+      cy.contains("a", "Return home").then(($link) => {
+        const link = $link.get(0)?.getBoundingClientRect();
+        if (!link) throw new Error("Expected 404 return link");
+        expect(link.left + link.width / 2).to.be.closeTo(
+          content.left + content.width / 2,
+          1,
+        );
+      });
+    });
+    cy.document().then((document) => {
+      expect(document.documentElement.scrollWidth).to.equal(
+        document.documentElement.clientWidth,
+      );
+    });
+  });
+
   it("keeps semantic color utilities in the production stylesheet", () => {
     cy.visit("/contact");
     cy.get('input[name="email"]')
