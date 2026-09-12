@@ -1,14 +1,14 @@
 # 013 — Add route and layout transitions
 
-| Field          | Value                                  |
-| -------------- | -------------------------------------- |
-| Type           | Feature                                |
-| Status         | Tracked in the [plan index](README.md) |
-| Depends on     | 012                                    |
-| Blocks         | Future project-detail transitions      |
-| Planned branch | `feat/route-layout-transitions`        |
-| PR base        | `main`                                 |
-| PR             | Not opened                             |
+| Field          | Value                                                      |
+| -------------- | ---------------------------------------------------------- |
+| Type           | Feature                                                    |
+| Status         | Tracked in the [plan index](README.md)                     |
+| Depends on     | 012                                                        |
+| Blocks         | Future project-detail transitions                          |
+| Planned branch | `feat/route-layout-transitions`                            |
+| PR base        | `main`                                                     |
+| PR             | [#31](https://github.com/avidixit27/avi-dixit.com/pull/31) |
 
 ## Outcome
 
@@ -92,4 +92,4 @@ Implemented an application-owned `RouteTransitionBoundary` that centralizes the 
 
 Test-first evidence: the new Cypress assertions initially failed because navigation retained its old scroll position and unknown URLs rendered no route. They pass with the transition boundary, and cover route focus, normal navigation scroll reset, back navigation, and the reachable 404 screen. Visual review of the Home, Shop, and Contact transitions was approved before final E2E verification. Reduced-motion route changes are immediate and do not intercept scrolling or history.
 
-Verification: `npm run check` passed linting, format, strict application and Cypress type checks, 31 unit tests (100% statements and lines; 94.54% branches), 20 component tests, and 13 production E2E journeys. `npm run security:audit` found zero production vulnerabilities. The production build retains the existing `motionFeatures` chunk at 12.62 kB gzip; no `domMax`, additional Motion runtime, or speculative shared-element system was added. Project-detail shared transitions remain deferred until real source/destination routes exist. Add the PR link and final CI result after opening the pull request.
+Verification: `npm run check` passed linting, format, strict application and Cypress type checks, 31 unit tests (100% statements and lines; 94.54% branches), 20 component tests, and 13 production E2E journeys. `npm run security:audit` found zero production vulnerabilities. The production build retains the existing `motionFeatures` chunk at 12.62 kB gzip; no `domMax`, additional Motion runtime, or speculative shared-element system was added. Project-detail shared transitions remain deferred until real source/destination routes exist. PR [#31](https://github.com/avidixit27/avi-dixit.com/pull/31) awaits CI and review.

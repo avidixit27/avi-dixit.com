@@ -47,9 +47,9 @@ Completed tickets are historical records. Read one only when its outcome or impl
 
 Plans 007–011 established the configuration, regression, coverage, dark visual system, and Motion runtime base. Scroll composition now continues from `main`; route transitions remain a separate lifecycle-risk task.
 
-| Plan                                                                      | Status      | Depends on | Planned branch                  | PR base | PR         |
-| ------------------------------------------------------------------------- | ----------- | ---------- | ------------------------------- | ------- | ---------- |
-| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | In progress | 012        | `feat/route-layout-transitions` | `main`  | Not opened |
+| Plan                                                                      | Status      | Depends on | Planned branch                  | PR base | PR                                                         |
+| ------------------------------------------------------------------------- | ----------- | ---------- | ------------------------------- | ------- | ---------------------------------------------------------- |
+| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | In progress | 012        | `feat/route-layout-transitions` | `main`  | [#31](https://github.com/avidixit27/avi-dixit.com/pull/31) |
 
 ### Stack management
 
