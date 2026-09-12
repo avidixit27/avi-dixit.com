@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "motion": "^13.2.0",
-    "react": "^18.2.0",
+    "react": "^19.2.8",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.18.3"
   },
@@ -46,7 +46,7 @@
     "@eslint/js": "^9.39.5",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^22.20.1",
-    "@types/react": "^18.3.31",
+    "@types/react": "^19.2.18",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/coverage-v8": "^5.0.0",
