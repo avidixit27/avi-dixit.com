@@ -7,7 +7,7 @@
 | Depends on     | 012                                    |
 | Blocks         | Future project-detail transitions      |
 | Planned branch | `feat/route-layout-transitions`        |
-| PR base        | `feat/portfolio-scroll-composition`    |
+| PR base        | `main`                                 |
 | PR             | Not opened                             |
 
 ## Outcome
@@ -88,4 +88,8 @@ Route changes and existing shared layout states transition coherently without de
 
 ## Implementation record
 
-Not started. Record route policy, test-first evidence, Motion feature choice, bundle delta, accessibility review, CI, limitations, and PR link.
+Implemented an application-owned `RouteTransitionBoundary` that centralizes the current React Router location, lazy route readiness, route-keyed Motion presence, fallback content, and the fallback route. The approved policy updates URLs immediately; push and replace navigation scroll to the top and move focus to the current route container, while browser back/forward retains browser-managed scroll and does not force focus. An exiting route is removed from the accessibility tree, made inert before paint, and cannot receive pointer interaction. The existing CSS navigation indicator remains the chosen layout treatment because it already communicates the active destination without expanding the Motion feature set.
+
+Test-first evidence: the new Cypress assertions initially failed because navigation retained its old scroll position and unknown URLs rendered no route. They pass with the transition boundary, and cover route focus, normal navigation scroll reset, back navigation, and the reachable 404 screen. Visual review of the Home, Shop, and Contact transitions was approved before final E2E verification. Reduced-motion route changes are immediate and do not intercept scrolling or history.
+
+Verification: `npm run check` passed linting, format, strict application and Cypress type checks, 31 unit tests (100% statements and lines; 94.54% branches), 20 component tests, and 13 production E2E journeys. `npm run security:audit` found zero production vulnerabilities. The production build retains the existing `motionFeatures` chunk at 12.62 kB gzip; no `domMax`, additional Motion runtime, or speculative shared-element system was added. Project-detail shared transitions remain deferred until real source/destination routes exist. Add the PR link and final CI result after opening the pull request.
