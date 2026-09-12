@@ -175,8 +175,38 @@ describe("photography portfolio", () => {
   });
 
   it("keeps an unknown route informative and reachable", () => {
+    cy.viewport(555, 844);
     cy.visit("/unknown-route");
-    cy.contains("h1", "Page not found").should("be.visible");
+    cy.contains("h1", "Page not found")
+      .should("be.visible")
+      .then(($heading) => {
+        expect(
+          parseFloat(getComputedStyle($heading.get(0)).fontSize),
+        ).to.be.greaterThan(48);
+      });
+    cy.get("main > div").then(($content) => {
+      const content = $content.get(0)?.getBoundingClientRect();
+      if (!content) throw new Error("Expected centered 404 content");
+
+      const availableCenterY = 64 + (844 - 64) / 2;
+      expect(content.left + content.width / 2).to.be.closeTo(555 / 2, 1);
+      expect(content.top + content.height / 2).to.be.closeTo(
+        availableCenterY,
+        1,
+      );
+
+      cy.contains("a", "Return home").then(($link) => {
+        const link = $link.get(0)?.getBoundingClientRect();
+        if (!link) throw new Error("Expected 404 return link");
+        expect(link.left + link.width / 2).to.be.closeTo(
+          content.left + content.width / 2,
+          1,
+        );
+      });
+    });
+    cy.document().then((document) => {
+      expect(document.documentElement.scrollWidth).to.equal(555);
+    });
   });
 
   it("keeps semantic color utilities in the production stylesheet", () => {

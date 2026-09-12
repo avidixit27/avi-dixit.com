@@ -8,15 +8,17 @@ import {
   useLocation,
   useNavigationType,
 } from "react-router-dom";
+import Portfolio from "../features/portfolio/Portfolio";
 import { ROUTES } from "../resources/navigation";
+import {
+  ROUTE_EXIT_OFFSET_PX,
+  ROUTE_TRANSITION,
+} from "./motionPresentationPolicy";
 import NotFound from "./NotFound";
 import RouteLoadingFallback from "./RouteLoadingFallback";
 
-const Portfolio = lazy(() => import("../features/portfolio/Portfolio"));
 const Shop = lazy(() => import("../features/shop/Shop"));
 const Contact = lazy(() => import("../features/inquiries/Contact"));
-
-const ROUTE_TRANSITION = { duration: 0.18, ease: "easeOut" } as const;
 
 interface RouteTransitionBoundaryProps {
   portfolioGridRef: Ref<HTMLDivElement>;
@@ -77,12 +79,16 @@ function RouteFrame({
       aria-hidden={isPresent ? undefined : true}
       className={
         isPresent
-          ? "relative"
-          : "pointer-events-none absolute inset-x-0 top-0 z-20 w-full"
+          ? "relative min-h-screen bg-canvas"
+          : "pointer-events-none absolute inset-x-0 top-0 z-20 min-h-screen w-full bg-canvas"
       }
-      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-      animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-      exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
+      initial={false}
+      animate={{ opacity: 1, y: 0 }}
+      exit={
+        reduceMotion
+          ? { opacity: 1, y: 0 }
+          : { opacity: 0, y: ROUTE_EXIT_OFFSET_PX }
+      }
       transition={reduceMotion ? { duration: 0 } : ROUTE_TRANSITION}
     >
       {children}
