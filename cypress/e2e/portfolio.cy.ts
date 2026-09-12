@@ -188,8 +188,16 @@ describe("photography portfolio", () => {
       const content = $content.get(0)?.getBoundingClientRect();
       if (!content) throw new Error("Expected centered 404 content");
 
+      const layoutViewportWidth =
+        $content.get(0)?.ownerDocument.documentElement.clientWidth;
+      if (!layoutViewportWidth) {
+        throw new Error("Expected a measurable layout viewport");
+      }
       const availableCenterY = 64 + (844 - 64) / 2;
-      expect(content.left + content.width / 2).to.be.closeTo(555 / 2, 1);
+      expect(content.left + content.width / 2).to.be.closeTo(
+        layoutViewportWidth / 2,
+        1,
+      );
       expect(content.top + content.height / 2).to.be.closeTo(
         availableCenterY,
         1,
@@ -205,7 +213,9 @@ describe("photography portfolio", () => {
       });
     });
     cy.document().then((document) => {
-      expect(document.documentElement.scrollWidth).to.equal(555);
+      expect(document.documentElement.scrollWidth).to.equal(
+        document.documentElement.clientWidth,
+      );
     });
   });
 
