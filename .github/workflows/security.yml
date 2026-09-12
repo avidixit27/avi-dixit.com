@@ -36,6 +36,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - run: npm ci --omit=dev --ignore-scripts --no-audit
       - run: npm run security:audit
 
   codeql:
