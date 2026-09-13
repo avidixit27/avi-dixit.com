@@ -10,6 +10,10 @@ updates:
       timezone: America/New_York
     open-pull-requests-limit: 5
     ignore:
+      # TypeScript 7 is deferred until typescript-eslint supports it.
+      - dependency-name: typescript
+        versions:
+          - ">=7.0.0 <8.0.0"
       # ESLint 10 is blocked until both React and JSX accessibility plugins support it.
       - dependency-name: eslint
         versions:
