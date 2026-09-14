@@ -46,7 +46,7 @@ Completed tickets are historical records. Read one only when its outcome or impl
 
 ## Current sequence
 
-Plans 007–013 established the configuration, regression, coverage, dark visual system, Motion runtime, scroll composition, and route-transition foundation. Dependency-maintenance PR #32 is merged. Plan 014 is stacked on the temporary TypeScript 7 compatibility guard while its implementation is reviewed.
+Plans 007–013 established the configuration, regression, coverage, dark visual system, Motion runtime, scroll composition, and route-transition foundation. Dependency-maintenance PR #32 is merged. Plan 014 is stacked on the temporary TypeScript 7 compatibility guard ([#37](https://github.com/avidixit27/avi-dixit.com/pull/37)); its implementation is in [#38](https://github.com/avidixit27/avi-dixit.com/pull/38) and awaits review.
 
 | Plan                                                                                         | Status      | Planned branch                          | Depends on                |
 | -------------------------------------------------------------------------------------------- | ----------- | --------------------------------------- | ------------------------- |

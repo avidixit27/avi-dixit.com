@@ -8,7 +8,7 @@
 | Blocks         | [015 — Brand asset payload optimization](015-brand-asset-payload-optimization.md) |
 | Planned branch | `fix/ui-stability-regressions`                                                    |
 | PR base        | `chore/temporarily-ignore-typescript-7`                                           |
-| PR             | Not opened                                                                        |
+| PR             | [#38](https://github.com/avidixit27/avi-dixit.com/pull/38)                       |
 
 ## Outcome
 
