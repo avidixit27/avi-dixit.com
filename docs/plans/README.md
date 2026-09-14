@@ -46,11 +46,11 @@ Completed tickets are historical records. Read one only when its outcome or impl
 
 ## Current sequence
 
-Plans 007–013 established the configuration, regression, coverage, dark visual system, Motion runtime, scroll composition, and route-transition foundation. Dependency-maintenance PR #32 is merged. Plan 014 is stacked on the temporary TypeScript 7 compatibility guard ([#37](https://github.com/avidixit27/avi-dixit.com/pull/37)); its implementation is in [#38](https://github.com/avidixit27/avi-dixit.com/pull/38) and awaits review.
+Plans 007–013 established the configuration, regression, coverage, dark visual system, Motion runtime, scroll composition, and route-transition foundation. Dependency-maintenance PR #32 and the temporary TypeScript 7 compatibility guard ([#37](https://github.com/avidixit27/avi-dixit.com/pull/37)) are merged. Plan 014 was reviewed in [#38](https://github.com/avidixit27/avi-dixit.com/pull/38), but that PR merged into the guard branch after the guard had already reached `main`; [#41](https://github.com/avidixit27/avi-dixit.com/pull/41) restores the reviewed tree directly to `main`.
 
 | Plan                                                                                         | Status      | Planned branch                          | Depends on                |
 | -------------------------------------------------------------------------------------------- | ----------- | --------------------------------------- | ------------------------- |
-| [014 — UI stability regressions](014-ui-stability-regressions.md)                            | In progress | `fix/ui-stability-regressions`          | TypeScript 7 guard branch |
+| [014 — UI stability regressions](014-ui-stability-regressions.md)                            | In progress | `fix/restore-ui-stability-regressions`  | TypeScript 7 guard merged |
 | [015 — Brand asset payload optimization](015-brand-asset-payload-optimization.md)            | Planned     | `perf/brand-asset-payloads`             | 014                       |
 | [016 — Feature availability controls](016-feature-availability-controls.md)                  | Planned     | `feat/feature-availability-controls`    | 015                       |
 | [017 — Portfolio statement and résumé](017-portfolio-statement-and-resume.md)                | Planned     | `feat/portfolio-statement-resume`       | 016                       |

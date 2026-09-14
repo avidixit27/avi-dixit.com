@@ -6,9 +6,9 @@
 | Status         | Tracked in the [plan index](README.md)                                            |
 | Depends on     | PR #32 merged into `main` with its compatibility guards                           |
 | Blocks         | [015 — Brand asset payload optimization](015-brand-asset-payload-optimization.md) |
-| Planned branch | `fix/ui-stability-regressions`                                                    |
-| PR base        | `chore/temporarily-ignore-typescript-7`                                           |
-| PR             | [#38](https://github.com/avidixit27/avi-dixit.com/pull/38)                        |
+| Planned branch | `fix/restore-ui-stability-regressions`                                            |
+| PR base        | `main`                                                                            |
+| PR             | [#41](https://github.com/avidixit27/avi-dixit.com/pull/41)                        |
 
 ## Outcome
 
@@ -114,7 +114,7 @@ After the user approves the output and requests no further visual edits:
 
 ## Implementation record
 
-Implementation completed on `fix/ui-stability-regressions` and visually approved on 2026-09-14. The final changes:
+Implementation completed on `fix/ui-stability-regressions` and visually approved on 2026-09-14. PR #38 was merged into its parent branch after that parent had already merged to `main`, so recovery PR #41 reapplies the reviewed tree directly to `main`. The final changes:
 
 - prevent same-route Home links from creating a new location key; the navigation owns a 900 ms eased return and reduced-motion remains immediate;
 - explicitly suspend and cancel the footer landing animation during that reset, eliminating the stale target that restored the previous scroll position after the next wheel gesture;
@@ -122,4 +122,4 @@ Implementation completed on `fix/ui-stability-regressions` and visually approved
 - paint a stable noninteractive bootstrap surface until fonts are ready, reset non-POP routes before paint, and keep the responsive 404 geometry stable;
 - remove the React image-priority warning by using the supported `fetchPriority` prop spelling.
 
-Focused Vitest passed (`7/7` footer policy tests). The full unit coverage gate passed with 34 tests, 100% statements/lines/functions, and 94.73% branches. Lint, formatting, TypeScript, `git diff --check`, and the production build pass locally. Cypress component and production E2E pass locally with Node 22.22.2; the E2E suite reports 14/14 passing. The local production dependency audit could not reach the npm registry and remains covered by the existing CI security workflow. PR #38 CI passed after the final navigation fixes.
+Focused Vitest passed (`7/7` footer policy tests). The full unit coverage gate passed with 34 tests, 100% statements/lines/functions, and 94.73% branches. Lint, formatting, TypeScript, `git diff --check`, and the production build pass locally. Cypress component and production E2E pass locally with Node 22.22.2; the E2E suite reports 14/14 passing. The local production dependency audit could not reach the npm registry and remains covered by the existing CI security workflow. PR #38 CI passed after the final navigation fixes; PR #41 is the direct-to-`main` recovery PR.
