@@ -1,10 +1,10 @@
-# 020 — Define the Instagram feed sync architecture
+# 021 — Define the Instagram feed sync architecture
 
 | Field          | Value                                                                       |
 | -------------- | --------------------------------------------------------------------------- |
 | Type           | Architecture                                                                |
 | Status         | Tracked in the [plan index](README.md)                                      |
-| Depends on     | [016 — Feature availability controls](016-feature-availability-controls.md) |
+| Depends on     | [017 — Feature availability controls](017-feature-availability-controls.md) |
 | Blocks         | A separately approved Instagram implementation ticket                       |
 | Planned branch | `docs/instagram-feed-sync-architecture`                                     |
 | PR base        | `main`                                                                      |
@@ -21,7 +21,7 @@ The resulting decision will support a later, separately approved implementation 
 - The Instagram account is confirmed to be a Professional account owned and managed by the site owner.
 - The current repository deploys a static Vite build through one Cloudflare Worker configured in `wrangler.jsonc`. It has no Worker source entry, scheduled handler, KV binding, API route, or server-side Instagram code.
 - The Instagram feed is supplemental and must remain separate from the curated portfolio catalog and project routes.
-- Plan 016 establishes centralized release visibility. A later Instagram UI must be releasable behind that mechanism until its production sync and presentation are approved.
+- Plan 017 establishes centralized release visibility. A later Instagram UI must be releasable behind that mechanism until its production sync and presentation are approved.
 - Meta's current [Instagram API with Instagram Login](https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-instagram-login) supports Professional Business and Creator accounts and does not require a linked Facebook Page.
 - Meta's current [Business Login documentation](https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-instagram-login/business-login) says a Business-type Meta app is required. Standard Access is sufficient when an app serves Professional accounts the app owner manages and has added in the App Dashboard; Advanced Access and App Review are required when serving accounts the app owner does not manage.
 - The first version reads only owned media and therefore requests only `instagram_business_basic`. It does not request publishing, messaging, comment-management, insights, or Facebook Login permissions.
@@ -152,7 +152,7 @@ AWS documents custom [Secrets Manager rotation through Lambda](https://docs.aws.
 8. Complete the threat model and least-privilege review. Confirm that no app secret is required after initial exchange, no management API token is introduced solely to rewrite a Worker secret, and no browser or log surface can receive the Meta token.
 9. Compare the validated Cloudflare design with the AWS migration boundary. Retain Cloudflare unless an existing AWS platform or concrete security requirement offsets the extra Lambda, Secrets Manager, delivery, monitoring, and cross-cloud ownership.
 10. Present the architecture, feed freshness, failure behavior, operational recovery, estimated cost, and deferred design choices for user approval.
-11. After approval, update `architecture.md` with the enduring decision and create a separately numbered implementation ticket. Do not provision services or write application code under Plan 020.
+11. After approval, update `architecture.md` with the enduring decision and create a separately numbered implementation ticket. Do not provision services or write application code under Plan 021.
 
 ## Acceptance criteria
 
@@ -180,7 +180,7 @@ Architecture verification only:
 - Exercise Meta requests only through a private administrative client with a temporary test token; redact all request URLs, headers, IDs, and response credentials from recorded evidence.
 - Calculate full-sync calls and catalog size from the real post count without downloading every media asset.
 - Review data-flow and trust-boundary diagrams, contracts, failure sequences, cost estimate, and recovery runbook.
-- `npx prettier --check docs/plans/020-instagram-feed-sync-architecture.md docs/plans/README.md`
+- `npx prettier --check docs/plans/021-instagram-feed-sync-architecture.md docs/plans/README.md`
 - `git diff --check`
 - Confirm the final diff contains only planning or enduring architecture documentation and no secrets, application code, dependencies, Wrangler changes, or generated artifacts.
 

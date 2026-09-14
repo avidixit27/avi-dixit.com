@@ -1,10 +1,10 @@
-# 019 — Add the portfolio discovery index
+# 020 — Add the portfolio discovery index
 
 | Field          | Value                                                                                        |
 | -------------- | -------------------------------------------------------------------------------------------- |
 | Type           | Feature                                                                                      |
 | Status         | Tracked in the [plan index](README.md)                                                       |
-| Depends on     | [018 — Portfolio collection models and routes](018-portfolio-collection-model-and-routes.md) |
+| Depends on     | [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md) |
 | Blocks         | None                                                                                         |
 | Planned branch | `feat/portfolio-discovery-index`                                                             |
 | PR base        | `main`                                                                                       |
@@ -16,9 +16,9 @@ Every portfolio ends with a restrained, destination-grouped index that lets visi
 
 ## Prerequisites and current state
 
-- Complete Plan 018 with at least two real portfolio summaries and routes. This ticket must consume its lightweight summary catalog rather than define a parallel list of projects.
+- Complete Plan 019 with at least two real portfolio summaries and routes. This ticket must consume its lightweight summary catalog rather than define a parallel list of projects.
 - Home remains the film portfolio at `/`; other projects use short `/portfolio/:slug` paths. Destination is display and grouping metadata.
-- Plan 017 adds Home-only Artist Statement and Résumé links above the shared footer. Plan 019 may compose those links within the broader Home closing region, but they remain absent from other portfolios.
+- Plan 018 adds Home-only Artist Statement and Résumé links above the shared footer. Plan 020 may compose those links within the broader Home closing region, but they remain absent from other portfolios.
 - The shared fixed footer remains responsible only for the decorative signature, copyright, parallax, and final landing behavior. It must not read the current route or receive project data.
 - The approved discovery direction is text-only. Do not preload photographs, generate hover thumbnails, or add an image-preview layer in the first version.
 - The index appears at the end of every portfolio. It displays every currently available project, including the current project as noninteractive text with `aria-current="page"` or equivalent semantic state.
@@ -38,7 +38,7 @@ Every portfolio ends with a restrained, destination-grouped index that lets visi
 - Respect feature availability by receiving an already filtered project list; the discovery component must not decide release policy.
 - Add grouping, semantics, navigation, responsive layout, reduced-motion, and cross-project journey coverage.
 
-Anticipated ownership includes `src/features/portfolio/`, the lightweight summary data established by Plan 018, existing Motion presentation policy only if a reusable timing already fits, and focused unit, component, and E2E coverage. The global `Footer.tsx`, primary `Navigation.tsx`, and image catalogs should not need discovery-specific behavior.
+Anticipated ownership includes `src/features/portfolio/`, the lightweight summary data established by Plan 019, existing Motion presentation policy only if a reusable timing already fits, and focused unit, component, and E2E coverage. The global `Footer.tsx`, primary `Navigation.tsx`, and image catalogs should not need discovery-specific behavior.
 
 ## Non-goals
 
@@ -69,8 +69,8 @@ Anticipated ownership includes `src/features/portfolio/`, the lightweight summar
 5. Render the current project as text with a visible “Current” label and `aria-current="page"`. Render every other available project as a router link. Use title and optional date as concise content; do not repeat destination inside every row when its group heading already supplies it.
 6. Implement the underline with local CSS or Tailwind pseudo-element utilities using the established vivid-violet token and visible keyboard focus. Keep pointer hover, keyboard focus, and touch activation equivalent in meaning.
 7. Add one section-level Motion reveal using the existing feature set. Limit it to opacity and a small transform, use a short fixed stagger only across rendered groups or links, run once when the section becomes visible, and render final values immediately under reduced motion.
-8. Place discovery after each project's gallery and project-owned editorial content and before the shared footer reveal. On Home, compose the Plan 017 portfolio-document links in the same closing region or immediately adjacent section without duplicating them or exposing them elsewhere.
-9. Filter unreleased projects before passing summaries into discovery using Plan 016's application availability decision. Test the component independently with explicit lists so hidden features remain covered without appearing in production.
+8. Place discovery after each project's gallery and project-owned editorial content and before the shared footer reveal. On Home, compose the Plan 018 portfolio-document links in the same closing region or immediately adjacent section without duplicating them or exposing them elsewhere.
+9. Filter unreleased projects before passing summaries into discovery using Plan 017's application availability decision. Test the component independently with explicit lists so hidden features remain covered without appearing in production.
 10. Add E2E coverage for moving from Home to a secondary portfolio, seeing the new current marker, navigating to another project, returning through browser history, and using the Home wordmark. Verify route focus and scroll reset remain governed by the existing boundary.
 11. Build production and confirm that revealing or interacting with the index adds no image requests, eagerly loaded project media, new runtime dependency, or unexpected route prefetch. Record the JavaScript and CSS delta.
 12. Run focused lint, formatting, type, unit, and component checks. Review the closing index on representative mobile and desktop viewports with keyboard, touch-sized targets, normal motion, and reduced motion.

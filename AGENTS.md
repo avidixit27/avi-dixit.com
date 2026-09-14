@@ -43,9 +43,12 @@ Optimize for the fewest concepts a maintainer must understand, not the fewest li
 
 - Organize product behavior by feature. Keep genuinely shared presentation and infrastructure at the top level, and create directories only when their first implementation needs them.
 - Routes compose features. Features may use shared components and transport; shared components must not depend on routes, feature internals, or business API requests.
+- Keep route/page entrypoints isolated and thin, with API operations and business rules outside UI components. For future product detail work, use stable, directly addressable URLs such as `/shop/:slug`; do not implement new routes merely to satisfy this guidance.
+- Give route-data loading one explicit orchestration boundary rather than chains of effects that trigger further fetching. Keep reusable modules free of browser-only module initialization where practical; access `window`, `document`, and `localStorage` through browser entrypoints, effects, handlers, or deliberately scoped adapters.
 - Do not reach into another feature's internals. Compose cross-feature workflows above features or deliberately extract a shared responsibility.
 - Prefer explicit props, callbacks, children, and composition. Use Context only for a demonstrated shared-state concern.
 - Keep state local where possible and derive values rather than duplicating state. Give effects, listeners, timers, observers, and DOM mutations clear ownership and cleanup.
+- Keep catalog, cart, authentication, inventory, and checkout state with their owners rather than placing the entire shop in one global context.
 - Keep feature-specific types, hooks, helpers, constants, API operations, resources, and tests near their owner. Avoid catch-all utility or handler folders.
 - Extract coherent responsibilities for readability, reuse, or testability. Do not introduce speculative factories, generic frameworks, wrappers, or indirection.
 - Treat about 200 lines of hand-written source as a review signal, not a hard cap. Do not fragment cohesive code to meet a number; documentation and generated files are exempt.
@@ -132,5 +135,6 @@ Dependabot checks npm and GitHub Actions weekly. Secret scanning and push protec
 - Do not treat any backend language, framework, database, authentication, hosting, deployment, or repository location as selected. A separate repository remains permitted.
 - Do not create backend directories, schemas, endpoints, or infrastructure from earlier candidate discussions.
 - Keep frontend integration behind explicit contracts and isolated transport, with deliberate loading, empty, success, error, and retry states.
+- Keep authentication, inventory, payments, and Instagram operations behind purposeful service contracts, with provider-specific API calls and business rules outside presentation. Add those boundaries with approved integrations, not as speculative infrastructure.
 - Keep secrets out of browser code. Mocks support development and tests but do not prove production integration.
 - Agree backend contracts and ownership in a separately scoped task before implementing real integrations.
