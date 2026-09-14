@@ -8,6 +8,12 @@ function LocationKey() {
   return <output>{location.key}</output>;
 }
 
+function LocationPath() {
+  const location = useLocation();
+
+  return <output data-location>{location.pathname}</output>;
+}
+
 describe("Navigation", () => {
   it("renders route links and marks the current destination", () => {
     mount(
@@ -166,5 +172,75 @@ describe("Navigation", () => {
 
     cy.contains("a", "HOME").click();
     cy.get("@scrollTo").should("have.been.calledOnceWith", 0, 0);
+  });
+
+  it("cancels an active Home reset before navigating away", () => {
+    const onHomeResetEnd = cy.stub().as("onHomeResetEnd");
+
+    cy.window().then((window) => {
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 1200,
+      });
+      cy.stub(window.performance, "now").returns(100);
+      cy.stub(window, "requestAnimationFrame")
+        .onFirstCall()
+        .returns(1)
+        .onSecondCall()
+        .returns(42);
+      cy.stub(window, "cancelAnimationFrame").as("cancelAnimationFrame");
+      cy.stub(window, "matchMedia").returns({
+        matches: false,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <Navigation
+          portfolioGridElement={null}
+          onHomeResetEnd={onHomeResetEnd}
+        />
+        <LocationPath />
+      </MemoryRouter>,
+    );
+
+    cy.get('a[aria-label="Home"]').click();
+    cy.contains("a", "SHOP").click();
+
+    cy.get("@cancelAnimationFrame").then((cancelAnimationFrame) => {
+      expect(
+        cancelAnimationFrame
+          .getCalls()
+          .filter((call: sinon.SinonSpyCall) => call.args[0] === 42),
+      ).to.have.length(1);
+    });
+    cy.get("@onHomeResetEnd").should("have.been.calledOnce");
+    cy.get("output[data-location]").should("have.text", "/shop");
+  });
+
+  it("preserves modified Home link activation", () => {
+    const onHomeResetStart = cy.stub().as("onHomeResetStart");
+
+    cy.window().then((window) => {
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 1200,
+      });
+      cy.stub(window, "scrollTo").as("scrollTo");
+    });
+    mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <Navigation
+          portfolioGridElement={null}
+          onHomeResetStart={onHomeResetStart}
+        />
+      </MemoryRouter>,
+    );
+
+    cy.get('a[aria-label="Home"]').click({ ctrlKey: true });
+
+    cy.get("@onHomeResetStart").should("not.have.been.called");
+    cy.get("@scrollTo").should("not.have.been.called");
   });
 });
