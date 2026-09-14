@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logoSmall from "../assets/brand/avi-dixit-wordmark.svg";
@@ -23,6 +23,16 @@ interface IndicatorPosition {
   left: number;
   width: number;
   visible: boolean;
+}
+
+function isModifiedActivation(event: ReactMouseEvent<HTMLAnchorElement>) {
+  return (
+    event.button !== 0 ||
+    event.metaKey ||
+    event.altKey ||
+    event.ctrlKey ||
+    event.shiftKey
+  );
 }
 
 export default function Navigation({
@@ -55,6 +65,14 @@ export default function Navigation({
     },
     [],
   );
+
+  useLayoutEffect(() => {
+    if (isHome || homeResetFrameRef.current === null) return;
+
+    window.cancelAnimationFrame(homeResetFrameRef.current);
+    homeResetFrameRef.current = null;
+    onHomeResetEnd?.();
+  }, [isHome, onHomeResetEnd]);
 
   useEffect(() => {
     const positionIndicator = () => {
@@ -185,7 +203,16 @@ export default function Navigation({
   ) => {
     setIsHidden(false);
 
-    if (path !== ROUTES.home || !isHome) return;
+    if (path !== ROUTES.home || !isHome) {
+      if (homeResetFrameRef.current !== null) {
+        window.cancelAnimationFrame(homeResetFrameRef.current);
+        homeResetFrameRef.current = null;
+        onHomeResetEnd?.();
+      }
+      return;
+    }
+
+    if (event.defaultPrevented || isModifiedActivation(event)) return;
 
     event.preventDefault();
     if (window.scrollY <= 1) return;
@@ -237,7 +264,9 @@ export default function Navigation({
         <Link
           to={ROUTES.home}
           aria-label="Home"
-          onMouseDown={(event) => event.preventDefault()}
+          onMouseDown={(event) => {
+            if (!isModifiedActivation(event)) event.preventDefault();
+          }}
           onClick={(event) => handleNavigationClick(event, ROUTES.home)}
         >
           <img
