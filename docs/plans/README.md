@@ -42,21 +42,29 @@ Completed tickets are historical records. Read one only when its outcome or impl
 | [010 — Dark visual system and shell](010-dark-visual-system-and-shell.md)                              | Completed | `feat/dark-visual-system`                 | [#27](https://github.com/avidixit27/avi-dixit.com/pull/27)                                                         |
 | [011 — Accessible Motion foundation](011-accessible-motion-foundation.md)                              | Completed | `feat/motion-foundation`                  | [#29](https://github.com/avidixit27/avi-dixit.com/pull/29)                                                         |
 | [012 — Portfolio scroll composition](012-portfolio-scroll-composition.md)                              | Completed | `feat/portfolio-scroll-composition`       | [#30](https://github.com/avidixit27/avi-dixit.com/pull/30)                                                         |
+| [013 — Route and layout transitions](013-route-and-layout-transitions.md)                              | Completed | `feat/route-layout-transitions`           | [#31](https://github.com/avidixit27/avi-dixit.com/pull/31)                                                         |
 
 ## Current sequence
 
-Plans 007–011 established the configuration, regression, coverage, dark visual system, and Motion runtime base. Scroll composition now continues from `main`; route transitions remain a separate lifecycle-risk task.
+Plans 007–013 established the configuration, regression, coverage, dark visual system, Motion runtime, scroll composition, and route-transition foundation. Dependency-maintenance PR #32 is merged. Plan 014 is stacked on the temporary TypeScript 7 compatibility guard while its implementation is reviewed.
 
-| Plan                                                                      | Status      | Depends on | Planned branch                  | PR base | PR                                                         |
-| ------------------------------------------------------------------------- | ----------- | ---------- | ------------------------------- | ------- | ---------------------------------------------------------- |
-| [013 — Route and layout transitions](013-route-and-layout-transitions.md) | In progress | 012        | `feat/route-layout-transitions` | `main`  | [#31](https://github.com/avidixit27/avi-dixit.com/pull/31) |
+| Plan                                                                                         | Status      | Planned branch                          | Depends on                |
+| -------------------------------------------------------------------------------------------- | ----------- | --------------------------------------- | ------------------------- |
+| [014 — UI stability regressions](014-ui-stability-regressions.md)                            | In progress | `fix/ui-stability-regressions`          | TypeScript 7 guard branch |
+| [015 — Brand asset payload optimization](015-brand-asset-payload-optimization.md)            | Planned     | `perf/brand-asset-payloads`             | 014                       |
+| [016 — Feature availability controls](016-feature-availability-controls.md)                  | Planned     | `feat/feature-availability-controls`    | 015                       |
+| [017 — Portfolio statement and résumé](017-portfolio-statement-and-resume.md)                | Planned     | `feat/portfolio-statement-resume`       | 016                       |
+| [018 — Portfolio collection models and routes](018-portfolio-collection-model-and-routes.md) | Planned     | `feat/portfolio-collection-routes`      | 017                       |
+| [019 — Portfolio discovery index](019-portfolio-discovery-index.md)                          | Planned     | `feat/portfolio-discovery-index`        | 018                       |
+| [020 — Instagram feed sync architecture](020-instagram-feed-sync-architecture.md)            | Planned     | `docs/instagram-feed-sync-architecture` | 016                       |
+
+Plan 014 resolves the next verified interaction, responsive, and cold-route regressions. Plan 015 then removes the measured raster-in-SVG and favicon payloads before Plan 016 adds release visibility to the same navigation and route composition. Plan 017 adds the Home-only statement and résumé after that shell work settles. Plan 018 introduces the project model only when a second real portfolio is ready, then proves it without changing Home's role. Plan 019 adds destination-grouped discovery after those routes and summaries exist. Plan 020 can begin after Plan 016 because it produces architecture and feasibility evidence only; it may run while later portfolio content is prepared, but any Instagram implementation requires its own approved ticket.
 
 ### Stack management
 
 - Create each child branch from the reviewed, committed state of its parent. Each PR targets its immediate parent and identifies that dependency, so its diff contains only its own layer.
 - Use purpose-based branch prefixes such as `feat/`, `fix/`, `refactor/`, `test/`, and `chore/`; keep the remainder concise and kebab-case.
-- Keep configuration migration, responsive fixes, coverage policy, visual redesign, and each motion class in their recorded scopes.
-- Merge Plans 011–013 in dependency order. When a parent merges, update the dependent PR base and restack as necessary to avoid repeating merged changes.
+- Keep each plan within its recorded scope and create a separate ticket for material adjacent work.
 - Keep dependent work based on the reviewed parent branch until that parent merges; then update its base to avoid repeating merged changes.
 - Run pull-request CI for intermediate base branches as well as `main`. Introduce required-check rules only when the relevant workflow exists on the protected target.
 - Each plan remains a separately scoped task. Update current command and architecture status when its implementation changes those facts.
@@ -71,4 +79,4 @@ Plans 007–011 established the configuration, regression, coverage, dark visual
 
 ## Later direction
 
-After the foundation stack, prioritize premium UI refinement, then define backend contracts and ownership for publishing and inquiries. Print commerce and optional Instagram import need separately scoped plans. Backend technologies and repository location remain open; no later plan files are scaffolded in advance.
+After the current sequence, prioritize premium UI refinement, then define backend contracts and ownership for publishing and inquiries. Print commerce remains separately scoped. Plan 020 investigates optional Instagram synchronization without selecting a general backend platform; its implementation remains a later decision. Backend technologies and repository location otherwise remain open.

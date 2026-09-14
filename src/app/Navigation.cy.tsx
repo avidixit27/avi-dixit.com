@@ -1,6 +1,12 @@
 import { mount } from "@cypress/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import Navigation from "./Navigation";
+
+function LocationKey() {
+  const location = useLocation();
+
+  return <output>{location.key}</output>;
+}
 
 describe("Navigation", () => {
   it("renders route links and marks the current destination", () => {
@@ -89,5 +95,76 @@ describe("Navigation", () => {
         });
       });
     });
+  });
+
+  it("runs a controlled return to the top without remounting Home", () => {
+    const onHomeResetEnd = cy.stub().as("onHomeResetEnd");
+    const onHomeResetStart = cy.stub().as("onHomeResetStart");
+
+    let homeResetFrame: FrameRequestCallback | undefined;
+    cy.window().then((window) => {
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 1200,
+      });
+      cy.stub(window.performance, "now").returns(100);
+      cy.stub(window, "requestAnimationFrame").callsFake((callback) => {
+        homeResetFrame = callback;
+        return 1;
+      });
+      cy.stub(window, "scrollTo").as("scrollTo");
+      cy.stub(window, "matchMedia").returns({
+        matches: false,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <Navigation
+          portfolioGridElement={null}
+          onHomeResetEnd={onHomeResetEnd}
+          onHomeResetStart={onHomeResetStart}
+        />
+        <LocationKey />
+      </MemoryRouter>,
+    );
+
+    cy.get("output").invoke("text").as("initialLocationKey");
+    cy.get('a[aria-label="Home"]').click().should("not.have.focus");
+    cy.get("@onHomeResetStart").should("have.been.calledOnce");
+    cy.get("@scrollTo").should("not.have.been.called");
+    cy.then(() => {
+      expect(homeResetFrame).to.be.a("function");
+      homeResetFrame?.(1000);
+    });
+    cy.get("@scrollTo").should("have.been.calledOnceWith", 0, 0);
+    cy.get("@initialLocationKey").then((initialLocationKey) => {
+      cy.get("output").should("have.text", initialLocationKey);
+    });
+    cy.get("@onHomeResetEnd").should("have.been.calledOnce");
+  });
+
+  it("returns Home to the top immediately when motion is reduced", () => {
+    cy.window().then((window) => {
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 1200,
+      });
+      cy.stub(window, "scrollTo").as("scrollTo");
+      cy.stub(window, "matchMedia").returns({
+        matches: true,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <Navigation portfolioGridElement={null} />
+      </MemoryRouter>,
+    );
+
+    cy.contains("a", "HOME").click();
+    cy.get("@scrollTo").should("have.been.calledOnceWith", 0, 0);
   });
 });
