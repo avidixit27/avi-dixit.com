@@ -85,6 +85,8 @@ This is an ownership map, not a scaffolding checklist. Create a directory only w
 - Shared components must not import routes, application providers, feature internals, or perform business API requests.
 - A feature must not reach into another feature's internals. Compose their interaction above them, or deliberately extract a shared responsibility.
 - Keep feature-specific API operations inside the owning feature. Shared transport must not become a catalog of unrelated business operations.
+- Keep route/page entrypoints thin and reasonably isolated: they own URL parameters, metadata, and composition, while feature modules own reusable behavior. Future product detail pages must have stable, directly addressable URLs such as `/shop/:slug`; product identity must not depend on transient navigation or modal state. This is a direction for future product work, not a request to create those routes now.
+- Keep business rules and API operations outside presentation components, behind explicit feature/service contracts. Route-specific loading orchestration belongs at the route boundary and calls those contracts; changing the routing or rendering system should not require rewriting business behavior.
 - Introduce narrow feature entrypoints when another layer needs them; avoid broad barrel files that export every internal symbol.
 - Keep constants and utilities beside their owners. Add top-level `constants` or `utils` only when the code has a clear responsibility shared across features.
 - Event handlers belong to their component or feature. Do not introduce a general-purpose `handler` directory.
@@ -119,10 +121,13 @@ For example, a photo display component can accept source variants, dimensions, a
 
 - Keep state local until multiple consumers require shared ownership. Lift it to the nearest common owner before introducing a global provider.
 - Use Context for a real shared concern across a subtree; ordinary component customization uses props.
+- Keep future catalog, cart, authentication, inventory, and checkout state with their respective owners. Do not collect all shop state in a single global context; share only the specific state a demonstrated cross-component workflow needs.
 - Keep state minimal and normalized: group values that change together, avoid contradictory or deeply nested shapes, and derive values from props or existing state rather than storing synchronized copies.
 - Represent mutually exclusive workflow states with one status or a discriminated union instead of combinations of booleans that permit impossible states.
 - Use URL state for navigation and shareable selections when the product requires them. Keep temporary interaction details local.
 - Effects synchronize with external systems. Do not use effects for values that can be calculated during rendering.
+- Avoid chains of effects that fetch route data by triggering one another through state updates. Give route data one clear orchestration boundary with explicit inputs, loading/error states, and cancellation; keep its API operations independently usable outside component lifecycles.
+- Keep reusable modules safe to import without a browser where practical. Defer `window`, `document`, and `localStorage` access to browser entrypoints, effects, event handlers, or narrow adapters invoked in a browser context. Shared rendering must not require browser globals, and persisted state should have a defined initial value before browser storage is read. Explicit browser bootstrapping may use browser APIs; do not add speculative compatibility layers or claim server rendering is implemented.
 - Put user-triggered work in event handlers. Keep every Effect dependency complete, make setup and cleanup symmetrical, and handle stale or cancelled asynchronous work when results can arrive after inputs change or a component unmounts.
 - Give timers, listeners, observers, scroll locks, and DOM measurements an explicit owner and cleanup path.
 - Use refs for DOM integration and non-rendering mutable values. Do not read or write refs during render, and avoid hidden contracts based on another component's element IDs or body classes.
@@ -227,6 +232,7 @@ The frontend should be prepared for integration through these principles:
 
 - Agree explicit request, response, and error contracts before implementing a real integration. Decide the contract format and ownership with the backend project.
 - Isolate HTTP transport from presentation. Map external representations into the inputs the UI needs.
+- Keep authentication, inventory, payments, and Instagram integration behind separate, purposeful service boundaries. UI components consume explicit data and operation contracts rather than scattering provider-specific calls or business rules throughout the component tree. Introduce each boundary when its integration is approved, without preselecting a backend or building a generic service framework.
 - Represent loading, empty, success, error, and retry states intentionally. Do not present successful submission or publication before the corresponding operation succeeds.
 - Use fixtures and controlled HTTP responses for frontend development and testing. Never mistake a mock workflow for a working production integration.
 - Keep backend credentials and private service secrets out of browser code and public build-time variables.

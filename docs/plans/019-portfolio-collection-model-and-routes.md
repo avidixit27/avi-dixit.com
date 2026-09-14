@@ -1,11 +1,11 @@
-# 018 — Establish portfolio collection models and routes
+# 019 — Establish portfolio collection models and routes
 
 | Field          | Value                                                                         |
 | -------------- | ----------------------------------------------------------------------------- |
 | Type           | Feature                                                                       |
 | Status         | Tracked in the [plan index](README.md)                                        |
-| Depends on     | [017 — Portfolio statement and résumé](017-portfolio-statement-and-resume.md) |
-| Blocks         | [019 — Portfolio discovery index](019-portfolio-discovery-index.md)           |
+| Depends on     | [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md) |
+| Blocks         | [020 — Portfolio discovery index](020-portfolio-discovery-index.md)           |
 | Planned branch | `feat/portfolio-collection-routes`                                            |
 | PR base        | `main`                                                                        |
 | PR             | Not opened                                                                    |
@@ -16,7 +16,7 @@ The current film portfolio remains the complete Home experience at `/`, while ad
 
 ## Prerequisites and current state
 
-- Complete Plan 017 first because it adds a statement route and a Home-only closing section that belongs specifically to the current film body of work.
+- Complete Plan 018 first because it adds a statement route and a Home-only closing section that belongs specifically to the current film body of work.
 - `Portfolio.tsx` currently owns one catalog, one hero selection, one editorial composition, one grid, and one lightbox workflow. `photoCatalog.ts` combines reusable photo types and construction logic with one literal Vite glob and the film photo metadata.
 - The current film portfolio remains at `/`. The wordmark and Home navigation continue to return to that experience.
 - Additional projects use `/portfolio/:slug`. Slugs should usually contain two to four lowercase words separated by hyphens and must not exceed 32 characters. Prefer stable descriptive names such as `/portfolio/tokyo-night`; omit years or redundant location words unless needed to distinguish projects.

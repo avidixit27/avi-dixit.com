@@ -1,14 +1,14 @@
 # 014 — Resolve UI stability regressions
 
-| Field          | Value                                                                             |
-| -------------- | --------------------------------------------------------------------------------- |
-| Type           | Fix                                                                               |
-| Status         | Tracked in the [plan index](README.md)                                            |
-| Depends on     | PR #32 merged into `main` with its compatibility guards                           |
-| Blocks         | [015 — Brand asset payload optimization](015-brand-asset-payload-optimization.md) |
-| Planned branch | `fix/restore-ui-stability-regressions`                                            |
-| PR base        | `main`                                                                            |
-| PR             | [#41](https://github.com/avidixit27/avi-dixit.com/pull/41)                        |
+| Field          | Value                                                             |
+| -------------- | ----------------------------------------------------------------- |
+| Type           | Fix                                                               |
+| Status         | Tracked in the [plan index](README.md)                            |
+| Depends on     | PR #32 merged into `main` with its compatibility guards           |
+| Blocks         | [015 — Browser-test reliability](015-browser-test-reliability.md) |
+| Planned branch | `fix/restore-ui-stability-regressions`                            |
+| PR base        | `main`                                                            |
+| PR             | [#41](https://github.com/avidixit27/avi-dixit.com/pull/41)        |
 
 ## Outcome
 
@@ -41,7 +41,7 @@ Anticipated ownership includes `src/app/Navigation.tsx`, its component coverage,
 - Do not redesign the portfolio, navigation, 404 copy, or established route animation.
 - Do not add global smooth scrolling, change ordinary page scrolling, or route the same-page Home reset through React Router.
 - Do not add SSR, static route generation, a custom Cloudflare routing service, or another runtime.
-- Do not split or optimize the wordmark, portrait, or favicon; [Plan 015](015-brand-asset-payload-optimization.md) owns that measured payload work.
+- Do not split or optimize the wordmark, portrait, or favicon; [Plan 016](016-brand-and-photo-payload-optimization.md) owns that measured payload work.
 - Do not solve an unverified breakpoint hypothesis. If the reported gap cannot be reproduced from the supplied viewport and recording, record the evidence and seek a decision before changing layout rules.
 
 ## Deliverables
@@ -114,7 +114,7 @@ After the user approves the output and requests no further visual edits:
 
 ## Implementation record
 
-Implementation completed on `fix/ui-stability-regressions` and visually approved on 2026-09-14. PR #38 was merged into its parent branch after that parent had already merged to `main`, so recovery PR #41 reapplies the reviewed tree directly to `main`. The final changes:
+Implementation completed on `fix/ui-stability-regressions` and visually approved on 2026-09-14. PR #38 was merged into its parent branch after that parent had already merged to `main`, so recovery PR #41 merged the reviewed tree directly into `main` on 2026-09-14. The final changes:
 
 - prevent same-route Home links from creating a new location key; the navigation owns a 900 ms eased return and reduced-motion remains immediate;
 - explicitly suspend and cancel the footer landing animation during that reset, eliminating the stale target that restored the previous scroll position after the next wheel gesture;

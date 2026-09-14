@@ -1,11 +1,11 @@
-# 017 — Add the portfolio statement and résumé
+# 018 — Add the portfolio statement and résumé
 
 | Field          | Value                                                                                        |
 | -------------- | -------------------------------------------------------------------------------------------- |
 | Type           | Feature                                                                                      |
 | Status         | Tracked in the [plan index](README.md)                                                       |
-| Depends on     | [016 — Feature availability controls](016-feature-availability-controls.md)                  |
-| Blocks         | [018 — Portfolio collection models and routes](018-portfolio-collection-model-and-routes.md) |
+| Depends on     | [017 — Feature availability controls](017-feature-availability-controls.md)                  |
+| Blocks         | [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md) |
 | Planned branch | `feat/portfolio-statement-resume`                                                            |
 | PR base        | `main`                                                                                       |
 | PR             | Not opened                                                                                   |
@@ -16,7 +16,7 @@ The current body of work ends with two restrained, Home-only links to its accomp
 
 ## Prerequisites and current state
 
-- Complete Plan 016 first so route visibility and navigation composition have settled before adding another route.
+- Complete Plan 017 first so route visibility and navigation composition have settled before adding another route.
 - `Portfolio.tsx` currently ends with the photo grid inside the opaque Home surface, followed by the application-wide fixed footer. `Footer.tsx` intentionally contains only the decorative signature and copyright.
 - The artist statement accompanies the displayed body of work. It is not an “About the artist” biography and must not be labeled or framed as one.
 - The approved placement is a Home-owned final section immediately after the photo grid and before the shared footer reveal. It may visually complement the footer, but it remains part of the portfolio feature and normal document flow.
