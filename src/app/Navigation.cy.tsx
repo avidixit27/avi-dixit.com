@@ -243,4 +243,103 @@ describe("Navigation", () => {
     cy.get("@onHomeResetStart").should("not.have.been.called");
     cy.get("@scrollTo").should("not.have.been.called");
   });
+
+  it("keeps an active Home reset for a modified non-Home link activation", () => {
+    const onHomeResetEnd = cy.stub().as("onHomeResetEnd");
+
+    cy.window().then((window) => {
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 1200,
+      });
+      cy.stub(window.performance, "now").returns(100);
+      cy.stub(window, "requestAnimationFrame")
+        .onFirstCall()
+        .returns(1)
+        .onSecondCall()
+        .returns(42);
+      cy.stub(window, "cancelAnimationFrame").as("cancelAnimationFrame");
+      cy.stub(window, "matchMedia").returns({
+        matches: false,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <Navigation
+          portfolioGridElement={null}
+          onHomeResetEnd={onHomeResetEnd}
+        />
+        <LocationPath />
+      </MemoryRouter>,
+    );
+
+    cy.get('a[aria-label="Home"]').click();
+    cy.contains("a", "SHOP").click({ ctrlKey: true });
+
+    cy.get("@cancelAnimationFrame").then((cancelAnimationFrame) => {
+      expect(
+        cancelAnimationFrame
+          .getCalls()
+          .filter((call: sinon.SinonSpyCall) => call.args[0] === 42),
+      ).to.have.length(0);
+    });
+    cy.get("@onHomeResetEnd").should("not.have.been.called");
+    cy.get("output[data-location]").should("have.text", "/");
+  });
+
+  it("does not retain a canceled reset handle after motion becomes reduced", () => {
+    const onHomeResetEnd = cy.stub().as("onHomeResetEnd");
+
+    cy.window().then((window) => {
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 1200,
+      });
+      cy.stub(window.performance, "now").returns(100);
+      cy.stub(window, "requestAnimationFrame")
+        .onFirstCall()
+        .returns(1)
+        .onSecondCall()
+        .returns(42);
+      cy.stub(window, "cancelAnimationFrame").as("cancelAnimationFrame");
+      cy.stub(window, "scrollTo");
+      cy.stub(window, "matchMedia")
+        .onFirstCall()
+        .returns({
+          matches: false,
+          addEventListener: cy.stub(),
+          removeEventListener: cy.stub(),
+        } as unknown as MediaQueryList)
+        .onSecondCall()
+        .returns({
+          matches: true,
+          addEventListener: cy.stub(),
+          removeEventListener: cy.stub(),
+        } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <Navigation
+          portfolioGridElement={null}
+          onHomeResetEnd={onHomeResetEnd}
+        />
+        <LocationPath />
+      </MemoryRouter>,
+    );
+
+    cy.get('a[aria-label="Home"]').click().click();
+    cy.contains("a", "SHOP").click();
+
+    cy.get("@cancelAnimationFrame").then((cancelAnimationFrame) => {
+      expect(
+        cancelAnimationFrame
+          .getCalls()
+          .filter((call: sinon.SinonSpyCall) => call.args[0] === 42),
+      ).to.have.length(1);
+    });
+    cy.get("@onHomeResetEnd").should("have.been.calledOnce");
+    cy.get("output[data-location]").should("have.text", "/shop");
+  });
 });
