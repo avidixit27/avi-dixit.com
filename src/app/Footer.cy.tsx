@@ -30,6 +30,12 @@ describe("Footer", () => {
       expect(window.document.documentElement.scrollHeight).to.be.greaterThan(
         window.innerHeight,
       );
+      const maximumScrollY =
+        window.document.documentElement.scrollHeight - window.innerHeight;
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: maximumScrollY - 1,
+      });
       const wheelEvent = new window.WheelEvent("wheel", {
         cancelable: true,
         deltaY: 10,
@@ -37,7 +43,7 @@ describe("Footer", () => {
       expect(window.dispatchEvent(wheelEvent)).to.equal(false);
       Object.defineProperty(window, "scrollY", {
         configurable: true,
-        value: 500,
+        value: 0,
       });
       window.dispatchEvent(new Event("scroll"));
     });
