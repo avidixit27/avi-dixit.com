@@ -174,9 +174,20 @@ describe("photography portfolio", () => {
     cy.window().its("scrollY").should("be.greaterThan", 0);
   });
 
+  it("returns to the top when Home is selected from a scrolled portfolio", () => {
+    cy.visit("/");
+    cy.scrollTo(0, 1200);
+    cy.window().its("scrollY").should("be.greaterThan", 0);
+
+    cy.contains("a", "HOME").click();
+    cy.location("pathname").should("eq", "/");
+    cy.window().its("scrollY").should("equal", 0);
+  });
+
   it("keeps an unknown route informative and reachable", () => {
     cy.viewport(555, 844);
     cy.visit("/unknown-route");
+    cy.get("#app-bootstrap").should("not.exist");
     cy.contains("h1", "Page not found")
       .should("be.visible")
       .then(($heading) => {
@@ -252,7 +263,7 @@ describe("photography portfolio", () => {
 
     cy.contains("h2", /all I could see was mayhem/).should("be.visible");
     cy.get('[data-portfolio-sticky="true"]')
-      .should("have.class", "md:sticky")
+      .should("have.class", "lg:sticky")
       .find(
         'img[alt="A seated person looking into a small mirror on the ground"]',
       )
