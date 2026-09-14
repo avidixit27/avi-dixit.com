@@ -1,4 +1,5 @@
 import { mount } from "@cypress/react";
+import { MotionConfig } from "motion/react";
 import Footer from "./Footer";
 import MotionProvider from "./MotionProvider";
 
@@ -18,9 +19,11 @@ describe("Footer", () => {
 
     mount(
       <MotionProvider>
-        <div className="min-h-[3000px]">
-          <Footer landingEnabled />
-        </div>
+        <MotionConfig reducedMotion="never">
+          <div className="min-h-[3000px]">
+            <Footer landingEnabled />
+          </div>
+        </MotionConfig>
       </MotionProvider>,
     );
     cy.get('footer[aria-label="Site footer"]').should("exist");
