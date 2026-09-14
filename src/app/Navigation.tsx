@@ -203,6 +203,8 @@ export default function Navigation({
   ) => {
     setIsHidden(false);
 
+    if (event.defaultPrevented || isModifiedActivation(event)) return;
+
     if (path !== ROUTES.home || !isHome) {
       if (homeResetFrameRef.current !== null) {
         window.cancelAnimationFrame(homeResetFrameRef.current);
@@ -212,13 +214,12 @@ export default function Navigation({
       return;
     }
 
-    if (event.defaultPrevented || isModifiedActivation(event)) return;
-
     event.preventDefault();
     if (window.scrollY <= 1) return;
 
     if (homeResetFrameRef.current !== null) {
       window.cancelAnimationFrame(homeResetFrameRef.current);
+      homeResetFrameRef.current = null;
     }
     onHomeResetStart?.();
 
