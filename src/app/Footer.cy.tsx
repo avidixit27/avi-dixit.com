@@ -1,5 +1,4 @@
 import { mount } from "@cypress/react";
-import { MotionConfig } from "motion/react";
 import Footer from "./Footer";
 import MotionProvider from "./MotionProvider";
 
@@ -13,20 +12,19 @@ describe("Footer", () => {
       } as unknown as MediaQueryList);
       Object.defineProperty(window, "scrollY", {
         configurable: true,
-        value: 2000,
+        value: 1,
       });
+      cy.spy(window, "addEventListener").as("addEventListener");
     });
 
     mount(
       <MotionProvider>
-        <MotionConfig reducedMotion="never">
-          <div className="min-h-[3000px]">
-            <Footer landingEnabled />
-          </div>
-        </MotionConfig>
+        <div className="min-h-[3000px]">
+          <Footer landingEnabled />
+        </div>
       </MotionProvider>,
     );
-    cy.get('footer[aria-label="Site footer"]').should("exist");
+    cy.get("@addEventListener").should("have.been.calledWith", "wheel");
     cy.window().then((window) => {
       cy.stub(window, "requestAnimationFrame").returns(42);
       cy.stub(window, "cancelAnimationFrame").as("cancelAnimationFrame");
@@ -39,6 +37,7 @@ describe("Footer", () => {
         configurable: true,
         value: maximumScrollY - 1,
       });
+      window.dispatchEvent(new Event("scroll"));
       const wheelEvent = new window.WheelEvent("wheel", {
         cancelable: true,
         deltaY: 10,

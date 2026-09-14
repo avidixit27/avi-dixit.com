@@ -1,4 +1,4 @@
-import { useReducedMotionConfig, useScroll, useTransform } from "motion/react";
+import { useReducedMotion, useScroll, useTransform } from "motion/react";
 import * as m from "motion/react-m";
 import { useEffect, useRef } from "react";
 import signatureLogo from "../assets/icons/avi-signature-logo.svg";
@@ -17,7 +17,7 @@ interface FooterProps {
 
 export default function Footer({ landingEnabled }: FooterProps) {
   const footerRef = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotionConfig();
+  const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: footerRef,
     offset: FOOTER_PARALLAX_SCROLL_OFFSETS,
