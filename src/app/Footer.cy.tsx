@@ -3,11 +3,69 @@ import Footer from "./Footer";
 import MotionProvider from "./MotionProvider";
 
 describe("Footer", () => {
+  it("cancels an active landing when scrolling moves upward", () => {
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia").returns({
+        matches: false,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 2000,
+      });
+    });
+
+    mount(
+      <MotionProvider>
+        <div className="min-h-[3000px]">
+          <Footer landingEnabled />
+        </div>
+      </MotionProvider>,
+    );
+    cy.get('footer[aria-label="Site footer"]').should("exist");
+    cy.window().then((window) => {
+      cy.stub(window, "requestAnimationFrame").returns(42);
+      cy.stub(window, "cancelAnimationFrame").as("cancelAnimationFrame");
+      expect(window.document.documentElement.scrollHeight).to.be.greaterThan(
+        window.innerHeight,
+      );
+      const wheelEvent = new window.WheelEvent("wheel", {
+        cancelable: true,
+        deltaY: 10,
+      });
+      expect(window.dispatchEvent(wheelEvent)).to.equal(false);
+      Object.defineProperty(window, "scrollY", {
+        configurable: true,
+        value: 500,
+      });
+      window.dispatchEvent(new Event("scroll"));
+    });
+    cy.get("@cancelAnimationFrame").should("have.been.calledOnceWith", 42);
+  });
+
+  it("leaves wheel scrolling native while a Home reset is active", () => {
+    mount(
+      <MotionProvider>
+        <Footer landingEnabled={false} />
+      </MotionProvider>,
+    );
+
+    cy.window().then((window) => {
+      const wheelEvent = new window.WheelEvent("wheel", {
+        cancelable: true,
+        deltaY: 100,
+      });
+
+      expect(window.dispatchEvent(wheelEvent)).to.equal(true);
+    });
+  });
+
   it("renders the copyright-only footer with its complete decorative signature", () => {
     cy.viewport(1280, 800);
     mount(
       <MotionProvider>
-        <Footer />
+        <Footer landingEnabled />
       </MotionProvider>,
     );
 

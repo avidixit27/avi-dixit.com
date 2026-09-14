@@ -26,6 +26,24 @@ const photos = [
 ] as const satisfies readonly Photo[];
 
 describe("PortfolioScrollComposition", () => {
+  it("keeps the coincidence composition connected below the wide layout", () => {
+    cy.viewport(1023, 800);
+    mount(<PortfolioScrollComposition photos={photos} onOpen={cy.stub()} />);
+
+    cy.get('[data-portfolio-sticky="true"]').should(($sticky) => {
+      expect(getComputedStyle($sticky.get(0)).position).to.equal("static");
+    });
+    cy.get('[data-portfolio-sticky="true"]').then(($sticky) => {
+      const imageBottom = $sticky.get(0).getBoundingClientRect().bottom;
+
+      cy.contains("p", "Coincidence / Predestination").should(($copy) => {
+        expect(
+          $copy.get(0).getBoundingClientRect().top - imageBottom,
+        ).to.be.lessThan(80);
+      });
+    });
+  });
+
   it("presents the approved editorial sequence with CSS-owned sticky media", () => {
     const onOpen = cy.spy().as("onOpen");
     mount(<PortfolioScrollComposition photos={photos} onOpen={onOpen} />);
@@ -39,7 +57,7 @@ describe("PortfolioScrollComposition", () => {
     cy.contains("h2", /all I could see was mayhem/).should("be.visible");
     cy.contains("p", /more chaos. Static/).should("be.visible");
     cy.get('[data-portfolio-sticky="true"]')
-      .should("have.class", "md:sticky")
+      .should("have.class", "lg:sticky")
       .within(() => {
         cy.get("button").should("not.have.class", "hover:scale-[1.01]");
         cy.get("button").should("not.have.class", "hover:border-border-strong");
@@ -56,9 +74,14 @@ describe("PortfolioScrollComposition", () => {
       .and("have.class", "md:bottom-0")
       .parents('[data-portfolio-stack-boundary="release"]')
       .should("have.length", 1);
-    cy.contains("h2", "Something delightful and endlessly intriguing.").should(
-      "be.visible",
-    );
+    cy.contains("h2", "Something delightful and endlessly intriguing.")
+      .should("be.visible")
+      .and(($title) => {
+        const styles = getComputedStyle($title.get(0));
+        expect(parseFloat(styles.lineHeight)).to.be.greaterThan(
+          parseFloat(styles.fontSize),
+        );
+      });
 
     cy.get('[data-portfolio-sticky="true"] button').click();
     cy.get("@onOpen").should(

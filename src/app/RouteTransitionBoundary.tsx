@@ -1,6 +1,6 @@
 import { AnimatePresence, useIsPresent, useReducedMotion } from "motion/react";
 import * as m from "motion/react-m";
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef } from "react";
+import { lazy, Suspense, useLayoutEffect, useRef } from "react";
 import type { ReactNode, Ref } from "react";
 import {
   Route,
@@ -58,7 +58,7 @@ function RouteFrame({
     route.setAttribute("inert", "");
   }, [isPresent]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isPresent || navigationType === "POP") return undefined;
 
     window.scrollTo(0, 0);
