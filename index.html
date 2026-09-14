@@ -31,8 +31,25 @@
       imagesrcset="/src/assets/brand/avi-dixit-wordmark.svg"
       fetchpriority="high"
     />
+    <style>
+      #app-bootstrap {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: grid;
+        place-items: center;
+        margin: 0;
+        background: #0e0e0e;
+        color: #f6f1e8;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.875rem;
+      }
+    </style>
   </head>
   <body class="bg-primary">
+    <div id="app-bootstrap" role="status" aria-live="polite">
+      Loading portfolio
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

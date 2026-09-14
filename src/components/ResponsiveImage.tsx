@@ -38,8 +38,6 @@ export default function ResponsiveImage({
   imageRef,
   onLoad,
 }: ResponsiveImageProps) {
-  const priorityAttribute = { fetchpriority: fetchPriority };
-
   return (
     <picture className={pictureClassName}>
       {sources.map((source) => (
@@ -51,7 +49,7 @@ export default function ResponsiveImage({
         />
       ))}
       <img
-        {...priorityAttribute}
+        fetchPriority={fetchPriority}
         ref={imageRef}
         src={src}
         srcSet={srcSet}

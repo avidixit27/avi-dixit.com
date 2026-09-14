@@ -20,7 +20,7 @@ describe("footer presentation policy", () => {
     expect(FOOTER_LANDING_SETTLE_THRESHOLD_PX).toBe(0.5);
   });
 
-  it("replays ordinary downward scrolling at 1:1 before the landing zone", () => {
+  it("leaves ordinary downward scrolling before the landing zone native", () => {
     expect(
       getFooterLandingWheelPlan({
         deltaMode: 0,
@@ -28,7 +28,7 @@ describe("footer presentation policy", () => {
         remainingDistance: 1_000,
         viewportHeight: 800,
       }),
-    ).toEqual({ easedDelta: 0, immediateDelta: 100 });
+    ).toBeNull();
   });
 
   it("leaves upward and completed scrolling outside the controller", () => {
