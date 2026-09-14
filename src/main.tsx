@@ -8,11 +8,7 @@ if (!rootElement) {
   throw new Error("Expected the application root element to exist.");
 }
 
-const bootstrapElement = document.getElementById("app-bootstrap");
-void document.fonts.ready.then(() => {
-  window.requestAnimationFrame(() => bootstrapElement?.remove());
-});
-
+// dummy commit
 ReactDOM.createRoot(rootElement).render(
   <StrictMode>
     <App />

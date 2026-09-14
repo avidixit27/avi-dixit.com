@@ -89,10 +89,10 @@ export default function PortfolioScrollComposition({
           ref={stickyRef}
           className="relative z-10 border-y border-border bg-surface"
         >
-          <div className="page-container grid gap-10 py-16 lg:min-h-[120svh] lg:grid-cols-2 lg:items-start lg:gap-16 lg:py-24">
+          <div className="page-container grid gap-10 py-16 md:min-h-[120svh] md:grid-cols-2 md:items-start md:gap-16 md:py-24">
             <div
               data-portfolio-sticky="true"
-              className="lg:sticky lg:top-12 lg:self-start"
+              className="md:sticky md:top-12 md:self-start"
             >
               <button
                 type="button"
@@ -125,7 +125,7 @@ export default function PortfolioScrollComposition({
                 </m.div>
               </button>
             </div>
-            <div className="lg:pt-[38svh]">
+            <div className="md:pt-[38svh]">
               <p className="font-inter text-xs tracking-[0.2em] text-brand-warm uppercase">
                 {PORTFOLIO_COMPOSITION.sticky.eyebrow}
               </p>
@@ -198,7 +198,7 @@ export default function PortfolioScrollComposition({
             <p className="font-inter text-xs tracking-[0.2em] uppercase">
               {PORTFOLIO_COMPOSITION.release.eyebrow}
             </p>
-            <h2 className="mt-6 font-display text-5xl leading-[1.08] sm:text-7xl lg:text-8xl">
+            <h2 className="mt-6 font-display text-5xl leading-none sm:text-7xl lg:text-8xl">
               {PORTFOLIO_COMPOSITION.release.title}
             </h2>
             {PORTFOLIO_COMPOSITION.release.description && (

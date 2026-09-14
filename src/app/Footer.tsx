@@ -11,11 +11,7 @@ import {
   getFooterLandingWheelPlan,
 } from "./footerPresentationPolicy";
 
-interface FooterProps {
-  landingEnabled: boolean;
-}
-
-export default function Footer({ landingEnabled }: FooterProps) {
+export default function Footer() {
   const footerRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -35,12 +31,11 @@ export default function Footer({ landingEnabled }: FooterProps) {
   const motionProps = reduceMotion ? {} : { style: { y, opacity } };
 
   useEffect(() => {
-    if (reduceMotion || !landingEnabled) return;
+    if (reduceMotion) return;
 
     let animationFrame: number | null = null;
     let pendingImmediateDelta = 0;
     let previousFrameTime: number | null = null;
-    let previousScrollY = window.scrollY;
     let targetScrollY = window.scrollY;
 
     const cancelLanding = () => {
@@ -51,18 +46,6 @@ export default function Footer({ landingEnabled }: FooterProps) {
       pendingImmediateDelta = 0;
       previousFrameTime = null;
       targetScrollY = window.scrollY;
-    };
-
-    const syncTargetWithScroll = () => {
-      const nextScrollY = window.scrollY;
-
-      if (nextScrollY < previousScrollY) {
-        cancelLanding();
-      } else if (animationFrame === null) {
-        targetScrollY = window.scrollY;
-      }
-
-      previousScrollY = nextScrollY;
     };
 
     const animateLanding = (frameTime: number) => {
@@ -153,7 +136,6 @@ export default function Footer({ landingEnabled }: FooterProps) {
     };
 
     window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("scroll", syncTargetWithScroll, { passive: true });
     window.addEventListener("keydown", cancelLanding);
     window.addEventListener("pointerdown", cancelLanding, { passive: true });
     window.addEventListener("resize", cancelLanding, { passive: true });
@@ -162,13 +144,12 @@ export default function Footer({ landingEnabled }: FooterProps) {
     return () => {
       cancelLanding();
       window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("scroll", syncTargetWithScroll);
       window.removeEventListener("keydown", cancelLanding);
       window.removeEventListener("pointerdown", cancelLanding);
       window.removeEventListener("resize", cancelLanding);
       window.removeEventListener("touchstart", cancelLanding);
     };
-  }, [landingEnabled, reduceMotion]);
+  }, [reduceMotion]);
 
   return (
     <div

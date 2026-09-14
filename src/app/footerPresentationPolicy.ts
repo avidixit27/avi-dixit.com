@@ -34,9 +34,6 @@ export function getFooterLandingWheelPlan({
         ? deltaY * viewportHeight
         : deltaY;
   const landingZone = viewportHeight * FOOTER_LANDING_ZONE_VIEWPORT_RATIO;
-
-  if (remainingDistance - pixelDelta >= landingZone) return null;
-
   const distanceBeforeZone = Math.max(0, remainingDistance - landingZone);
 
   const immediateDelta = Math.min(pixelDelta, distanceBeforeZone);
