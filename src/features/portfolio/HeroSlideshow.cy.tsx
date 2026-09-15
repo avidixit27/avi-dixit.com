@@ -66,9 +66,13 @@ describe("HeroSlideshow", () => {
 
   it("clears its timer when unmounted", () => {
     cy.clock();
-    cy.window().then((window) => cy.spy(window, "clearInterval").as("clear"));
+    cy.window().then((window) => {
+      cy.spy(window, "setInterval").as("setInterval");
+      cy.spy(window, "clearInterval").as("clearInterval");
+    });
     mount(<HeroSlideshow photos={photos} onOpen={cy.stub()} />);
+    cy.get("@setInterval").should("have.been.calledOnce");
     mount(<div>Replacement</div>);
-    cy.get("@clear").should("have.been.calledOnce");
+    cy.get("@clearInterval").should("have.been.calledOnce");
   });
 });

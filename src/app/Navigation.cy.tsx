@@ -238,7 +238,7 @@ describe("Navigation", () => {
       </MemoryRouter>,
     );
 
-    cy.get('a[aria-label="Home"]').click({ ctrlKey: true });
+    cy.get('a[aria-label="Home"]').trigger("click", { ctrlKey: true });
 
     cy.get("@onHomeResetStart").should("not.have.been.called");
     cy.get("@scrollTo").should("not.have.been.called");
@@ -276,7 +276,7 @@ describe("Navigation", () => {
     );
 
     cy.get('a[aria-label="Home"]').click();
-    cy.contains("a", "SHOP").click({ ctrlKey: true });
+    cy.contains("a", "SHOP").trigger("click", { ctrlKey: true });
 
     cy.get("@cancelAnimationFrame").then((cancelAnimationFrame) => {
       expect(

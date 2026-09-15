@@ -366,6 +366,9 @@ describe("Lightbox", () => {
   it("closes on Escape after the exit transition", () => {
     cy.clock();
     const onClosed = cy.spy().as("onClosed");
+    cy.window().then((window) =>
+      cy.spy(window, "addEventListener").as("addEventListener"),
+    );
     mount(
       <Lightbox
         photos={photos}
@@ -377,6 +380,7 @@ describe("Lightbox", () => {
       />,
     );
 
+    cy.get("@addEventListener").should("have.been.calledWith", "keydown");
     pressKey("Escape");
     cy.get('[role="dialog"]').should("have.class", "opacity-0");
     cy.tick(LIGHTBOX_CLOSE_DURATION_MS);
@@ -385,6 +389,10 @@ describe("Lightbox", () => {
 
   it("removes keyboard listeners when unmounted", () => {
     const onSelect = cy.spy().as("onSelect");
+    cy.window().then((window) => {
+      cy.spy(window, "addEventListener").as("addEventListener");
+      cy.spy(window, "removeEventListener").as("removeEventListener");
+    });
     mount(
       <Lightbox
         photos={photos}
@@ -395,7 +403,9 @@ describe("Lightbox", () => {
         onClosed={cy.stub()}
       />,
     );
+    cy.get("@addEventListener").should("have.been.calledWith", "keydown");
     mount(<div>Replacement</div>);
+    cy.get("@removeEventListener").should("have.been.calledWith", "keydown");
     pressKey("ArrowRight");
     cy.get("@onSelect").should("not.have.been.called");
   });

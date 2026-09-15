@@ -54,13 +54,23 @@ jobs:
           cache: npm
       - run: npm ci --no-audit
       - run: npm run test:component
-      - name: Upload component failure screenshots
+      - name: Upload component test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: component-test-reports
+          path: cypress/results
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Upload component failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: component-test-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
+          name: component-test-failure-diagnostics
+          path: |
+            cypress/screenshots
+            cypress/videos
+          if-no-files-found: warn
           retention-days: 7
 
   production-e2e:
@@ -74,11 +84,21 @@ jobs:
           cache: npm
       - run: npm ci --no-audit
       - run: npm run test:e2e
-      - name: Upload browser failure screenshots
+      - name: Upload browser test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: end-to-end-test-reports
+          path: cypress/results
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Upload browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: end-to-end-test-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
+          name: end-to-end-test-failure-diagnostics
+          path: |
+            cypress/screenshots
+            cypress/videos
+          if-no-files-found: warn
           retention-days: 7

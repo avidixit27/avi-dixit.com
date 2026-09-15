@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "resolveJsonModule": true,
     "types": ["cypress", "node", "vite/client"]
   },
   "include": ["../cypress.config.ts", "../src/**/*.cy.tsx", "./**/*.ts"],

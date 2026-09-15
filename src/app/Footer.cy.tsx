@@ -42,7 +42,10 @@ describe("Footer", () => {
         cancelable: true,
         deltaY: 10,
       });
-      expect(window.dispatchEvent(wheelEvent)).to.equal(false);
+      expect(
+        window.dispatchEvent(wheelEvent),
+        "Footer landing wheel should prevent default after its listener is ready",
+      ).to.equal(false);
       Object.defineProperty(window, "scrollY", {
         configurable: true,
         value: 0,

@@ -205,28 +205,29 @@ describe("photography portfolio", () => {
         throw new Error("Expected a measurable layout viewport");
       }
       const availableCenterY = 64 + (844 - 64) / 2;
-      expect(content.left + content.width / 2).to.be.closeTo(
-        layoutViewportWidth / 2,
-        1,
-      );
-      expect(content.top + content.height / 2).to.be.closeTo(
-        availableCenterY,
-        1,
-      );
+      expect(
+        content.left + content.width / 2,
+        `404 horizontal center (${content.left + content.width / 2}px)`,
+      ).to.be.closeTo(layoutViewportWidth / 2, 1);
+      expect(
+        content.top + content.height / 2,
+        `404 vertical center (${content.top + content.height / 2}px)`,
+      ).to.be.closeTo(availableCenterY, 1);
 
       cy.contains("a", "Return home").then(($link) => {
         const link = $link.get(0)?.getBoundingClientRect();
         if (!link) throw new Error("Expected 404 return link");
-        expect(link.left + link.width / 2).to.be.closeTo(
-          content.left + content.width / 2,
-          1,
-        );
+        expect(
+          link.left + link.width / 2,
+          `404 return-link center (${link.left + link.width / 2}px)`,
+        ).to.be.closeTo(content.left + content.width / 2, 1);
       });
     });
     cy.document().then((document) => {
-      expect(document.documentElement.scrollWidth).to.equal(
-        document.documentElement.clientWidth,
-      );
+      expect(
+        document.documentElement.scrollWidth,
+        `404 scroll width (${document.documentElement.scrollWidth}px)`,
+      ).to.equal(document.documentElement.clientWidth);
     });
   });
 
