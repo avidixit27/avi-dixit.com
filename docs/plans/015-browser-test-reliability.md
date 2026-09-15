@@ -3,7 +3,7 @@
 | Field          | Value                                                                                |
 | -------------- | ------------------------------------------------------------------------------------ |
 | Type           | Test reliability and tooling                                                         |
-| Status         | In progress; container adoption deferred pending user confirmation                   |
+| Status         | Completed; required container adoption deferred                                      |
 | Depends on     | Plan 014 merged into `main` through PR #41                                           |
 | Blocks         | [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md) |
 | Planned branch | `test/browser-test-reliability`                                                      |
@@ -122,6 +122,6 @@ Current evidence:
 - In a clean copied source tree with separate Linux `node_modules`, the cold image ran `npm ci` in 12 seconds and then completed the four repaired specs (24 tests, zero failures/pending/skipped) in 27.497 seconds of Cypress lifecycle time. A warm run completed the same four specs and 24 tests with the same zero counts in 26.345 seconds. No retries were configured.
 - Recommendation: defer required container adoption. The only suitable official image currently misses the project Node pin and browser version, while local ARM execution adds emulation cost; adding a Dockerfile or CI job would imply parity that this evaluation cannot establish. Retain native execution, structured artifacts, and the explicit macOS-arm64/Linux-x64 differences. Re-evaluate only when an image can be pinned to the required runtime and browser, or CI itself intentionally adopts that image.
 
-The implementation commit passed the PR CI gate as reported by the user. This evidence update requires its own CI run; do not treat local/container evidence as a substitute. The container-defer recommendation needs user confirmation before the plan is marked complete.
+PR #43 passed CI and merged into `main` on 2026-09-15. The user proceeded to Plan 016 after the merge, accepting the recorded recommendation to defer required container adoption. Local and container evidence remain distinct from the passing PR gate.
 
 RCA references: [repeated Footer failure](https://github.com/avidixit27/avi-dixit.com/actions/runs/34863933856), [Footer test fix](https://github.com/avidixit27/avi-dixit.com/commit/70a29c04f9546de2eacfefe66088eced8d7ec4f9), [viewport-width failure](https://github.com/avidixit27/avi-dixit.com/actions/runs/34491681408), and [404 geometry failure](https://github.com/avidixit27/avi-dixit.com/actions/runs/34669175634).

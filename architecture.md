@@ -329,6 +329,8 @@ When changing a material architectural decision, update this document in the sam
 
 Do not introduce new layers merely to imitate an architecture pattern. A new module, dependency, or abstraction must solve a present responsibility or an explicitly approved requirement. Never weaken tests or lint rules merely to make a change pass; rule changes need their own rationale.
 
+For each change, understand the affected flow before choosing the lowest-maintenance solution: reuse existing ownership and code, then standard-library or native platform capabilities, then installed tooling, before adding custom machinery. Correctness at trust boundaries, error handling, accessibility, and regression protection remain part of the solution. [AGENTS.md](AGENTS.md#simplicity-and-configuration) gives the operational decision order; an optional local coding plugin may reinforce it but is not an application dependency.
+
 ### Tooling references
 
 - [React: Components and Hooks must be pure](https://react.dev/reference/rules/components-and-hooks-must-be-pure)
