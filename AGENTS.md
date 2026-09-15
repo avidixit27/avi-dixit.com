@@ -101,23 +101,26 @@ After pushing:
 
 `package.json` is the command and dependency source of truth. Use Node `22.22.2` from `.nvmrc`.
 
-| Command                       | Purpose                                                         |
-| ----------------------------- | --------------------------------------------------------------- |
-| `npm run dev`                 | Start the Vite development server                               |
-| `npm run build`               | Build the production frontend                                   |
-| `npm run preview`             | Preview through the configured Cloudflare path                  |
-| `npm run lint`                | Run ESLint and fail on warnings                                 |
-| `npm run format:check`        | Check formatting without editing                                |
-| `npm run format`              | Apply Prettier explicitly                                       |
-| `npm run typecheck`           | Check application and Cypress TypeScript without emitting files |
-| `npm run test:unit`           | Run Vitest once                                                 |
-| `npm run test:unit:watch`     | Run Vitest in watch mode                                        |
-| `npm run test:unit:coverage`  | Enforce the 90% Vitest coverage gate for pure TypeScript        |
-| `npm run test:component`      | Run Cypress component tests in headless Chrome                  |
-| `npm run test:component:open` | Open the Cypress component runner                               |
-| `npm run test:e2e`            | Build, serve, and test critical journeys in headless Chrome     |
-| `npm run security:audit`      | Fail on moderate or higher production advisories                |
-| `npm run check`               | Run the complete local verification sequence                    |
+| Command                              | Purpose                                                                    |
+| ------------------------------------ | -------------------------------------------------------------------------- |
+| `npm run dev`                        | Start the Vite development server                                          |
+| `npm run build`                      | Build the production frontend                                              |
+| `npm run preview`                    | Preview through the configured Cloudflare path                             |
+| `npm run lint`                       | Run ESLint and fail on warnings                                            |
+| `npm run format:check`               | Check formatting without editing                                           |
+| `npm run format`                     | Apply Prettier explicitly                                                  |
+| `npm run typecheck`                  | Check application and Cypress TypeScript without emitting files            |
+| `npm run test:unit`                  | Run Vitest once                                                            |
+| `npm run test:unit:watch`            | Run Vitest in watch mode                                                   |
+| `npm run test:unit:coverage`         | Enforce the 90% Vitest coverage gate for pure TypeScript                   |
+| `npm run test:component`             | Run Cypress component tests in headless Chrome                             |
+| `npm run test:component:reliability` | Run repaired lifecycle/navigation component specs 20 times without retries |
+| `npm run test:component:open`        | Open the Cypress component runner                                          |
+| `npm run test:e2e`                   | Build, serve, and test critical journeys in headless Chrome                |
+| `npm run security:audit`             | Fail on moderate or higher production advisories                           |
+| `npm run check`                      | Run the complete local verification sequence                               |
+
+Browser-test commands write a fresh machine-readable completion report to `cypress/results/`. A run is successful only when Cypress exits successfully and that report proves nonzero completed tests and specs, no failures, and no pending or skipped tests. When a browser test fails, first inspect its matching report and retained screenshot/video artifacts, then rerun the smallest affected spec under Node 22.22.2; do not treat a command with no Cypress summary as a pass.
 
 Husky and lint-staged check staged files before commits. GitHub Actions validates pull requests and pushes to `main`; its unit job runs the 90% coverage gate. A separate workflow runs the production audit and CodeQL. Pull requests also receive dependency review.
 

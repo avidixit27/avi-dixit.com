@@ -3,7 +3,7 @@
 | Field          | Value                                                                                |
 | -------------- | ------------------------------------------------------------------------------------ |
 | Type           | Test reliability and tooling                                                         |
-| Status         | Planned; approved for the next implementation in the [plan index](README.md)         |
+| Status         | In progress; approved for implementation in the [plan index](README.md)              |
 | Depends on     | Plan 014 merged into `main` through PR #41                                           |
 | Blocks         | [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md) |
 | Planned branch | `test/browser-test-reliability`                                                      |
@@ -109,6 +109,17 @@ During iteration, select only the relevant spec. Run one full affected suite aft
 
 ## Implementation record
 
-Not started. The user approved this plan on 2026-09-14: CT plus related E2E failures, execution evidence, diagnostics, and container evaluation before adoption. Planning continues with Plan 016; approval does not mean implementation has begun.
+Implementation started on 2026-09-15. The user approved this plan on 2026-09-14: CT plus related E2E failures, execution evidence, diagnostics, and container evaluation before adoption.
+
+Current evidence:
+
+- Historical run `34863933856` confirms the original Footer failure at `Footer.cy.tsx:46`: `expected true to equal false`; 24 of 25 component tests passed. It was a concrete wheel-listener/readiness failure, not evidence that every browser failure has the same cause.
+- The local desktop sandbox aborts the Cypress desktop process with `SIGABRT` before a spec starts. The previous invocation surfaced as a silent success in this environment; the new runner now exits `134` and names the missing fresh completion report. Outside that port/desktop sandbox, the same native macOS target is usable: Node 22.22.2, Cypress 16.0.0, Chrome 153.0.8010.37, macOS 25.6.0 arm64.
+- The reporting unit tests cover valid, missing, stale, incomplete, zero-test, and failed-run reports. A successful report records requested/completed specs, test totals, failure/pending/skipped totals, Node, Cypress, browser, OS, architecture, and failing test titles/messages. CI uploads reports for every browser job and screenshots/videos only when that job fails, all retained seven days.
+- Lifecycle tests now prove timer/listener setup before unmount or Escape dispatch. The full-suite investigation also found modified-link Cypress clicks causing the component runner to follow native navigation; synthetic modified-click dispatch now tests the handler without resetting the runner document.
+- Local native verification passed: focused repaired CT (3 specs, 14 tests), full CT (8 specs, 29 tests), and production E2E (1 spec, 14 tests), each with zero failures, pending, or skipped tests. `npm run test:component:reliability` then completed 20 fresh processes over Footer, Navigation, HeroSlideshow, and Lightbox: every run reported 4 specs and 24 tests with zero failures, pending, or skipped tests. No retries were configured.
+- Docker 28.5.1 is installed, but its daemon is unavailable at `/Users/avidixit/.docker/run/docker.sock`; therefore no Linux image could be evaluated. Recommendation: defer container adoption and retain the native path plus explicit remaining macOS-arm64/Linux-x64 browser differences until Docker is available for measured evaluation. This is an explicit environment limitation, not CI-parity evidence.
+
+Remaining before completion: run final checks, inspect the diff, push the implementation PR, and record CI evidence separately. The container-defer recommendation needs user confirmation before the plan is marked complete.
 
 RCA references: [repeated Footer failure](https://github.com/avidixit27/avi-dixit.com/actions/runs/34863933856), [Footer test fix](https://github.com/avidixit27/avi-dixit.com/commit/70a29c04f9546de2eacfefe66088eced8d7ec4f9), [viewport-width failure](https://github.com/avidixit27/avi-dixit.com/actions/runs/34491681408), and [404 geometry failure](https://github.com/avidixit27/avi-dixit.com/actions/runs/34669175634).
