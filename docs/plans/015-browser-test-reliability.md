@@ -3,12 +3,12 @@
 | Field          | Value                                                                                |
 | -------------- | ------------------------------------------------------------------------------------ |
 | Type           | Test reliability and tooling                                                         |
-| Status         | In progress; approved for implementation in the [plan index](README.md)              |
+| Status         | In review; container adoption deferred pending user confirmation                     |
 | Depends on     | Plan 014 merged into `main` through PR #41                                           |
 | Blocks         | [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md) |
 | Planned branch | `test/browser-test-reliability`                                                      |
 | PR base        | `main`                                                                               |
-| PR             | Not opened                                                                           |
+| PR             | [#43](https://github.com/avidixit27/avi-dixit.com/pull/43)                           |
 
 ## Outcome
 
@@ -118,8 +118,10 @@ Current evidence:
 - The reporting unit tests cover valid, missing, stale, incomplete, zero-test, and failed-run reports. A successful report records requested/completed specs, test totals, failure/pending/skipped totals, Node, Cypress, browser, OS, architecture, and failing test titles/messages. CI uploads reports for every browser job and screenshots/videos only when that job fails, all retained seven days.
 - Lifecycle tests now prove timer/listener setup before unmount or Escape dispatch. The full-suite investigation also found modified-link Cypress clicks causing the component runner to follow native navigation; synthetic modified-click dispatch now tests the handler without resetting the runner document.
 - Local native verification passed: focused repaired CT (3 specs, 14 tests), full CT (8 specs, 29 tests), and production E2E (1 spec, 14 tests), each with zero failures, pending, or skipped tests. `npm run test:component:reliability` then completed 20 fresh processes over Footer, Navigation, HeroSlideshow, and Lightbox: every run reported 4 specs and 24 tests with zero failures, pending, or skipped tests. No retries were configured.
-- Docker 28.5.1 is installed, but its daemon is unavailable at `/Users/avidixit/.docker/run/docker.sock`; therefore no Linux image could be evaluated. Recommendation: defer container adoption and retain the native path plus explicit remaining macOS-arm64/Linux-x64 browser differences until Docker is available for measured evaluation. This is an explicit environment limitation, not CI-parity evidence.
+- Docker 28.5.1 was evaluated once its daemon was available. The closest official Cypress browser image to the repository pin was `cypress/browsers:node-22.21.0-chrome-141.0.7390.107-1-ff-144.0-edge-141.0.3537.92-1`, pinned as `sha256:1b0e8df630f819b84ae8f46e39746ac79e3e1666208a1d0716b2e07ccafd19a9`. Docker Hub did not provide an official Node 22.22.2 browser tag. This image is Linux x64, emulated by Docker Desktop on the local macOS ARM host, and uses Chrome 141 rather than the inspected CI Chrome 152 or local Chrome 153; it is useful Linux evidence, not exact CI parity.
+- In a clean copied source tree with separate Linux `node_modules`, the cold image ran `npm ci` in 12 seconds and then completed the four repaired specs (24 tests, zero failures/pending/skipped) in 27.497 seconds of Cypress lifecycle time. A warm run completed the same four specs and 24 tests with the same zero counts in 26.345 seconds. No retries were configured.
+- Recommendation: defer required container adoption. The only suitable official image currently misses the project Node pin and browser version, while local ARM execution adds emulation cost; adding a Dockerfile or CI job would imply parity that this evaluation cannot establish. Retain native execution, structured artifacts, and the explicit macOS-arm64/Linux-x64 differences. Re-evaluate only when an image can be pinned to the required runtime and browser, or CI itself intentionally adopts that image.
 
-Remaining before completion: run final checks, inspect the diff, push the implementation PR, and record CI evidence separately. The container-defer recommendation needs user confirmation before the plan is marked complete.
+The implementation commit passed the PR CI gate as reported by the user. This evidence update requires its own CI run; do not treat local/container evidence as a substitute. The container-defer recommendation needs user confirmation before the plan is marked complete.
 
 RCA references: [repeated Footer failure](https://github.com/avidixit27/avi-dixit.com/actions/runs/34863933856), [Footer test fix](https://github.com/avidixit27/avi-dixit.com/commit/70a29c04f9546de2eacfefe66088eced8d7ec4f9), [viewport-width failure](https://github.com/avidixit27/avi-dixit.com/actions/runs/34491681408), and [404 geometry failure](https://github.com/avidixit27/avi-dixit.com/actions/runs/34669175634).
