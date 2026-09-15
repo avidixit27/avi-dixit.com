@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { validateBrowserRun } from "./run-cypress-with-report.mjs";
+import {
+  requestedSpecs,
+  validateBrowserRun,
+} from "./run-cypress-with-report.mjs";
 
 const startedAt = Date.parse("2026-09-14T20:00:00.000Z");
 
@@ -23,6 +26,20 @@ function completedReport(overrides = {}) {
 }
 
 describe("validateBrowserRun", () => {
+  it("parses separate and equals-form spec arguments", () => {
+    expect(
+      requestedSpecs([
+        "--spec",
+        "src/app/Footer.cy.tsx,src/app/Navigation.cy.tsx",
+        "--spec=src/features/portfolio/*.cy.tsx",
+      ]),
+    ).toEqual([
+      "src/app/Footer.cy.tsx",
+      "src/app/Navigation.cy.tsx",
+      "src/features/portfolio/*.cy.tsx",
+    ]);
+  });
+
   it("accepts a completed run with the requested spec and tests", () => {
     expect(
       validateBrowserRun({
@@ -83,5 +100,18 @@ describe("validateBrowserRun", () => {
         "Cypress reported 1 failed tests.",
       ]),
     );
+  });
+
+  it("accepts a completed spec that matches a requested glob", () => {
+    expect(
+      validateBrowserRun({
+        childExitCode: 0,
+        report: completedReport({
+          specs: [{ name: "src/features/portfolio/Lightbox.cy.tsx" }],
+        }),
+        requested: ["src/features/portfolio/*.cy.tsx"],
+        startedAt,
+      }),
+    ).toEqual([]);
   });
 });

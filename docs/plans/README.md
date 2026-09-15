@@ -49,17 +49,17 @@ Completed tickets are historical records. Read one only when its outcome or impl
 
 Plan 014 reached `main` through recovery PR #41. The TypeScript 7 guard (#37) is also merged. The next work is browser-test reliability, before further media and product changes.
 
-| Plan                                                                                         | Status    | Planned branch                          | Depends on |
-| -------------------------------------------------------------------------------------------- | --------- | --------------------------------------- | ---------- |
-| [015 — Browser-test reliability](015-browser-test-reliability.md)                            | In review | `test/browser-test-reliability`         | 014        |
-| [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md)         | Planned   | `perf/brand-and-photo-payloads`         | 015        |
-| [017 — Feature availability controls](017-feature-availability-controls.md)                  | Planned   | `feat/feature-availability-controls`    | 016        |
-| [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md)                | Planned   | `feat/portfolio-statement-resume`       | 017        |
-| [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md) | Planned   | `feat/portfolio-collection-routes`      | 018        |
-| [020 — Portfolio discovery index](020-portfolio-discovery-index.md)                          | Planned   | `feat/portfolio-discovery-index`        | 019        |
-| [021 — Instagram feed sync architecture](021-instagram-feed-sync-architecture.md)            | Planned   | `docs/instagram-feed-sync-architecture` | 017        |
+| Plan                                                                                         | Status      | Planned branch                          | Depends on |
+| -------------------------------------------------------------------------------------------- | ----------- | --------------------------------------- | ---------- |
+| [015 — Browser-test reliability](015-browser-test-reliability.md)                            | In progress | `test/browser-test-reliability`         | 014        |
+| [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md)         | Planned     | `perf/brand-and-photo-payloads`         | 015        |
+| [017 — Feature availability controls](017-feature-availability-controls.md)                  | Planned     | `feat/feature-availability-controls`    | 016        |
+| [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md)                | Planned     | `feat/portfolio-statement-resume`       | 017        |
+| [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md) | Planned     | `feat/portfolio-collection-routes`      | 018        |
+| [020 — Portfolio discovery index](020-portfolio-discovery-index.md)                          | Planned     | `feat/portfolio-discovery-index`        | 019        |
+| [021 — Instagram feed sync architecture](021-instagram-feed-sync-architecture.md)            | Planned     | `docs/instagram-feed-sync-architecture` | 017        |
 
-Plans 015–017 are approved. Plan 015 is in review: it includes CT and related E2E failures, execution evidence, diagnostics, and a measured container evaluation. Its container recommendation is to defer adoption pending user confirmation. Former plans 015–020 were renumbered to 016–021 at the user's request.
+Plans 015–017 are approved. Plan 015 is in progress: it includes CT and related E2E failures, execution evidence, diagnostics, and a measured container evaluation. Its container recommendation is to defer adoption pending user confirmation. Former plans 015–020 were renumbered to 016–021 at the user's request.
 
 Plan 016 combines the existing brand-asset work with AVIF → WebP → JPEG portfolio delivery, the format order selected by the user. It retains four widths per format, aligns lightbox preloading with display selection, and requires measured quality, transfer, decode, build, and storage evidence. Plan 017 then adds approved feature availability controls, initially hiding both Shop and Contact while keeping them available in explicit all-features development and tests. Plan 018 adds the Home statement and résumé; Plans 019–020 add collections and discovery. Plan 021 can begin after Plan 017, but authorizes architecture and feasibility evidence only.
 

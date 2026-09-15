@@ -23,20 +23,31 @@ let failures = 0;
 for (let attempt = 1; attempt <= runCount; attempt += 1) {
   console.log(`Browser reliability run ${attempt}/${runCount}`);
 
-  const exitCode = await new Promise((resolveRun) => {
+  const result = await new Promise((resolveRun) => {
     const child = spawn(process.execPath, argumentsList, {
       cwd: projectRoot,
       env: process.env,
-      stdio: "ignore",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let output = "";
+
+    child.stdout.on("data", (chunk) => {
+      output += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      output += chunk;
     });
 
-    child.once("error", () => resolveRun(1));
-    child.once("close", (code) => resolveRun(code ?? 1));
+    child.once("error", (error) =>
+      resolveRun({ exitCode: 1, output: `${output}${error.message}\n` }),
+    );
+    child.once("close", (code) => resolveRun({ exitCode: code ?? 1, output }));
   });
 
-  if (exitCode !== 0) {
+  if (result.exitCode !== 0) {
     failures += 1;
     console.error(`Browser reliability run ${attempt}/${runCount} failed.`);
+    if (result.output) process.stderr.write(result.output);
   }
 }
 

@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { arch, platform, release } from "node:os";
 import { dirname } from "node:path";
 
@@ -16,6 +17,7 @@ interface SpecReport {
 
 interface BrowserRunReport {
   readonly browser: string | null;
+  readonly commit: string | null;
   readonly completedAt: string;
   readonly cypressVersion: string | null;
   readonly nodeVersion: string;
@@ -51,6 +53,23 @@ function getRequestedSpecs() {
   }
 }
 
+function getCommit() {
+  const workflowCommit = process.env.GITHUB_SHA?.trim();
+  if (workflowCommit) return workflowCommit;
+
+  try {
+    const commit = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+
+    return commit || null;
+  } catch {
+    return null;
+  }
+}
+
 function writeReport(report: BrowserRunReport) {
   const reportPath = process.env.CYPRESS_RUN_REPORT_PATH;
   if (!reportPath) return;
@@ -74,6 +93,7 @@ export function registerBrowserRunReporting(on: Cypress.PluginEvents): void {
         typeof results.browserName === "string"
           ? `${results.browserName} ${results.browserVersion}`
           : null,
+      commit: getCommit(),
       completedAt: new Date().toISOString(),
       cypressVersion:
         typeof results.cypressVersion === "string"

@@ -1,17 +1,21 @@
 import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { basename, resolve } from "node:path";
+import { basename, matchesGlob, resolve } from "node:path";
 import { spawn } from "node:child_process";
 
 const projectRoot = process.cwd();
 
-function requestedSpecs(argumentsList) {
+export function requestedSpecs(argumentsList) {
   const requested = [];
 
   for (let index = 0; index < argumentsList.length; index += 1) {
-    if (argumentsList[index] !== "--spec") continue;
-
-    const value = argumentsList[index + 1];
+    const argument = argumentsList[index];
+    const value =
+      argument === "--spec"
+        ? argumentsList[index + 1]
+        : argument.startsWith("--spec=")
+          ? argument.slice("--spec=".length)
+          : undefined;
     if (typeof value !== "string") continue;
 
     requested.push(...value.split(",").filter(Boolean));
@@ -76,7 +80,18 @@ export function validateBrowserRun({
 
   const completed = new Set(report.specs?.map((spec) => spec.name));
   for (const requestedSpec of requested) {
-    if (!completed.has(requestedSpec)) {
+    const matched = [...completed].some((completedSpec) => {
+      try {
+        return (
+          completedSpec === requestedSpec ||
+          matchesGlob(completedSpec, requestedSpec)
+        );
+      } catch {
+        return false;
+      }
+    });
+
+    if (!matched) {
       failures.push(`Requested spec did not complete: ${requestedSpec}.`);
     }
   }
