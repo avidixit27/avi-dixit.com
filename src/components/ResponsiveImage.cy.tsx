@@ -9,6 +9,10 @@ describe("ResponsiveImage", () => {
         srcSet="/photo-480.jpg 480w, /photo-960.jpg 960w"
         sources={[
           {
+            type: "image/avif",
+            srcSet: "/photo-480.avif 480w, /photo-960.avif 960w",
+          },
+          {
             type: "image/webp",
             srcSet: "/photo-480.webp 480w, /photo-960.webp 960w",
           },
@@ -24,6 +28,11 @@ describe("ResponsiveImage", () => {
     );
 
     cy.get("picture source")
+      .first()
+      .should("have.attr", "type", "image/avif")
+      .and("have.attr", "srcset", "/photo-480.avif 480w, /photo-960.avif 960w");
+    cy.get("picture source")
+      .eq(1)
       .should("have.attr", "type", "image/webp")
       .and("have.attr", "srcset", "/photo-480.webp 480w, /photo-960.webp 960w");
     cy.get("picture img")

@@ -49,7 +49,7 @@ export default function ResponsiveImage({
         />
       ))}
       <img
-        fetchPriority={fetchPriority}
+        {...{ fetchpriority: fetchPriority }}
         ref={imageRef}
         src={src}
         srcSet={srcSet}

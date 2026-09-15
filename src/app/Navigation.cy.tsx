@@ -43,30 +43,33 @@ describe("Navigation", () => {
       .and("not.have.class", "font-bold");
   });
 
-  it("keeps the larger wordmark centered in the navigation row", () => {
+  it("keeps the portrait and wordmark centered in the navigation row", () => {
     mount(
       <MemoryRouter>
         <Navigation portfolioGridElement={null} />
       </MemoryRouter>,
     );
 
-    cy.get('img[alt="Avi Dixit"]')
+    cy.get('a[aria-label="Home"]')
+      .find("img")
+      .should("have.length", 2)
+      .first()
       .should("have.class", "h-12")
       .and("have.class", "md:h-14")
-      .then(($wordmark) => {
-        const wordmark = $wordmark.get(0);
-        const navigation = wordmark?.closest("nav");
-        if (!wordmark || !navigation) {
-          throw new Error("Expected the navigation wordmark");
+      .then(($portrait) => {
+        const portrait = $portrait.get(0);
+        const navigation = portrait?.closest("nav");
+        if (!portrait || !navigation) {
+          throw new Error("Expected the navigation portrait");
         }
 
-        const wordmarkCenter =
-          wordmark.getBoundingClientRect().top +
-          wordmark.getBoundingClientRect().height / 2;
+        const portraitCenter =
+          portrait.getBoundingClientRect().top +
+          portrait.getBoundingClientRect().height / 2;
         const navigationCenter =
           navigation.getBoundingClientRect().top +
           navigation.getBoundingClientRect().height / 2;
-        expect(Math.abs(wordmarkCenter - navigationCenter)).to.be.lessThan(1);
+        expect(Math.abs(portraitCenter - navigationCenter)).to.be.lessThan(1);
       });
   });
 

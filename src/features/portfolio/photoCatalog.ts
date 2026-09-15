@@ -120,6 +120,15 @@ const webpSrcSetModules = import.meta.glob<string>(
   },
 );
 
+const avifSrcSetModules = import.meta.glob<string>(
+  "../../assets/photography/portfolio/*.JPG",
+  {
+    eager: true,
+    import: "default",
+    query: "?portfolio-responsive&format=avif&as=srcset",
+  },
+);
+
 function isPhotoFileName(
   fileName: string,
 ): fileName is keyof typeof PHOTO_DETAILS {
@@ -146,6 +155,7 @@ function getGeneratedSource(
 export function buildPhotoCatalog(
   fallbackSources: Readonly<Record<string, string>>,
   jpegSources: Readonly<Record<string, string>>,
+  avifSources: Readonly<Record<string, string>>,
   webpSources: Readonly<Record<string, string>>,
 ): readonly Photo[] {
   return Object.freeze(
@@ -156,6 +166,10 @@ export function buildPhotoCatalog(
         src,
         srcSet: getGeneratedSource(jpegSources, path),
         sources: Object.freeze([
+          Object.freeze({
+            type: "image/avif",
+            srcSet: getGeneratedSource(avifSources, path),
+          }),
           Object.freeze({
             type: "image/webp",
             srcSet: getGeneratedSource(webpSources, path),
@@ -170,5 +184,6 @@ export function buildPhotoCatalog(
 export const PHOTO_CATALOG = buildPhotoCatalog(
   fallbackModules,
   jpegSrcSetModules,
+  avifSrcSetModules,
   webpSrcSetModules,
 );

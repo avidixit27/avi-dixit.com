@@ -7,6 +7,8 @@ import { imagetools } from "vite-imagetools";
 const PORTFOLIO_RESPONSIVE_WIDTHS = "480;960;1440;2160";
 const PORTFOLIO_FALLBACK_WIDTH = "1440";
 const PORTFOLIO_IMAGE_QUALITY = "82";
+const PORTFOLIO_AVIF_QUALITY = "50";
+const PORTFOLIO_AVIF_EFFORT = "6";
 
 export default defineConfig({
   plugins: [
@@ -21,7 +23,12 @@ export default defineConfig({
 
         if (url.searchParams.has("portfolio-responsive")) {
           directives.set("w", PORTFOLIO_RESPONSIVE_WIDTHS);
-          directives.set("quality", PORTFOLIO_IMAGE_QUALITY);
+          if (url.searchParams.get("format") === "avif") {
+            directives.set("quality", PORTFOLIO_AVIF_QUALITY);
+            directives.set("effort", PORTFOLIO_AVIF_EFFORT);
+          } else {
+            directives.set("quality", PORTFOLIO_IMAGE_QUALITY);
+          }
         } else if (url.searchParams.has("portfolio-fallback")) {
           directives.set("w", PORTFOLIO_FALLBACK_WIDTH);
           directives.set("quality", PORTFOLIO_IMAGE_QUALITY);

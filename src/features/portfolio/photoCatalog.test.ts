@@ -24,9 +24,10 @@ describe("photo catalog", () => {
         (photo) =>
           photo.src.length > 0 &&
           photo.srcSet.length > 0 &&
-          photo.sources.length === 1 &&
-          photo.sources[0]?.type === "image/webp" &&
-          (photo.sources[0]?.srcSet.length ?? 0) > 0,
+          photo.sources.length === 2 &&
+          photo.sources[0]?.type === "image/avif" &&
+          photo.sources[1]?.type === "image/webp" &&
+          photo.sources.every((source) => source.srcSet.length > 0),
       ),
     ).toBe(true);
   });
@@ -40,10 +41,10 @@ describe("photo catalog", () => {
         "/first.jpg",
     };
 
-    expect(() => buildPhotoCatalog(fallbackModules, {}, {})).toThrow(
+    expect(() => buildPhotoCatalog(fallbackModules, {}, {}, {})).toThrow(
       "Missing photo metadata",
     );
-    expect(() => buildPhotoCatalog(knownFallbackModules, {}, {})).toThrow(
+    expect(() => buildPhotoCatalog(knownFallbackModules, {}, {}, {})).toThrow(
       "Missing generated media",
     );
   });

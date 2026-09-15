@@ -25,6 +25,36 @@ interface LightboxProps {
   onClosed: () => void;
 }
 
+interface PreloadedPhoto {
+  readonly image: HTMLImageElement;
+  readonly picture: HTMLPictureElement;
+}
+
+function createPreload(photo: Photo, imageDocument: Document): PreloadedPhoto {
+  const picture = imageDocument.createElement("picture");
+  picture.dataset.lightboxPreload = "true";
+  picture.setAttribute("aria-hidden", "true");
+  picture.className =
+    "pointer-events-none fixed -top-px -left-px h-px w-px overflow-hidden opacity-0";
+  photo.sources.forEach((photoSource) => {
+    const source = imageDocument.createElement("source");
+    source.type = photoSource.type;
+    source.srcset = photoSource.srcSet;
+    source.sizes = LIGHTBOX_IMAGE_SIZES;
+    picture.append(source);
+  });
+  const image = imageDocument.createElement("img");
+  image.decoding = "async";
+  image.fetchPriority = "low";
+  image.sizes = LIGHTBOX_IMAGE_SIZES;
+  image.srcset = photo.srcSet;
+  image.src = photo.src;
+  picture.append(image);
+  imageDocument.body.append(picture);
+
+  return { image, picture };
+}
+
 export default function Lightbox({
   photos,
   selectedIndex,
@@ -37,7 +67,7 @@ export default function Lightbox({
   const closeTimerRef = useRef<number | null>(null);
   const navigationLockedRef = useRef(true);
   const pendingNavigationOffsetRef = useRef(0);
-  const preloadCacheRef = useRef(new Map<string, HTMLImageElement>());
+  const preloadCacheRef = useRef(new Map<string, PreloadedPhoto>());
   const [isClosing, setIsClosing] = useState(false);
   const [loadedPhotoId, setLoadedPhotoId] = useState<string | null>(null);
   const [settledPhotoId, setSettledPhotoId] = useState<string | null>(null);
@@ -98,20 +128,14 @@ export default function Lightbox({
       if (!preloadPhoto) return;
       retainedPhotoIds.add(preloadPhoto.id);
       if (preloadCacheRef.current.has(preloadPhoto.id)) return;
-      const imageWindow = imageRef.current?.ownerDocument.defaultView ?? window;
-      const preload = new imageWindow.Image();
-      preload.decoding = "async";
-      preload.fetchPriority = "low";
-      preload.sizes = LIGHTBOX_IMAGE_SIZES;
-      preload.srcset =
-        preloadPhoto.sources.find((source) => source.type === "image/webp")
-          ?.srcSet ?? preloadPhoto.srcSet;
-      preload.src = preloadPhoto.src;
-      preloadCacheRef.current.set(preloadPhoto.id, preload);
-      void preload.decode().catch(() => undefined);
+      const imageDocument = imageRef.current?.ownerDocument ?? document;
+      const preloadEntry = createPreload(preloadPhoto, imageDocument);
+      preloadCacheRef.current.set(preloadPhoto.id, preloadEntry);
+      void preloadEntry.image.decode().catch(() => undefined);
     });
-    preloadCacheRef.current.forEach((_, photoId) => {
+    preloadCacheRef.current.forEach((preload, photoId) => {
       if (!retainedPhotoIds.has(photoId)) {
+        preload.picture.remove();
         preloadCacheRef.current.delete(photoId);
       }
     });
@@ -160,6 +184,7 @@ export default function Lightbox({
       if (closeTimerRef.current !== null) {
         window.clearTimeout(closeTimerRef.current);
       }
+      preloadCacheRef.current.forEach((preload) => preload.picture.remove());
       preloadCacheRef.current.clear();
     },
     [],

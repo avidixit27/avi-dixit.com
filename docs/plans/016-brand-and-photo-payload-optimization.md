@@ -3,7 +3,7 @@
 | Field          | Value                                                                       |
 | -------------- | --------------------------------------------------------------------------- |
 | Type           | Performance fix                                                             |
-| Status         | Tracked in the [plan index](README.md)                                      |
+| Status         | Implementation approved; awaiting pull-request review                       |
 | Depends on     | [015 — Browser-test reliability](015-browser-test-reliability.md)           |
 | Blocks         | [017 — Feature availability controls](017-feature-availability-controls.md) |
 | Planned branch | `perf/brand-and-photo-payloads`                                             |
@@ -166,6 +166,14 @@ After the user approves the output and requests no further visual edits:
 
 ## Implementation record
 
-Not started. On 2026-09-14 the user selected AVIF → WebP → JPEG for portfolio photographs, retaining four widths per format, and approved the complete Plan 016. On implementation, record extraction provenance, output dimensions and per-format encoder settings, source/emitted/transfer sizes, unique output counts, cold/warm build cost, browser decode/LCP evidence, preload decisions, visual approval, commands, limitations, and the PR link.
+Implementation started on 2026-09-15 after PR #44 merged. The user selected AVIF → WebP → JPEG for portfolio photographs, retaining four widths per format, and approved the complete plan.
+
+Current evidence:
+
+- The original embedded JPEG is 6000 × 4000 pixels. The first extraction mistakenly took a 427 × 418 crop from its upper-left corner and removed the dark silhouette. The corrected navigation portrait uses the source's centered 4000 × 4000 crop, preserving the visible silhouette and colored background: 192 × 192 WebP (3,546 bytes) and 64 × 64 PNG favicon (6,424 bytes). The vector-only wordmark is 3,085 bytes (1,151 bytes gzip); the old combined SVG and mislabeled favicon were 880,049 and 3,001,487 bytes. Chrome visual review at 1280 × 720 and 390 × 844 confirmed the corrected silhouette, circular crop, lettering, and alignment; the user approved the result on 2026-09-15.
+- Vite 8.2.2 with Sharp 0.35.4 successfully emitted 48 AVIF, 48 WebP, and 48 JPEG portfolio candidates: 1,333,713, 2,867,232, and 5,805,916 bytes respectively. AVIF quality 50 and effort 6 reduced the current 12-photo corpus by 53.5% relative to WebP quality 82. The build reported 919 ms under Node 22.22.2; the surrounding macOS timing command could not read `kern.clockrate` but the Vite build itself completed successfully.
+- The reported hard-refresh regression was caused by the development server generating responsive AVIF variants on demand rather than serving the production build's static assets. A same-candidate local request took 564 ms through the Vite development path versus 190 ms for WebP, while production-preview AVIF requests were served in 4–49 ms. The user approved keeping development and production AVIF settings identical and using `npm run preview` for representative pre-deployment performance review instead of adding a divergent development format or quality path.
+- In a cache-disabled Chrome production-preview run at 1280 × 720, DOM content loaded in 51 ms and the load event completed in 112 ms. The three initially requested portfolio AVIFs completed in 15–49 ms; the lightbox reached ready state in 499 ms and one forward navigation in 308 ms while retaining the three-forward/two-backward native `<picture>` preload window. The selected `currentSrc` and all five resolved preloads were AVIF, so the earlier WebP-preload/AVIF-display duplication was not present.
+- Verification under Node 22.22.2 passed: 44 unit tests with the coverage gate, lint, formatting, application/Cypress type checks, 22 affected Chrome component tests, production build, 14 production portfolio E2E tests against a freshly restarted preview, and the production dependency audit with no vulnerabilities. React 18's priority hint is rendered with the lowercase native `fetchpriority` attribute to avoid the previous unknown-property console warning. The user approved photographic quality and production-preview performance on 2026-09-15; push and PR review remain.
 
 Technical references: [native image-format selection](https://html.spec.whatwg.org/multipage/images.html#image-format-based-selection), [Sharp AVIF output options](https://sharp.pixelplumbing.com/api-output/#avif), and [AVIF decoding and delivery considerations](https://web.dev/articles/avif-updates-2023).
