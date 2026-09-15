@@ -3,12 +3,12 @@
 | Field          | Value                                                                       |
 | -------------- | --------------------------------------------------------------------------- |
 | Type           | Performance fix                                                             |
-| Status         | Implementation approved; awaiting pull-request review                       |
+| Status         | In review                                                                   |
 | Depends on     | [015 — Browser-test reliability](015-browser-test-reliability.md)           |
 | Blocks         | [017 — Feature availability controls](017-feature-availability-controls.md) |
 | Planned branch | `perf/brand-and-photo-payloads`                                             |
 | PR base        | `main`                                                                      |
-| PR             | Not opened                                                                  |
+| PR             | [#45](https://github.com/avidixit27/avi-dixit.com/pull/45)                  |
 
 > Approved. The user selected AVIF → WebP → JPEG for portfolio photos and approved the complete plan. Plan 015 merged through PR #43.
 
@@ -174,6 +174,6 @@ Current evidence:
 - Vite 8.2.2 with Sharp 0.35.4 successfully emitted 48 AVIF, 48 WebP, and 48 JPEG portfolio candidates: 1,333,713, 2,867,232, and 5,805,916 bytes respectively. AVIF quality 50 and effort 6 reduced the current 12-photo corpus by 53.5% relative to WebP quality 82. The build reported 919 ms under Node 22.22.2; the surrounding macOS timing command could not read `kern.clockrate` but the Vite build itself completed successfully.
 - The reported hard-refresh regression was caused by the development server generating responsive AVIF variants on demand rather than serving the production build's static assets. A same-candidate local request took 564 ms through the Vite development path versus 190 ms for WebP, while production-preview AVIF requests were served in 4–49 ms. The user approved keeping development and production AVIF settings identical and using `npm run preview` for representative pre-deployment performance review instead of adding a divergent development format or quality path.
 - In a cache-disabled Chrome production-preview run at 1280 × 720, DOM content loaded in 51 ms and the load event completed in 112 ms. The three initially requested portfolio AVIFs completed in 15–49 ms; the lightbox reached ready state in 499 ms and one forward navigation in 308 ms while retaining the three-forward/two-backward native `<picture>` preload window. The selected `currentSrc` and all five resolved preloads were AVIF, so the earlier WebP-preload/AVIF-display duplication was not present.
-- Verification under Node 22.22.2 passed: 44 unit tests with the coverage gate, lint, formatting, application/Cypress type checks, 22 affected Chrome component tests, production build, 14 production portfolio E2E tests against a freshly restarted preview, and the production dependency audit with no vulnerabilities. React 18's priority hint is rendered with the lowercase native `fetchpriority` attribute to avoid the previous unknown-property console warning. The user approved photographic quality and production-preview performance on 2026-09-15; push and PR review remain.
+- Verification under Node 22.22.2 passed: 44 unit tests with the coverage gate, lint, formatting, application/Cypress type checks, 22 affected Chrome component tests, production build, 14 production portfolio E2E tests against a freshly restarted preview, and the production dependency audit with no vulnerabilities. React 18's priority hint is rendered with the lowercase native `fetchpriority` attribute to avoid the previous unknown-property console warning. The user approved photographic quality and production-preview performance on 2026-09-15. PR [#45](https://github.com/avidixit27/avi-dixit.com/pull/45) is open for review.
 
 Technical references: [native image-format selection](https://html.spec.whatwg.org/multipage/images.html#image-format-based-selection), [Sharp AVIF output options](https://sharp.pixelplumbing.com/api-output/#avif), and [AVIF decoding and delivery considerations](https://web.dev/articles/avif-updates-2023).
