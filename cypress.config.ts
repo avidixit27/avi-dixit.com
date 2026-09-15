@@ -1,5 +1,6 @@
 import { defineConfig } from "cypress";
 import { registerBrowserRunReporting } from "./cypress/reporting";
+import specPatterns from "./cypress/spec-patterns.json" with { type: "json" };
 import viteConfig from "./vite.config";
 
 export default defineConfig({
@@ -10,7 +11,7 @@ export default defineConfig({
       bundler: "vite",
       viteConfig,
     },
-    specPattern: "src/**/*.cy.tsx",
+    specPattern: specPatterns.component,
     setupNodeEvents(on) {
       registerBrowserRunReporting(on);
     },
@@ -18,7 +19,7 @@ export default defineConfig({
   },
   e2e: {
     baseUrl: "http://127.0.0.1:4173",
-    specPattern: "cypress/e2e/**/*.cy.ts",
+    specPattern: specPatterns.e2e,
     setupNodeEvents(on) {
       registerBrowserRunReporting(on);
     },

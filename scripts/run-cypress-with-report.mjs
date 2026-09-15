@@ -2,6 +2,7 @@ import { existsSync, globSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { basename, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
+import specPatterns from "../cypress/spec-patterns.json" with { type: "json" };
 
 const projectRoot = process.cwd();
 
@@ -22,6 +23,15 @@ export function requestedSpecs(argumentsList) {
   }
 
   return requested;
+}
+
+export function selectedSpecs(argumentsList) {
+  const requested = requestedSpecs(argumentsList);
+  if (requested.length > 0) return requested;
+  if (argumentsList.includes("--component")) return [specPatterns.component];
+  if (argumentsList.includes("--e2e")) return [specPatterns.e2e];
+
+  return [];
 }
 
 export function expectedSpecs(requested, findMatches = globSync) {
@@ -113,11 +123,11 @@ export function validateBrowserRun({
   return failures;
 }
 
-function runCypress(argumentsList, reportPath) {
+function runCypress(argumentsList, reportPath, selected) {
   const binary = resolve(projectRoot, "node_modules/.bin/cypress");
   const taskEnvironment = {
     ...process.env,
-    CYPRESS_REQUESTED_SPECS: JSON.stringify(requestedSpecs(argumentsList)),
+    CYPRESS_REQUESTED_SPECS: JSON.stringify(selected),
     CYPRESS_RUN_REPORT_PATH: reportPath,
   };
 
@@ -145,7 +155,8 @@ if (
   resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 ) {
   const argumentsList = process.argv.slice(2);
-  const requested = requestedSpecs(argumentsList);
+  const selected = selectedSpecs(argumentsList);
+  const expected = expectedSpecs(selected);
   const runId = `${new Date().toISOString().replaceAll(/[:.]/g, "-")}-${process.pid}`;
   const reportDirectory = resolve(projectRoot, "cypress/results");
   const reportPath = resolve(reportDirectory, `${runId}.json`);
@@ -154,12 +165,12 @@ if (
   mkdirSync(reportDirectory, { recursive: true });
   rmSync(reportPath, { force: true });
 
-  const childResult = await runCypress(argumentsList, reportPath);
+  const childResult = await runCypress(argumentsList, reportPath, selected);
   const result = readReport(reportPath);
   const failures = validateBrowserRun({
     childExitCode: childResult.exitCode,
     report: result.report,
-    requested: expectedSpecs(requested),
+    requested: expected,
     startedAt: commandStartedAt,
   });
 

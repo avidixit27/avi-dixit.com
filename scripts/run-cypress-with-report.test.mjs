@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   expectedSpecs,
   requestedSpecs,
+  selectedSpecs,
   validateBrowserRun,
 } from "./run-cypress-with-report.mjs";
 
@@ -39,6 +40,15 @@ describe("validateBrowserRun", () => {
       "src/app/Footer.cy.tsx",
       "src/app/Navigation.cy.tsx",
       "src/features/portfolio/*.cy.tsx",
+    ]);
+  });
+
+  it("uses the configured pattern when a suite has no explicit spec", () => {
+    expect(selectedSpecs(["--component", "--browser", "chrome"])).toEqual([
+      "src/**/*.cy.tsx",
+    ]);
+    expect(selectedSpecs(["--e2e", "--browser", "chrome"])).toEqual([
+      "cypress/e2e/**/*.cy.ts",
     ]);
   });
 
