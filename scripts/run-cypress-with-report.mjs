@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, globSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { basename, matchesGlob, resolve } from "node:path";
+import { basename, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
 
 const projectRoot = process.cwd();
@@ -13,7 +13,7 @@ export function requestedSpecs(argumentsList) {
     const value =
       argument === "--spec"
         ? argumentsList[index + 1]
-        : argument.startsWith("--spec=")
+        : typeof argument === "string" && argument.startsWith("--spec=")
           ? argument.slice("--spec=".length)
           : undefined;
     if (typeof value !== "string") continue;
@@ -22,6 +22,25 @@ export function requestedSpecs(argumentsList) {
   }
 
   return requested;
+}
+
+export function expectedSpecs(requested, findMatches = globSync) {
+  const expected = new Set();
+
+  for (const requestedSpec of requested) {
+    const matches = findMatches(requestedSpec, { cwd: projectRoot });
+    const resolvedMatches = matches.map((match) =>
+      relative(projectRoot, resolve(projectRoot, match)),
+    );
+
+    for (const spec of resolvedMatches.length > 0
+      ? resolvedMatches
+      : [requestedSpec]) {
+      expected.add(spec);
+    }
+  }
+
+  return [...expected];
 }
 
 function readReport(reportPath) {
@@ -62,6 +81,12 @@ export function validateBrowserRun({
     failures.push("Cypress completion report predates this command.");
   }
 
+  if (typeof report.commit !== "string" || report.commit.trim() === "") {
+    failures.push(
+      "Cypress completion report does not identify the tested commit.",
+    );
+  }
+
   if (!Number.isInteger(report.totals?.tests) || report.totals.tests <= 0) {
     failures.push("Cypress completed with zero executed tests.");
   }
@@ -80,18 +105,7 @@ export function validateBrowserRun({
 
   const completed = new Set(report.specs?.map((spec) => spec.name));
   for (const requestedSpec of requested) {
-    const matched = [...completed].some((completedSpec) => {
-      try {
-        return (
-          completedSpec === requestedSpec ||
-          matchesGlob(completedSpec, requestedSpec)
-        );
-      } catch {
-        return false;
-      }
-    });
-
-    if (!matched) {
+    if (!completed.has(requestedSpec)) {
       failures.push(`Requested spec did not complete: ${requestedSpec}.`);
     }
   }
@@ -131,6 +145,7 @@ if (
   resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 ) {
   const argumentsList = process.argv.slice(2);
+  const requested = requestedSpecs(argumentsList);
   const runId = `${new Date().toISOString().replaceAll(/[:.]/g, "-")}-${process.pid}`;
   const reportDirectory = resolve(projectRoot, "cypress/results");
   const reportPath = resolve(reportDirectory, `${runId}.json`);
@@ -144,7 +159,7 @@ if (
   const failures = validateBrowserRun({
     childExitCode: childResult.exitCode,
     report: result.report,
-    requested: requestedSpecs(argumentsList),
+    requested: expectedSpecs(requested),
     startedAt: commandStartedAt,
   });
 

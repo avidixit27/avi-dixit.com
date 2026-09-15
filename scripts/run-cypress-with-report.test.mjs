@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  expectedSpecs,
   requestedSpecs,
   validateBrowserRun,
 } from "./run-cypress-with-report.mjs";
@@ -8,6 +9,7 @@ const startedAt = Date.parse("2026-09-14T20:00:00.000Z");
 
 function completedReport(overrides = {}) {
   return {
+    commit: "test-commit",
     specs: [
       {
         name: "src/app/Footer.cy.tsx",
@@ -37,6 +39,18 @@ describe("validateBrowserRun", () => {
       "src/app/Footer.cy.tsx",
       "src/app/Navigation.cy.tsx",
       "src/features/portfolio/*.cy.tsx",
+    ]);
+  });
+
+  it("expands every requested glob before validation", () => {
+    expect(
+      expectedSpecs(["src/features/portfolio/*.cy.tsx"], () => [
+        "src/features/portfolio/HeroSlideshow.cy.tsx",
+        "src/features/portfolio/Lightbox.cy.tsx",
+      ]),
+    ).toEqual([
+      "src/features/portfolio/HeroSlideshow.cy.tsx",
+      "src/features/portfolio/Lightbox.cy.tsx",
     ]);
   });
 
@@ -102,16 +116,36 @@ describe("validateBrowserRun", () => {
     );
   });
 
-  it("accepts a completed spec that matches a requested glob", () => {
+  it("rejects a report without its tested commit", () => {
+    expect(
+      validateBrowserRun({
+        childExitCode: 0,
+        report: completedReport({
+          commit: null,
+        }),
+        requested: ["src/app/Footer.cy.tsx"],
+        startedAt,
+      }),
+    ).toContain(
+      "Cypress completion report does not identify the tested commit.",
+    );
+  });
+
+  it("rejects a partial result from an expanded glob", () => {
     expect(
       validateBrowserRun({
         childExitCode: 0,
         report: completedReport({
           specs: [{ name: "src/features/portfolio/Lightbox.cy.tsx" }],
         }),
-        requested: ["src/features/portfolio/*.cy.tsx"],
+        requested: [
+          "src/features/portfolio/HeroSlideshow.cy.tsx",
+          "src/features/portfolio/Lightbox.cy.tsx",
+        ],
         startedAt,
       }),
-    ).toEqual([]);
+    ).toContain(
+      "Requested spec did not complete: src/features/portfolio/HeroSlideshow.cy.tsx.",
+    );
   });
 });
