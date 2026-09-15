@@ -10,7 +10,7 @@
 | PR base        | `main`                                                                      |
 | PR             | Not opened                                                                  |
 
-> Approved. The user selected AVIF → WebP → JPEG for portfolio photos and approved the complete plan. Plan 015 must complete before implementation starts.
+> Approved. The user selected AVIF → WebP → JPEG for portfolio photos and approved the complete plan. Plan 015 merged through PR #43.
 
 ## Outcome
 

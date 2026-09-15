@@ -29,6 +29,10 @@
 
 Optimize for the fewest concepts a maintainer must understand, not the fewest lines.
 
+After tracing the affected behavior and its callers, stop at the first solution that satisfies the ticket: omit speculative work; reuse an existing implementation; use the language standard library; use a native browser, React, or tool capability; use an installed dependency; then write the smallest correct new implementation. A short diff in the wrong owner is not simpler. For a bug, fix the shared cause where its callers meet rather than adding symptom guards to each caller. Document a deliberate shortcut's known limit and upgrade trigger beside its owner.
+
+Assume the [Ponytail Codex plugin](https://github.com/DietrichGebert/ponytail) is enabled and functioning. Its guidance reinforces this decision order; these repository instructions and the approved plan remain authoritative for scope, safety, accessibility, and verification. If the plugin is unavailable, continue using the decision order here and flag the missing integration separately.
+
 - Keep one obvious source of truth for each concern. Remove duplicate configuration, stale compatibility paths, dead dependencies, and unused implementations.
 - Prefer framework-native or tool-native integration when it remains clear and testable. Colocate configuration with its owning tool when no other tool needs a separate file.
 - Do not add a config file, wrapper, helper, abstraction, or dependency solely because it is conventional elsewhere or might help hypothetical future scale.
