@@ -35,7 +35,7 @@ describe("RouteTransitionBoundary", () => {
   });
 
   it("keeps each released route independently available", () => {
-    mountRoute("/shop/", true, false);
+    mountRoute("/SHOP/", true, false);
     cy.contains("h1", "Print shop").should("be.visible");
     cy.get('[data-route-content="true"]').should(
       "have.attr",
@@ -43,7 +43,7 @@ describe("RouteTransitionBoundary", () => {
       "Print shop",
     );
 
-    mountRoute("/contact/", false, true);
+    mountRoute("/CONTACT/", false, true);
     cy.contains("h1", "Contact").should("be.visible");
     cy.get('[data-route-content="true"]').should(
       "have.attr",

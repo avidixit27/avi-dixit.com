@@ -3,6 +3,7 @@ import * as m from "motion/react-m";
 import { lazy, Suspense, useLayoutEffect, useRef } from "react";
 import type { ReactNode, Ref } from "react";
 import {
+  matchPath,
   Route,
   Routes,
   useLocation,
@@ -27,11 +28,12 @@ interface RouteTransitionBoundaryProps {
 }
 
 function getRouteLabel(pathname: string, availability: FeatureAvailability) {
-  const routePath = pathname.replace(/\/+$/, "") || ROUTES.home;
-
-  if (routePath === ROUTES.home) return "Portfolio";
-  if (routePath === ROUTES.shop && availability.shop) return "Print shop";
-  if (routePath === ROUTES.contact && availability.contact) return "Contact";
+  if (matchPath(ROUTES.home, pathname)) return "Portfolio";
+  if (availability.shop && matchPath(ROUTES.shop, pathname))
+    return "Print shop";
+  if (availability.contact && matchPath(ROUTES.contact, pathname)) {
+    return "Contact";
+  }
   return "Page not found";
 }
 

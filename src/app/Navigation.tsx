@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, matchPath, useLocation } from "react-router-dom";
 import portrait from "../assets/brand/avi-dixit-portrait.webp";
 import wordmark from "../assets/brand/avi-dixit-wordmark.svg";
 import { NAVIGATION_ITEMS, ROUTES } from "../resources/navigation";
@@ -94,14 +94,19 @@ export default function Navigation({
 
     const positionIndicator = () => {
       const wrapper = linksWrapRef.current;
-      const activeLink = linkRefs.current.get(location.pathname);
-      if (!wrapper || !activeLink) {
+      const activeLink = visibleItems.find((item) =>
+        matchPath(item.path, location.pathname),
+      )?.path;
+      const activeElement = activeLink
+        ? linkRefs.current.get(activeLink)
+        : undefined;
+      if (!wrapper || !activeElement) {
         setIndicator((current) => ({ ...current, visible: false }));
         return;
       }
 
       const wrapperRect = wrapper.getBoundingClientRect();
-      const linkRect = activeLink.getBoundingClientRect();
+      const linkRect = activeElement.getBoundingClientRect();
       setIndicator({
         left: linkRect.left - wrapperRect.left,
         width: linkRect.width,
@@ -318,7 +323,7 @@ export default function Navigation({
             aria-hidden="true"
           />
           {visibleItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = matchPath(item.path, location.pathname) !== null;
             return (
               <Link
                 key={item.path}

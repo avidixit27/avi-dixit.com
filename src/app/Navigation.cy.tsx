@@ -42,7 +42,7 @@ function NavigationAvailabilityHarness() {
 describe("Navigation", () => {
   it("shows only released destinations and clears a disabled active link", () => {
     mount(
-      <MemoryRouter initialEntries={["/shop"]}>
+      <MemoryRouter initialEntries={["/SHOP/"]}>
         <NavigationAvailabilityHarness />
       </MemoryRouter>,
     );
@@ -59,7 +59,7 @@ describe("Navigation", () => {
 
   it("renders route links and marks the current destination", () => {
     mount(
-      <MemoryRouter initialEntries={["/shop"]}>
+      <MemoryRouter initialEntries={["/SHOP/"]}>
         <Navigation availability={allFeatures} portfolioGridElement={null} />
       </MemoryRouter>,
     );
