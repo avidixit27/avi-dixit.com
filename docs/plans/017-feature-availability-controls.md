@@ -3,12 +3,12 @@
 | Field          | Value                                                                                |
 | -------------- | ------------------------------------------------------------------------------------ |
 | Type           | Feature                                                                              |
-| Status         | In progress; tracked in the [plan index](README.md)                                  |
+| Status         | In review; tracked in the [plan index](README.md)                                    |
 | Depends on     | [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md) |
 | Blocks         | [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md)        |
 | Planned branch | `feat/feature-availability-controls`                                                 |
 | PR base        | `main`                                                                               |
-| PR             | Not opened                                                                           |
+| PR             | [#47](https://github.com/avidixit27/avi-dixit.com/pull/47)                           |
 
 ## Outcome
 
@@ -144,7 +144,7 @@ Approved for implementation. On 2026-09-14, the user selected hiding both Shop a
 
 Implementation began on 2026-09-15 from merged `main` in `feat/feature-availability-controls`. `src/app/featureAvailability.ts` owns the two committed release Booleans and resolves Vite's development-only override; `App.tsx` passes the result explicitly to navigation and route composition. The release decision is `shop: false` and `contact: true`.
 
-Verification under Node 22.22.2 passed: focused availability unit tests; 13 focused Navigation and RouteTransitionBoundary Chrome component tests; lint, formatting, and type checks; the dedicated all-features development smoke test; and 13 normal production E2E tests against a fresh build. A `vite build --mode all-features` diagnostic with `NODE_ENV=development` also passed the production E2E suite, confirming that neither a nonstandard build mode nor environment variable enables the development-only override. The user approved normal and all-features browser behavior on 2026-09-15. CI and PR evidence remain to be recorded.
+Verification under Node 22.22.2 passed: focused availability unit tests; 13 focused Navigation and RouteTransitionBoundary Chrome component tests; lint, formatting, and type checks; the dedicated all-features development smoke test; and 13 normal production E2E tests against a fresh build. A `vite build --mode all-features` diagnostic with `NODE_ENV=development` also passed the production E2E suite, confirming that neither a nonstandard build mode nor environment variable enables the development-only override. The user approved normal and all-features browser behavior on 2026-09-15. PR [#47](https://github.com/avidixit27/avi-dixit.com/pull/47) is open for review; record CI evidence when it completes.
 
 ## Design references
 
