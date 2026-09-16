@@ -3,6 +3,7 @@ import * as m from "motion/react-m";
 import { lazy, Suspense, useLayoutEffect, useRef } from "react";
 import type { ReactNode, Ref } from "react";
 import {
+  matchPath,
   Route,
   Routes,
   useLocation,
@@ -15,19 +16,24 @@ import {
   ROUTE_TRANSITION,
 } from "./motionPresentationPolicy";
 import NotFound from "./NotFound";
+import type { FeatureAvailability } from "./featureAvailability";
 import RouteLoadingFallback from "./RouteLoadingFallback";
 
 const Shop = lazy(() => import("../features/shop/Shop"));
 const Contact = lazy(() => import("../features/inquiries/Contact"));
 
 interface RouteTransitionBoundaryProps {
+  availability: FeatureAvailability;
   portfolioGridRef: Ref<HTMLDivElement>;
 }
 
-function getRouteLabel(pathname: string) {
-  if (pathname === ROUTES.home) return "Portfolio";
-  if (pathname === ROUTES.shop) return "Print shop";
-  if (pathname === ROUTES.contact) return "Contact";
+function getRouteLabel(pathname: string, availability: FeatureAvailability) {
+  if (matchPath(ROUTES.home, pathname)) return "Portfolio";
+  if (availability.shop && matchPath(ROUTES.shop, pathname))
+    return "Print shop";
+  if (availability.contact && matchPath(ROUTES.contact, pathname)) {
+    return "Contact";
+  }
   return "Page not found";
 }
 
@@ -97,6 +103,7 @@ function RouteFrame({
 }
 
 export default function RouteTransitionBoundary({
+  availability,
   portfolioGridRef,
 }: RouteTransitionBoundaryProps) {
   const location = useLocation();
@@ -109,7 +116,7 @@ export default function RouteTransitionBoundary({
           key={location.key}
           locationKey={location.key}
           navigationType={navigationType}
-          label={getRouteLabel(location.pathname)}
+          label={getRouteLabel(location.pathname, availability)}
         >
           <Suspense fallback={<RouteLoadingFallback />}>
             <Routes location={location}>
@@ -117,8 +124,12 @@ export default function RouteTransitionBoundary({
                 path={ROUTES.home}
                 element={<Portfolio gridMarkerRef={portfolioGridRef} />}
               />
-              <Route path={ROUTES.shop} element={<Shop />} />
-              <Route path={ROUTES.contact} element={<Contact />} />
+              {availability.shop && (
+                <Route path={ROUTES.shop} element={<Shop />} />
+              )}
+              {availability.contact && (
+                <Route path={ROUTES.contact} element={<Contact />} />
+              )}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

@@ -129,49 +129,28 @@ describe("photography portfolio", () => {
     cy.get('[role="dialog"]').should("not.exist");
   });
 
-  it("supports the current shop and contact route behavior", () => {
+  it("keeps Shop disabled while Contact remains released", () => {
     cy.visit("/shop");
-    cy.contains("button", "Add to Cart").first().click().click();
-    cy.contains("Cart (2)").should("be.visible");
-    cy.contains("Total:").parent().should("contain.text", "$298.00");
+    cy.contains("h1", "Page not found").should("be.visible");
+    cy.get('[data-route-content="true"]').should(
+      "have.attr",
+      "aria-label",
+      "Page not found",
+    );
+    cy.contains("a", "Return home").click();
+    cy.location("pathname").should("eq", "/");
 
-    cy.visit("/contact");
-    cy.get('input[name="email"]').should("have.attr", "type", "email");
-    cy.contains("button", "Send Message").should("be.enabled");
-    cy.get("footer")
-      .should("contain.text", "Copyright @Avi Dixit 2026")
-      .and("not.contain.text", "avidixit27@gmail.com")
-      .and("not.contain.text", "Instagram");
-    cy.get(".custom-scrollbar").should("not.exist");
-  });
-
-  it("updates routes immediately with deliberate focus and scroll behavior", () => {
     cy.visit("/");
-    cy.scrollTo(0, 1200);
-    cy.window().its("scrollY").should("be.greaterThan", 0);
-
-    cy.contains("a", "SHOP").click();
-    cy.location("pathname").should("eq", "/shop");
-    cy.window().its("scrollY").should("equal", 0);
-    cy.get('[data-route-content="true"]:not([aria-hidden="true"])')
-      .should("have.attr", "aria-label", "Print shop")
-      .and("have.focus");
-    cy.contains("h1", "Print shop").should("be.visible");
-
-    cy.contains("a", "CONTACT").click();
-    cy.location("pathname").should("eq", "/contact");
-    cy.get('[data-route-content="true"]:not([aria-hidden="true"])')
-      .should("have.attr", "aria-label", "Contact")
-      .and("have.focus");
+    cy.contains("a", "SHOP").should("not.exist");
+    cy.contains("a", "CONTACT").should("have.attr", "href", "/contact").click();
     cy.contains("h1", "Contact").should("be.visible");
-
-    cy.go("back");
-    cy.location("pathname").should("eq", "/shop");
-    cy.contains("h1", "Print shop").should("be.visible");
-
+    cy.get('[data-route-content="true"]:not([aria-hidden="true"])').should(
+      "have.attr",
+      "aria-label",
+      "Contact",
+    );
     cy.go("back");
     cy.location("pathname").should("eq", "/");
-    cy.window().its("scrollY").should("be.greaterThan", 0);
   });
 
   it("returns to the top when Home is selected from a scrolled portfolio", () => {
@@ -231,31 +210,34 @@ describe("photography portfolio", () => {
     });
   });
 
-  it("keeps semantic color utilities in the production stylesheet", () => {
-    cy.visit("/contact");
-    cy.get('input[name="email"]')
-      .focus()
-      .should(($input) => {
-        expect(getComputedStyle($input.get(0)).borderBottomColor).to.equal(
-          "rgb(255, 225, 147)",
-        );
-      });
-
-    cy.visit("/shop");
-    cy.contains("p", "$149").should(($price) => {
-      expect(getComputedStyle($price.get(0)).color).to.equal(
-        "rgb(230, 173, 255)",
-      );
-    });
-  });
-
   it("uses the approved dark canvas across the application shell", () => {
-    cy.visit("/contact");
+    cy.visit("/");
     cy.get("body").should(($body) => {
       expect(getComputedStyle($body.get(0)).backgroundColor).to.equal(
         "rgb(14, 14, 14)",
       );
     });
+  });
+
+  it("keeps hidden-feature utility rules in the production stylesheet", () => {
+    cy.visit("/");
+    cy.get('link[rel="stylesheet"]')
+      .first()
+      .invoke("attr", "href")
+      .then((stylesheet) => {
+        cy.request(stylesheet ?? "")
+          .its("body")
+          .should((css) => {
+            expect(css).to.contain(
+              ".focus\\:border-focus:focus{border-color:var(--color-focus)}",
+            );
+            expect(css).to.contain("--color-focus:#ffe193");
+            expect(css).to.contain(
+              ".text-brand-vivid{color:var(--color-brand-vivid)}",
+            );
+            expect(css).to.contain("--color-brand-vivid:#e6adff");
+          });
+      });
   });
 
   it("composes the home portfolio with sticky, parallax, and color-release chapters", () => {
@@ -371,7 +353,8 @@ describe("photography portfolio", () => {
   it("keeps primary navigation and gallery access usable on mobile", () => {
     cy.viewport(390, 844);
     cy.visit("/");
-    cy.contains("a", "SHOP").should("be.visible");
+    cy.contains("a", "SHOP").should("not.exist");
+    cy.contains("a", "CONTACT").should("be.visible");
     cy.get('[aria-label="Open hero image gallery"]').should("be.visible");
     cy.get('main [aria-label^="Open "]')
       .first()

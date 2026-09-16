@@ -9,35 +9,55 @@ const PORTFOLIO_FALLBACK_WIDTH = "1440";
 const PORTFOLIO_IMAGE_QUALITY = "82";
 const PORTFOLIO_AVIF_QUALITY = "50";
 const PORTFOLIO_AVIF_EFFORT = "4";
+const DEFAULT_CONFIG_ENV = {
+  command: "serve",
+  mode: "development",
+  isPreview: false,
+} as const;
 
-export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
+export function isAllFeaturesDevelopment(
+  command: string,
+  mode: string,
+  isPreview = false,
+) {
+  return command === "serve" && mode === "all-features" && !isPreview;
+}
 
-    imagetools({
-      include: /\.(?:avif|gif|heif|jpe?g|png|tiff|webp)(?:\?.*)?$/i,
+export default defineConfig(
+  ({ command, mode, isPreview } = DEFAULT_CONFIG_ENV) => ({
+    define: {
+      "import.meta.env.ALL_FEATURES_DEVELOPMENT": JSON.stringify(
+        isAllFeaturesDevelopment(command, mode, isPreview),
+      ),
+    },
+    plugins: [
+      react(),
+      tailwindcss(),
 
-      defaultDirectives: (url) => {
-        const directives = new URLSearchParams();
+      imagetools({
+        include: /\.(?:avif|gif|heif|jpe?g|png|tiff|webp)(?:\?.*)?$/i,
 
-        if (url.searchParams.has("portfolio-responsive")) {
-          directives.set("w", PORTFOLIO_RESPONSIVE_WIDTHS);
-          if (url.searchParams.get("format") === "avif") {
-            directives.set("quality", PORTFOLIO_AVIF_QUALITY);
-            directives.set("effort", PORTFOLIO_AVIF_EFFORT);
-          } else {
+        defaultDirectives: (url) => {
+          const directives = new URLSearchParams();
+
+          if (url.searchParams.has("portfolio-responsive")) {
+            directives.set("w", PORTFOLIO_RESPONSIVE_WIDTHS);
+            if (url.searchParams.get("format") === "avif") {
+              directives.set("quality", PORTFOLIO_AVIF_QUALITY);
+              directives.set("effort", PORTFOLIO_AVIF_EFFORT);
+            } else {
+              directives.set("quality", PORTFOLIO_IMAGE_QUALITY);
+            }
+          } else if (url.searchParams.has("portfolio-fallback")) {
+            directives.set("w", PORTFOLIO_FALLBACK_WIDTH);
             directives.set("quality", PORTFOLIO_IMAGE_QUALITY);
           }
-        } else if (url.searchParams.has("portfolio-fallback")) {
-          directives.set("w", PORTFOLIO_FALLBACK_WIDTH);
-          directives.set("quality", PORTFOLIO_IMAGE_QUALITY);
-        }
 
-        return directives;
-      },
-    }),
+          return directives;
+        },
+      }),
 
-    cloudflare(),
-  ],
-});
+      cloudflare(),
+    ],
+  }),
+);

@@ -10,6 +10,7 @@
 
 ## Start with the repository
 
+- For normal single-plan work, use the user's primary local checkout rather than an ephemeral temporary worktree. Before implementing a plan, update it from `main` and confirm the working tree is clean. If existing local changes prevent that, preserve them and resolve the checkout with the user before proceeding.
 - Read [architecture.md](architecture.md) before structural changes, new features, dependency decisions, or enduring convention changes.
 - Inspect existing source, dependencies, scripts, configuration, and working-tree changes before editing. Search for an existing implementation before adding one.
 - Before implementation code, state a three-bullet plan covering exact files or ownership areas, observable behavior, and proportionate verification.
@@ -108,6 +109,7 @@ After pushing:
 | Command                              | Purpose                                                                    |
 | ------------------------------------ | -------------------------------------------------------------------------- |
 | `npm run dev`                        | Start the Vite development server                                          |
+| `npm run dev:all-features`           | Start Vite development with every known feature visible                    |
 | `npm run build`                      | Build the production frontend                                              |
 | `npm run preview`                    | Preview through the configured Cloudflare path                             |
 | `npm run lint`                       | Run ESLint and fail on warnings                                            |
@@ -121,6 +123,7 @@ After pushing:
 | `npm run test:component:reliability` | Run repaired lifecycle/navigation component specs 20 times without retries |
 | `npm run test:component:open`        | Open the Cypress component runner                                          |
 | `npm run test:e2e`                   | Build, serve, and test critical journeys in headless Chrome                |
+| `npm run test:all-features`          | Test the enabled Shop and Contact development journey on port 4174         |
 | `npm run security:audit`             | Fail on moderate or higher production advisories                           |
 | `npm run check`                      | Run the complete local verification sequence                               |
 

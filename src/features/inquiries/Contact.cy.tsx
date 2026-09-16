@@ -15,7 +15,9 @@ describe("Contact", () => {
     cy.get('input[name="name"]').type("Avi").should("have.value", "Avi");
     cy.get('input[name="email"]')
       .type("avi@example.com")
-      .should("have.attr", "type", "email");
+      .should("have.attr", "type", "email")
+      .focus()
+      .should("have.css", "border-bottom-color", "rgb(255, 225, 147)");
     cy.get('textarea[name="message"]')
       .type("Print inquiry")
       .should("have.value", "Print inquiry");

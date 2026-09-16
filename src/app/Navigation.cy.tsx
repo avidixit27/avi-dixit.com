@@ -1,6 +1,10 @@
 import { mount } from "@cypress/react";
+import { useState } from "react";
 import { MemoryRouter, useLocation } from "react-router-dom";
+import { resolveFeatureAvailability } from "./featureAvailability";
 import Navigation from "./Navigation";
+
+const allFeatures = resolveFeatureAvailability({ shop: true, contact: true });
 
 function LocationKey() {
   const location = useLocation();
@@ -14,11 +18,49 @@ function LocationPath() {
   return <output data-location>{location.pathname}</output>;
 }
 
+function NavigationAvailabilityHarness() {
+  const [availability, setAvailability] = useState(allFeatures);
+
+  return (
+    <>
+      <button
+        type="button"
+        className="fixed right-0 bottom-0"
+        onClick={() =>
+          setAvailability(
+            resolveFeatureAvailability({ shop: false, contact: true }),
+          )
+        }
+      >
+        Hide Shop
+      </button>
+      <Navigation availability={availability} portfolioGridElement={null} />
+    </>
+  );
+}
+
 describe("Navigation", () => {
+  it("shows only released destinations and clears a disabled active link", () => {
+    mount(
+      <MemoryRouter initialEntries={["/SHOP/"]}>
+        <NavigationAvailabilityHarness />
+      </MemoryRouter>,
+    );
+
+    cy.contains("a", "HOME").should("be.visible");
+    cy.contains("a", "SHOP").should("be.visible");
+    cy.contains("a", "CONTACT").should("be.visible");
+
+    cy.contains("button", "Hide Shop").click();
+    cy.contains("a", "SHOP").should("not.exist");
+    cy.contains("a", "CONTACT").should("be.visible");
+    cy.get("nav span").should("have.class", "opacity-0");
+  });
+
   it("renders route links and marks the current destination", () => {
     mount(
-      <MemoryRouter initialEntries={["/shop"]}>
-        <Navigation portfolioGridElement={null} />
+      <MemoryRouter initialEntries={["/SHOP/"]}>
+        <Navigation availability={allFeatures} portfolioGridElement={null} />
       </MemoryRouter>,
     );
 
@@ -34,7 +76,7 @@ describe("Navigation", () => {
   it("uses the project display-font token for navigation labels", () => {
     mount(
       <MemoryRouter>
-        <Navigation portfolioGridElement={null} />
+        <Navigation availability={allFeatures} portfolioGridElement={null} />
       </MemoryRouter>,
     );
 
@@ -46,7 +88,7 @@ describe("Navigation", () => {
   it("keeps the portrait and wordmark centered in the navigation row", () => {
     mount(
       <MemoryRouter>
-        <Navigation portfolioGridElement={null} />
+        <Navigation availability={allFeatures} portfolioGridElement={null} />
       </MemoryRouter>,
     );
 
@@ -77,7 +119,7 @@ describe("Navigation", () => {
     cy.viewport(1280, 800);
     mount(
       <MemoryRouter>
-        <Navigation portfolioGridElement={null} />
+        <Navigation availability={allFeatures} portfolioGridElement={null} />
       </MemoryRouter>,
     );
 
@@ -131,6 +173,7 @@ describe("Navigation", () => {
     mount(
       <MemoryRouter initialEntries={["/"]}>
         <Navigation
+          availability={allFeatures}
           portfolioGridElement={null}
           onHomeResetEnd={onHomeResetEnd}
           onHomeResetStart={onHomeResetStart}
@@ -169,7 +212,7 @@ describe("Navigation", () => {
     });
     mount(
       <MemoryRouter initialEntries={["/"]}>
-        <Navigation portfolioGridElement={null} />
+        <Navigation availability={allFeatures} portfolioGridElement={null} />
       </MemoryRouter>,
     );
 
@@ -201,6 +244,7 @@ describe("Navigation", () => {
     mount(
       <MemoryRouter initialEntries={["/"]}>
         <Navigation
+          availability={allFeatures}
           portfolioGridElement={null}
           onHomeResetEnd={onHomeResetEnd}
         />
@@ -235,6 +279,7 @@ describe("Navigation", () => {
     mount(
       <MemoryRouter initialEntries={["/"]}>
         <Navigation
+          availability={allFeatures}
           portfolioGridElement={null}
           onHomeResetStart={onHomeResetStart}
         />
@@ -271,6 +316,7 @@ describe("Navigation", () => {
     mount(
       <MemoryRouter initialEntries={["/"]}>
         <Navigation
+          availability={allFeatures}
           portfolioGridElement={null}
           onHomeResetEnd={onHomeResetEnd}
         />
@@ -325,6 +371,7 @@ describe("Navigation", () => {
     mount(
       <MemoryRouter initialEntries={["/"]}>
         <Navigation
+          availability={allFeatures}
           portfolioGridElement={null}
           onHomeResetEnd={onHomeResetEnd}
         />

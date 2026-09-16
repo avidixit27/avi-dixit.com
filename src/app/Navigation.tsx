@@ -1,9 +1,10 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, matchPath, useLocation } from "react-router-dom";
 import portrait from "../assets/brand/avi-dixit-portrait.webp";
 import wordmark from "../assets/brand/avi-dixit-wordmark.svg";
 import { NAVIGATION_ITEMS, ROUTES } from "../resources/navigation";
+import type { FeatureAvailability } from "./featureAvailability";
 
 const NAV_FALLBACK_HEIGHT_PX = 64;
 const HOME_HIDE_DELAY_MS = 2000;
@@ -15,6 +16,7 @@ const PAGE_REVEAL_DELTA_PX = -8;
 const REDUCED_MOTION_MEDIA_QUERY = "(prefers-reduced-motion: reduce)";
 
 interface NavigationProps {
+  availability: FeatureAvailability;
   onHomeResetEnd?: () => void;
   onHomeResetStart?: () => void;
   portfolioGridElement: HTMLDivElement | null;
@@ -37,12 +39,13 @@ function isModifiedActivation(event: ReactMouseEvent<HTMLAnchorElement>) {
 }
 
 export default function Navigation({
+  availability,
   onHomeResetEnd,
   onHomeResetStart,
   portfolioGridElement,
 }: NavigationProps) {
   const location = useLocation();
-  const isHome = location.pathname === ROUTES.home;
+  const isHome = matchPath(ROUTES.home, location.pathname) !== null;
   const navRef = useRef<HTMLElement>(null);
   const linksWrapRef = useRef<HTMLDivElement>(null);
   const linkRefs = useRef(new Map<string, HTMLAnchorElement>());
@@ -57,6 +60,13 @@ export default function Navigation({
     width: 0,
     visible: false,
   });
+  const visibleItems = useMemo(
+    () =>
+      NAVIGATION_ITEMS.filter(
+        (item) => !item.feature || availability[item.feature],
+      ),
+    [availability],
+  );
 
   useEffect(
     () => () => {
@@ -76,16 +86,27 @@ export default function Navigation({
   }, [isHome, onHomeResetEnd]);
 
   useEffect(() => {
+    linkRefs.current.forEach((_, path) => {
+      if (!visibleItems.some((item) => item.path === path)) {
+        linkRefs.current.delete(path);
+      }
+    });
+
     const positionIndicator = () => {
       const wrapper = linksWrapRef.current;
-      const activeLink = linkRefs.current.get(location.pathname);
-      if (!wrapper || !activeLink) {
+      const activeLink = visibleItems.find((item) =>
+        matchPath(item.path, location.pathname),
+      )?.path;
+      const activeElement = activeLink
+        ? linkRefs.current.get(activeLink)
+        : undefined;
+      if (!wrapper || !activeElement) {
         setIndicator((current) => ({ ...current, visible: false }));
         return;
       }
 
       const wrapperRect = wrapper.getBoundingClientRect();
-      const linkRect = activeLink.getBoundingClientRect();
+      const linkRect = activeElement.getBoundingClientRect();
       setIndicator({
         left: linkRect.left - wrapperRect.left,
         width: linkRect.width,
@@ -99,7 +120,7 @@ export default function Navigation({
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", positionIndicator);
     };
-  }, [location.pathname]);
+  }, [location.pathname, visibleItems]);
 
   useEffect(() => {
     if (inactivityTimerRef.current !== null) {
@@ -301,8 +322,8 @@ export default function Navigation({
             }}
             aria-hidden="true"
           />
-          {NAVIGATION_ITEMS.map((item) => {
-            const isActive = location.pathname === item.path;
+          {visibleItems.map((item) => {
+            const isActive = matchPath(item.path, location.pathname) !== null;
             return (
               <Link
                 key={item.path}

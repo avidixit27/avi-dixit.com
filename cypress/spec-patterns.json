@@ -1,4 +1,4 @@
 {
   "component": "src/**/*.cy.tsx",
-  "e2e": "cypress/e2e/**/*.cy.ts"
+  "e2e": "cypress/e2e/**/!(all-features).cy.ts"
 }
