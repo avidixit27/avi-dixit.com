@@ -1,4 +1,5 @@
 import { mount } from "@cypress/react";
+import { useState } from "react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { resolveFeatureAvailability } from "./featureAvailability";
 import Navigation from "./Navigation";
@@ -17,39 +18,43 @@ function LocationPath() {
   return <output data-location>{location.pathname}</output>;
 }
 
+function NavigationAvailabilityHarness() {
+  const [availability, setAvailability] = useState(allFeatures);
+
+  return (
+    <>
+      <button
+        type="button"
+        className="fixed right-0 bottom-0"
+        onClick={() =>
+          setAvailability(
+            resolveFeatureAvailability({ shop: false, contact: true }),
+          )
+        }
+      >
+        Hide Shop
+      </button>
+      <Navigation availability={availability} portfolioGridElement={null} />
+    </>
+  );
+}
+
 describe("Navigation", () => {
   it("shows only released destinations and clears a disabled active link", () => {
     mount(
       <MemoryRouter initialEntries={["/shop"]}>
-        <Navigation
-          availability={resolveFeatureAvailability({
-            shop: false,
-            contact: false,
-          })}
-          portfolioGridElement={null}
-        />
+        <NavigationAvailabilityHarness />
       </MemoryRouter>,
     );
 
     cy.contains("a", "HOME").should("be.visible");
-    cy.contains("a", "SHOP").should("not.exist");
-    cy.contains("a", "CONTACT").should("not.exist");
-    cy.get("nav span").should("have.class", "opacity-0");
-
-    mount(
-      <MemoryRouter>
-        <Navigation
-          availability={resolveFeatureAvailability({
-            shop: true,
-            contact: false,
-          })}
-          portfolioGridElement={null}
-        />
-      </MemoryRouter>,
-    );
-
     cy.contains("a", "SHOP").should("be.visible");
-    cy.contains("a", "CONTACT").should("not.exist");
+    cy.contains("a", "CONTACT").should("be.visible");
+
+    cy.contains("button", "Hide Shop").click();
+    cy.contains("a", "SHOP").should("not.exist");
+    cy.contains("a", "CONTACT").should("be.visible");
+    cy.get("nav span").should("have.class", "opacity-0");
   });
 
   it("renders route links and marks the current destination", () => {

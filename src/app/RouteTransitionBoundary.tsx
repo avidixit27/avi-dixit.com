@@ -27,9 +27,11 @@ interface RouteTransitionBoundaryProps {
 }
 
 function getRouteLabel(pathname: string, availability: FeatureAvailability) {
-  if (pathname === ROUTES.home) return "Portfolio";
-  if (pathname === ROUTES.shop && availability.shop) return "Print shop";
-  if (pathname === ROUTES.contact && availability.contact) return "Contact";
+  const routePath = pathname.replace(/\/+$/, "") || ROUTES.home;
+
+  if (routePath === ROUTES.home) return "Portfolio";
+  if (routePath === ROUTES.shop && availability.shop) return "Print shop";
+  if (routePath === ROUTES.contact && availability.contact) return "Contact";
   return "Page not found";
 }
 

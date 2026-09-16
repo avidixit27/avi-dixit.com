@@ -24,10 +24,18 @@ describe("RouteTransitionBoundary", () => {
       "aria-label",
       "Page not found",
     );
+
+    mountRoute("/contact/", false, false);
+    cy.contains("h1", "Page not found").should("be.visible");
+    cy.get('[data-route-content="true"]').should(
+      "have.attr",
+      "aria-label",
+      "Page not found",
+    );
   });
 
   it("keeps each released route independently available", () => {
-    mountRoute("/shop", true, false);
+    mountRoute("/shop/", true, false);
     cy.contains("h1", "Print shop").should("be.visible");
     cy.get('[data-route-content="true"]').should(
       "have.attr",
@@ -35,7 +43,7 @@ describe("RouteTransitionBoundary", () => {
       "Print shop",
     );
 
-    mountRoute("/contact", false, true);
+    mountRoute("/contact/", false, true);
     cy.contains("h1", "Contact").should("be.visible");
     cy.get('[data-route-content="true"]').should(
       "have.attr",
