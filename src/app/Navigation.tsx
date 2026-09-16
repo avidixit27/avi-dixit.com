@@ -45,7 +45,7 @@ export default function Navigation({
   portfolioGridElement,
 }: NavigationProps) {
   const location = useLocation();
-  const isHome = location.pathname === ROUTES.home;
+  const isHome = matchPath(ROUTES.home, location.pathname) !== null;
   const navRef = useRef<HTMLElement>(null);
   const linksWrapRef = useRef<HTMLDivElement>(null);
   const linkRefs = useRef(new Map<string, HTMLAnchorElement>());
