@@ -6,6 +6,6 @@ describe("all-features Vite mode", () => {
     expect(isAllFeaturesDevelopment("serve", "all-features")).toBe(true);
     expect(isAllFeaturesDevelopment("serve", "development")).toBe(false);
     expect(isAllFeaturesDevelopment("build", "all-features")).toBe(false);
-    expect(isAllFeaturesDevelopment("preview", "all-features")).toBe(false);
+    expect(isAllFeaturesDevelopment("serve", "all-features", true)).toBe(false);
   });
 });

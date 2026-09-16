@@ -16,5 +16,6 @@ describe("Shop", () => {
       "p",
       "Explore the current print collections and prepare a selection.",
     ).should("have.class", "font-inter");
+    cy.contains("p", "$149").should("have.css", "color", "rgb(230, 173, 255)");
   });
 });

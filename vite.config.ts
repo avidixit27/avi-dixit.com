@@ -9,16 +9,25 @@ const PORTFOLIO_FALLBACK_WIDTH = "1440";
 const PORTFOLIO_IMAGE_QUALITY = "82";
 const PORTFOLIO_AVIF_QUALITY = "50";
 const PORTFOLIO_AVIF_EFFORT = "4";
+const DEFAULT_CONFIG_ENV = {
+  command: "serve",
+  mode: "development",
+  isPreview: false,
+} as const;
 
-export function isAllFeaturesDevelopment(command: string, mode: string) {
-  return command === "serve" && mode === "all-features";
+export function isAllFeaturesDevelopment(
+  command: string,
+  mode: string,
+  isPreview = false,
+) {
+  return command === "serve" && mode === "all-features" && !isPreview;
 }
 
 export default defineConfig(
-  ({ command, mode } = { command: "serve", mode: "development" }) => ({
+  ({ command, mode, isPreview } = DEFAULT_CONFIG_ENV) => ({
     define: {
       "import.meta.env.ALL_FEATURES_DEVELOPMENT": JSON.stringify(
-        isAllFeaturesDevelopment(command, mode),
+        isAllFeaturesDevelopment(command, mode, isPreview),
       ),
     },
     plugins: [

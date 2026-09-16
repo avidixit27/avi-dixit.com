@@ -231,9 +231,11 @@ describe("photography portfolio", () => {
             expect(css).to.contain(
               ".focus\\:border-focus:focus{border-color:var(--color-focus)}",
             );
+            expect(css).to.contain("--color-focus:#ffe193");
             expect(css).to.contain(
               ".text-brand-vivid{color:var(--color-brand-vivid)}",
             );
+            expect(css).to.contain("--color-brand-vivid:#e6adff");
           });
       });
   });

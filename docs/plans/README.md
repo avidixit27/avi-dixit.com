@@ -48,11 +48,11 @@ Completed tickets are historical records. Read one only when its outcome or impl
 
 ## Current sequence
 
-Plan 015 reached `main` through PR #43. Plan 016 is the next approved implementation.
+Plan 016 reached `main` through PR #45. Plan 017 is in review.
 
 | Plan                                                                                         | Status    | Planned branch                          | Depends on |
 | -------------------------------------------------------------------------------------------- | --------- | --------------------------------------- | ---------- |
-| [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md)         | In review | `perf/brand-and-photo-payloads`         | 015        |
+| [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md)         | Completed | `perf/brand-and-photo-payloads`         | 015        |
 | [017 — Feature availability controls](017-feature-availability-controls.md)                  | In review | `feat/feature-availability-controls`    | 016        |
 | [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md)                | Planned   | `feat/portfolio-statement-resume`       | 017        |
 | [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md) | Planned   | `feat/portfolio-collection-routes`      | 018        |
