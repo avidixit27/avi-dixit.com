@@ -8,7 +8,7 @@ const PORTFOLIO_RESPONSIVE_WIDTHS = "480;960;1440;2160";
 const PORTFOLIO_FALLBACK_WIDTH = "1440";
 const PORTFOLIO_IMAGE_QUALITY = "82";
 const PORTFOLIO_AVIF_QUALITY = "50";
-const PORTFOLIO_AVIF_EFFORT = "6";
+const PORTFOLIO_AVIF_EFFORT = "4";
 
 export default defineConfig({
   plugins: [
