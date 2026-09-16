@@ -26,12 +26,16 @@ describe("all-features development mode", () => {
       .and("not.contain.text", "avidixit27@gmail.com")
       .and("not.contain.text", "Instagram");
 
+    cy.window().then((pageWindow) => {
+      cy.spy(pageWindow, "scrollTo").as("scrollTo");
+    });
+
     cy.go("back");
     cy.location("pathname").should("eq", "/shop");
     cy.contains("h1", "Print shop").should("be.visible");
 
     cy.go("back");
     cy.location("pathname").should("eq", "/");
-    cy.window().its("scrollY").should("be.greaterThan", 0);
+    cy.get("@scrollTo").should("not.have.been.called");
   });
 });
