@@ -61,7 +61,7 @@ Plan 015 reached `main` through PR #43. Plan 016 is the next approved implementa
 
 Plans 015–017 are approved. Plan 015 completed CT and related E2E reliability fixes, execution evidence, diagnostics, and a measured container evaluation; required container adoption was deferred. Former plans 015–020 were renumbered to 016–021 at the user's request.
 
-Plan 016 combines the existing brand-asset work with AVIF → WebP → JPEG portfolio delivery, the format order selected by the user. It retains four widths per format, aligns lightbox preloading with display selection, and requires measured quality, transfer, decode, build, and storage evidence. Plan 017 then adds approved feature availability controls, initially hiding both Shop and Contact while keeping them available in explicit all-features development and tests. Plan 018 adds the Home statement and résumé; Plans 019–020 add collections and discovery. Plan 021 can begin after Plan 017, but authorizes architecture and feasibility evidence only.
+Plan 016 combines the existing brand-asset work with AVIF → WebP → JPEG portfolio delivery, the format order selected by the user. It retains four widths per format, aligns lightbox preloading with display selection, and requires measured quality, transfer, decode, build, and storage evidence. Plan 017 then adds approved feature availability controls, initially hiding Shop while keeping Contact released and both features available in explicit all-features development and tests. Plan 018 adds the Home statement and résumé; Plans 019–020 add collections and discovery. Plan 021 can begin after Plan 017, but authorizes architecture and feasibility evidence only.
 
 ### Stack management
 

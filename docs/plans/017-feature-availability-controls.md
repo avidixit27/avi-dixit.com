@@ -17,10 +17,9 @@ Unfinished features can be merged and deployed without appearing in production n
 ## Prerequisites and current state
 
 - Complete Plan 016 first so feature gating does not overlap with the navigation asset rewrite.
-- Shop and Contact are currently linked in navigation and routed at `/shop` and `/contact`. Shop has no checkout integration; Contact has local form fields but no submission integration. Both have direct Cypress coverage.
+- Shop and Contact have direct Cypress coverage. Shop has no checkout integration; Contact has local form fields but no submission integration.
 - `src/resources/navigation.ts` owns static navigation labels and routes. `Navigation.tsx` renders those items, while `RouteTransitionBoundary.tsx` owns route availability.
-- The user selected `shop: false` and `contact: false`. Both disabled URLs must render the existing 404 experience, and both features must remain directly testable and independently releasable.
-- Hiding Contact also makes its email and Instagram links unavailable through that page. Relocating them elsewhere is not part of this plan.
+- The user selected `shop: false` and `contact: true`. The disabled Shop URL must render the existing 404 experience; Contact remains directly testable and independently releasable.
 - Changing a release Boolean and deploying is acceptable. Runtime administration, instant remote toggles, and a third-party flag service are unnecessary.
 - The approved command behavior is:
   - `npm run dev` respects committed release flags and therefore mirrors production availability.
@@ -55,10 +54,10 @@ Anticipated ownership includes a focused module under `src/app/`, `App.tsx`, `Na
 
 ## Deliverables
 
-- Typed release-availability module with `shop: false`, `contact: false`, and a narrowly defined development override.
+- Typed release-availability module with `shop: false`, `contact: true`, and a narrowly defined development override.
 - Explicit availability inputs for application navigation and route composition.
 - `dev:all-features` package script using Vite's `all-features` mode.
-- Hidden Shop and Contact navigation and fallback behavior in normal development and production builds, leaving Home available.
+- Hidden Shop navigation and fallback behavior in normal development and production builds, with Home and Contact available.
 - Enabled Shop and Contact navigation and routing in all-features development.
 - Unit and component coverage for release resolution, navigation, routing, and direct Shop and Contact behavior; production disabled-route checks and an automated enabled-development smoke check.
 - Updated enduring architecture guidance and current command documentation.
@@ -74,7 +73,7 @@ Anticipated ownership includes a focused module under `src/app/`, `App.tsx`, `Na
 7. Omit each disabled route so the existing wildcard renders `NotFound`; retain existing lazy routes when enabled. Resolve the route frame's accessible label from effective availability too, so a disabled URL announces “Page not found,” not “Print shop” or “Contact.” Preserve route focus, scroll, outgoing-frame isolation, and reduced-motion behavior; do not create a second fallback page.
 8. Add component coverage for disabled, enabled, and mixed states; direct disabled URLs, including trailing-slash variants; return-home navigation; and availability changes with the same pathname. Keep both feature components' existing behavior tests active independent of committed flags.
 9. Adapt browser coverage without skipping assertions or weakening the release policy:
-   - Production E2E must prove both links are absent, both direct URLs show the fallback, Home remains usable, and fallback-to-Home navigation and browser history work. Retain Home scroll-reset and unknown-route checks.
+   - Production E2E must prove Shop is absent, its direct URL shows the fallback, Contact remains available, Home remains usable, and fallback-to-Home navigation and browser history work. Retain Home scroll-reset and unknown-route checks.
    - Move the existing enabled Shop/Contact journey and Home → Shop → Contact focus/scroll/history journey to a focused all-features development smoke spec, outside the default production spec selection. Preserve cart totals, Contact fields, and footer assertions there and/or in their existing direct component tests.
    - Preserve the production stylesheet regression gate for the Shop price and Contact focus-border utilities by checking the emitted production CSS rules and expected values, paired with direct component assertions for actual computed styles. A development-mode check alone is not evidence of production CSS generation.
    - Add one focused script for that development smoke check using existing Cypress and server-start/teardown tooling. Select the spec and base URL explicitly, use a strict dedicated port, and wire it into the existing CI workflow and full local check. Do not run the full portfolio suite against both servers. Require the execution evidence and failure artifacts established by Plan 015.
@@ -83,13 +82,13 @@ Anticipated ownership includes a focused module under `src/app/`, `App.tsx`, `Na
 
 ## Acceptance criteria
 
-- `shop: false` and `contact: false` each exist once as typed committed release decisions.
-- Normal `npm run dev` and production builds show Home navigation, omit Shop and Contact, and render the existing 404 experience for `/shop` and `/contact` with matching accessible labels.
+- `shop: false` and `contact: true` each exist once as typed committed release decisions.
+- Normal `npm run dev` and production builds show Home and Contact navigation, omit Shop, and render the existing 404 experience for `/shop` with a matching accessible label.
 - `npm run dev:all-features` displays both links and makes both routes usable without editing source files.
 - Builds and previews cannot enable all features through the development-only override, even with the all-features mode or a development `NODE_ENV`.
 - Enabling either release flag makes only that feature's navigation item and route available after build and deployment; the other remains disabled.
 - Navigation and routing receive availability explicitly and can be tested in either state without mocking build globals.
-- Shop and Contact direct component coverage continues to run while their release flags are false. Enabled-development smoke coverage and production disabled-route/stylesheet coverage run in CI without conditional skips.
+- Shop and Contact direct component coverage continues to run regardless of their release flags. Enabled-development smoke coverage and production disabled-route/stylesheet coverage run in CI and the full local check without conditional skips.
 - Remaining navigation links retain their order, spacing, active indicator, focus behavior, and mobile layout.
 - Direct visits, browser history, and route transitions behave normally for enabled, disabled, and unknown paths.
 - No new runtime request, service, dependency, secret, local-storage value, or duplicate configuration source is introduced.
@@ -105,7 +104,7 @@ Before visual approval:
 - `npm run format:check`
 - `npm run typecheck`
 - `npm run build`
-- Check a fresh `vite build --mode all-features` artifact through the existing test preview, and repeat with `NODE_ENV=development`, proving both hidden routes remain disabled. Do not deploy these diagnostic builds. Finish with the normal production build.
+- Check a fresh `vite build --mode all-features` artifact through the existing test preview, and repeat with `NODE_ENV=development`, proving Shop remains disabled. Do not deploy these diagnostic builds. Finish with the normal production build.
 - Manual browser review with `npm run dev`, `npm run dev:all-features`, and `npm run preview` (which performs its own build).
 - Keyboard and mobile review of the remaining normal navigation and the all-features navigation.
 
@@ -126,13 +125,13 @@ After the user approves the output and requests no further visual edits:
 | Flag plumbing becomes a framework                                  | Keep one typed object and explicit props; add a broader mechanism only when measured needs justify it.               |
 | Preview serves a stale build                                       | Use `npm run preview`, which builds first, or explicitly build before using `preview:test`.                          |
 | A mode or environment variable leaks unreleased views into a build | Base the override on the actual development-server command, not only `DEV`; verify nonstandard builds.               |
-| Hiding both pages silently removes browser coverage                | Preserve enabled journeys in the focused development smoke check, direct CT behavior, and production CSS assertions. |
+| Hiding Shop silently removes browser coverage                      | Preserve enabled journeys in the focused development smoke check, direct CT behavior, and production CSS assertions. |
 | Fallback visuals and accessibility disagree                        | Resolve the route label from effective availability and verify it alongside the visible heading.                     |
 
 ## Definition of done
 
 - Normal development, all-features development, production preview, navigation, routing, and testing satisfy every acceptance criterion.
-- Shop and Contact are hidden in the committed release state while their direct behavior and enabled journeys remain covered.
+- Shop is hidden and Contact is released in the committed release state while their direct behavior and enabled journeys remain covered.
 - Focused checks pass before browser approval, the user approves the visible behavior, and final E2E and release checks pass afterward.
 - Architecture and command documentation describe the implemented behavior without presenting flags as security.
 - The final diff remains within availability policy, integration, tests, scripts, and documentation.
@@ -140,7 +139,7 @@ After the user approves the output and requests no further visual edits:
 
 ## Implementation record
 
-Approved for implementation. On 2026-09-14, the user selected hiding both Shop and Contact and then approved the complete revised plan. Plans 015 and 016 must complete first.
+Approved for implementation. On 2026-09-14, the user initially selected hiding both Shop and Contact, then revised the committed release decision to `shop: false` and `contact: true`. Plans 015 and 016 must complete first.
 
 Implementation began on 2026-09-15 from merged `main` in `feat/feature-availability-controls`. `src/app/featureAvailability.ts` owns the two committed release Booleans and resolves Vite's development-only override; `App.tsx` passes the result explicitly to navigation and route composition. The release decision is `shop: false` and `contact: true`.
 
