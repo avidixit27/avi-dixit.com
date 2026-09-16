@@ -3,7 +3,7 @@
 | Field          | Value                                                                                |
 | -------------- | ------------------------------------------------------------------------------------ |
 | Type           | Feature                                                                              |
-| Status         | Tracked in the [plan index](README.md)                                               |
+| Status         | In progress; tracked in the [plan index](README.md)                                  |
 | Depends on     | [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md) |
 | Blocks         | [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md)        |
 | Planned branch | `feat/feature-availability-controls`                                                 |
@@ -142,7 +142,9 @@ After the user approves the output and requests no further visual edits:
 
 Approved for implementation. On 2026-09-14, the user selected hiding both Shop and Contact and then approved the complete revised plan. Plans 015 and 016 must complete first.
 
-On implementation, record final module ownership, enabled/disabled/mixed test evidence, command behavior, production-build confirmation, visual approval, commands, limitations, and PR link.
+Implementation began on 2026-09-15 from merged `main` in `feat/feature-availability-controls`. `src/app/featureAvailability.ts` owns the two committed release Booleans and resolves Vite's development-only override; `App.tsx` passes the result explicitly to navigation and route composition. The release decision is `shop: false` and `contact: true`.
+
+Verification under Node 22.22.2 passed: focused availability unit tests; 13 focused Navigation and RouteTransitionBoundary Chrome component tests; lint, formatting, and type checks; the dedicated all-features development smoke test; and 13 normal production E2E tests against a fresh build. A `vite build --mode all-features` diagnostic with `NODE_ENV=development` also passed the production E2E suite, confirming that neither a nonstandard build mode nor environment variable enables the development-only override. The user approved normal and all-features browser behavior on 2026-09-15. CI and PR evidence remain to be recorded.
 
 ## Design references
 

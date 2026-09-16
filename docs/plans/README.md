@@ -50,14 +50,14 @@ Completed tickets are historical records. Read one only when its outcome or impl
 
 Plan 015 reached `main` through PR #43. Plan 016 is the next approved implementation.
 
-| Plan                                                                                         | Status    | Planned branch                          | Depends on |
-| -------------------------------------------------------------------------------------------- | --------- | --------------------------------------- | ---------- |
-| [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md)         | In review | `perf/brand-and-photo-payloads`         | 015        |
-| [017 — Feature availability controls](017-feature-availability-controls.md)                  | Planned   | `feat/feature-availability-controls`    | 016        |
-| [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md)                | Planned   | `feat/portfolio-statement-resume`       | 017        |
-| [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md) | Planned   | `feat/portfolio-collection-routes`      | 018        |
-| [020 — Portfolio discovery index](020-portfolio-discovery-index.md)                          | Planned   | `feat/portfolio-discovery-index`        | 019        |
-| [021 — Instagram feed sync architecture](021-instagram-feed-sync-architecture.md)            | Planned   | `docs/instagram-feed-sync-architecture` | 017        |
+| Plan                                                                                         | Status      | Planned branch                          | Depends on |
+| -------------------------------------------------------------------------------------------- | ----------- | --------------------------------------- | ---------- |
+| [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md)         | In review   | `perf/brand-and-photo-payloads`         | 015        |
+| [017 — Feature availability controls](017-feature-availability-controls.md)                  | In progress | `feat/feature-availability-controls`    | 016        |
+| [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md)                | Planned     | `feat/portfolio-statement-resume`       | 017        |
+| [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md) | Planned     | `feat/portfolio-collection-routes`      | 018        |
+| [020 — Portfolio discovery index](020-portfolio-discovery-index.md)                          | Planned     | `feat/portfolio-discovery-index`        | 019        |
+| [021 — Instagram feed sync architecture](021-instagram-feed-sync-architecture.md)            | Planned     | `docs/instagram-feed-sync-architecture` | 017        |
 
 Plans 015–017 are approved. Plan 015 completed CT and related E2E reliability fixes, execution evidence, diagnostics, and a measured container evaluation; required container adoption was deferred. Former plans 015–020 were renumbered to 016–021 at the user's request.
 
