@@ -17,7 +17,7 @@ describe("photography portfolio", () => {
       expect(first.getAttribute("width")).to.match(/^\d+$/);
       expect(first.getAttribute("height")).to.match(/^\d+$/);
 
-      expect(first.currentSrc).to.match(/-[\w-]+\.(?:jpg|webp)$/);
+      expect(first.currentSrc).to.match(/-[\w-]+\.(?:avif|jpg|webp)$/);
     });
 
     cy.get("main button")

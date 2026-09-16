@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logoSmall from "../assets/brand/avi-dixit-wordmark.svg";
+import portrait from "../assets/brand/avi-dixit-portrait.webp";
+import wordmark from "../assets/brand/avi-dixit-wordmark.svg";
 import { NAVIGATION_ITEMS, ROUTES } from "../resources/navigation";
 
 const NAV_FALLBACK_HEIGHT_PX = 64;
@@ -265,15 +266,25 @@ export default function Navigation({
         <Link
           to={ROUTES.home}
           aria-label="Home"
+          className="flex items-center gap-1 md:gap-[5px]"
           onMouseDown={(event) => {
             if (!isModifiedActivation(event)) event.preventDefault();
           }}
           onClick={(event) => handleNavigationClick(event, ROUTES.home)}
         >
           <img
-            src={logoSmall}
-            alt="Avi Dixit"
-            className="h-12 w-auto md:h-14"
+            src={portrait}
+            alt=""
+            width="192"
+            height="192"
+            className="h-12 w-12 rounded-full md:h-14 md:w-14"
+          />
+          <img
+            src={wordmark}
+            alt=""
+            width="146"
+            height="22"
+            className="h-[17px] w-auto md:h-5"
           />
         </Link>
 

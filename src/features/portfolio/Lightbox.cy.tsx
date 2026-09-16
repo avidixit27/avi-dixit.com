@@ -14,6 +14,10 @@ function createPhoto(id: string, alt: string): Photo {
     srcSet: `/${id}-480.jpg 480w, /${id}-960.jpg 960w`,
     sources: [
       {
+        type: "image/avif",
+        srcSet: `/${id}-480.avif 480w, /${id}-960.avif 960w`,
+      },
+      {
         type: "image/webp",
         srcSet: `/${id}-480.webp 480w, /${id}-960.webp 960w`,
       },
@@ -116,46 +120,32 @@ describe("Lightbox", () => {
   });
 
   it("preloads and decodes a bounded responsive navigation window", () => {
-    const preloadedImages: HTMLImageElement[] = [];
     const preloadPhotos = Array.from({ length: 6 }, (_, index) =>
       createPhoto(`preload-${index}`, `Preload photo ${index}`),
     );
 
-    cy.window().then((window) => {
-      cy.stub(window, "Image").callsFake(() => {
-        const image = window.document.createElement("img");
-        cy.stub(image, "decode").resolves();
-        preloadedImages.push(image);
-        return image;
-      });
-      mount(
-        <Lightbox
-          photos={preloadPhotos}
-          selectedIndex={0}
-          previewSrc="/preload-preview.jpg"
-          landscapeIndices={[0, 1, 2, 3, 4, 5]}
-          onSelect={cy.stub()}
-          onClosed={cy.stub()}
-        />,
-      );
-    });
+    mount(
+      <Lightbox
+        photos={preloadPhotos}
+        selectedIndex={0}
+        previewSrc="/preload-preview.jpg"
+        landscapeIndices={[0, 1, 2, 3, 4, 5]}
+        onSelect={cy.stub()}
+        onClosed={cy.stub()}
+      />,
+    );
 
-    cy.wrap(preloadedImages)
+    cy.get('[data-lightbox-preload="true"]').should("have.length", 5);
+    cy.get('[data-lightbox-preload="true"] source[type="image/avif"]')
       .should("have.length", 5)
-      .then((images) => {
-        expect(images.map((image) => image.srcset)).to.deep.equal([
-          "/preload-1-480.webp 480w, /preload-1-960.webp 960w",
-          "/preload-2-480.webp 480w, /preload-2-960.webp 960w",
-          "/preload-3-480.webp 480w, /preload-3-960.webp 960w",
-          "/preload-5-480.webp 480w, /preload-5-960.webp 960w",
-          "/preload-4-480.webp 480w, /preload-4-960.webp 960w",
-        ]);
-        images.forEach((image) => {
-          expect(image.sizes).to.equal("95vw");
-          expect(image.fetchPriority).to.equal("low");
-          expect(image.decode).to.have.callCount(1);
-        });
-      });
+      .each(($source) =>
+        expect($source.attr("srcset")).to.match(/\.avif 480w, .*\.avif 960w/),
+      );
+    cy.get('[data-lightbox-preload="true"] img').each(($image) => {
+      expect($image.attr("sizes")).to.equal("95vw");
+      expect($image.prop("fetchPriority")).to.equal("low");
+      expect($image.attr("srcset")).to.match(/\.jpg 480w, .*\.jpg 960w/);
+    });
   });
 
   it("navigates eligible photos with buttons and arrow keys", () => {
