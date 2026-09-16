@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Ref } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import ArtistStatement from "./ArtistStatement";
 import HeroSlideshow from "./HeroSlideshow";
 import Lightbox from "./Lightbox";
 import { PHOTO_CATALOG } from "./photoCatalog";
@@ -7,6 +9,7 @@ import { getLandscapePhotoIndices } from "./photoNavigation";
 import { HERO_PHOTO_COUNT } from "./portfolioPresentationPolicy";
 import PhotoGrid from "./PhotoGrid";
 import PortfolioScrollComposition from "./PortfolioScrollComposition";
+import { ROUTES } from "../../resources/navigation";
 
 const HERO_PHOTOS = Object.freeze(PHOTO_CATALOG.slice(0, HERO_PHOTO_COUNT));
 const LANDSCAPE_PHOTO_INDICES = Object.freeze(
@@ -23,8 +26,11 @@ interface PhotoSelection {
 }
 
 export default function Portfolio({ gridMarkerRef }: PortfolioProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [selection, setSelection] = useState<PhotoSelection | null>(null);
   const isLightboxOpen = selection != null;
+  const isArtistStatementOpen = location.hash === "#artist-statement";
 
   const selectPhoto = useCallback((index: number, previewSrc: string) => {
     setSelection({ index, previewSrc });
@@ -32,6 +38,12 @@ export default function Portfolio({ gridMarkerRef }: PortfolioProps) {
   const closeLightbox = useCallback(() => {
     setSelection(null);
   }, []);
+  const closeArtistStatement = useCallback(() => {
+    navigate(
+      { pathname: ROUTES.home, hash: "" },
+      { replace: true, state: "restore-artist-statement-focus" },
+    );
+  }, [navigate]);
 
   useEffect(() => {
     if (!isLightboxOpen) return undefined;
@@ -47,6 +59,10 @@ export default function Portfolio({ gridMarkerRef }: PortfolioProps) {
         photos={PHOTO_CATALOG}
         gridMarkerRef={gridMarkerRef}
         onOpen={selectPhoto}
+      />
+      <ArtistStatement
+        isOpen={isArtistStatementOpen}
+        onClose={closeArtistStatement}
       />
       {selection && (
         <Lightbox

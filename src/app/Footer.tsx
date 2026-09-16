@@ -1,7 +1,10 @@
 import { useReducedMotion, useScroll, useTransform } from "motion/react";
 import * as m from "motion/react-m";
 import { useEffect, useRef } from "react";
+import { Link, matchPath, useLocation } from "react-router-dom";
+import resumeUrl from "../assets/documents/avi-dixit-resume.pdf";
 import signatureLogo from "../assets/icons/avi-signature-logo.svg";
+import { ROUTES } from "../resources/navigation";
 import { SITE_DETAILS } from "../resources/site";
 import {
   FOOTER_LANDING_OPACITY_START,
@@ -16,7 +19,10 @@ interface FooterProps {
 }
 
 export default function Footer({ landingEnabled }: FooterProps) {
+  const location = useLocation();
+  const isHome = matchPath(ROUTES.home, location.pathname) !== null;
   const footerRef = useRef<HTMLDivElement>(null);
+  const artistStatementLinkRef = useRef<HTMLAnchorElement>(null);
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: footerRef,
@@ -33,6 +39,14 @@ export default function Footer({ landingEnabled }: FooterProps) {
     [FOOTER_LANDING_OPACITY_START, 1],
   );
   const motionProps = reduceMotion ? {} : { style: { y, opacity } };
+
+  useEffect(() => {
+    if (location.state !== "restore-artist-statement-focus") return;
+    const frame = window.requestAnimationFrame(() => {
+      artistStatementLinkRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [location.key, location.state]);
 
   useEffect(() => {
     if (reduceMotion || !landingEnabled) return;
@@ -191,6 +205,37 @@ export default function Footer({ landingEnabled }: FooterProps) {
             aria-hidden="true"
             className="pointer-events-none absolute bottom-0 left-0 h-full max-w-[55vw] w-auto select-none object-contain opacity-95"
           />
+          {isHome && (
+            <nav
+              aria-label="Portfolio documents"
+              className="absolute inset-0 z-10 flex flex-row items-center justify-center gap-8 text-center text-[36px] sm:gap-12"
+            >
+              <Link
+                id="artist-statement-link"
+                ref={artistStatementLinkRef}
+                to={`${ROUTES.home}#artist-statement`}
+                onClick={(event) => {
+                  if (location.hash !== "#artist-statement") return;
+                  event.preventDefault();
+                  document.getElementById("artist-statement")?.scrollIntoView({
+                    behavior: reduceMotion ? "auto" : "smooth",
+                    block: "start",
+                  });
+                }}
+                className="rounded-sm font-tangerine leading-none text-text underline decoration-border-strong decoration-1 underline-offset-4 transition-colors hover:text-focus focus-visible:text-focus"
+              >
+                Artist Statement
+              </Link>
+              <a
+                href={resumeUrl}
+                target="_blank"
+                rel="noopener"
+                className="rounded-sm font-tangerine leading-none text-text underline decoration-border-strong decoration-1 underline-offset-4 transition-colors hover:text-focus focus-visible:text-focus"
+              >
+                Resume
+              </a>
+            </nav>
+          )}
           <p className="absolute right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))] bottom-[max(0.25rem,env(safe-area-inset-bottom))] z-10 font-footer text-footer-copy text-text-muted">
             {SITE_DETAILS.copyright}
           </p>

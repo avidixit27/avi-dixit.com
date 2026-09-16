@@ -1,4 +1,5 @@
 import { mount } from "@cypress/react";
+import { MemoryRouter } from "react-router-dom";
 import Footer from "./Footer";
 import MotionProvider from "./MotionProvider";
 
@@ -19,9 +20,11 @@ describe("Footer", () => {
 
     mount(
       <MotionProvider>
-        <div className="min-h-[3000px]">
-          <Footer landingEnabled />
-        </div>
+        <MemoryRouter>
+          <div className="min-h-[3000px]">
+            <Footer landingEnabled />
+          </div>
+        </MemoryRouter>
       </MotionProvider>,
     );
     cy.get("@addEventListener").should("have.been.calledWith", "wheel");
@@ -58,7 +61,9 @@ describe("Footer", () => {
   it("leaves wheel scrolling native while a Home reset is active", () => {
     mount(
       <MotionProvider>
-        <Footer landingEnabled={false} />
+        <MemoryRouter>
+          <Footer landingEnabled={false} />
+        </MemoryRouter>
       </MotionProvider>,
     );
 
@@ -72,11 +77,13 @@ describe("Footer", () => {
     });
   });
 
-  it("renders the copyright-only footer with its complete decorative signature", () => {
+  it("keeps portfolio documents in the Home footer only", () => {
     cy.viewport(1280, 800);
     mount(
       <MotionProvider>
-        <Footer landingEnabled />
+        <MemoryRouter initialEntries={["/"]}>
+          <Footer landingEnabled />
+        </MemoryRouter>
       </MotionProvider>,
     );
 
@@ -94,7 +101,23 @@ describe("Footer", () => {
         .should("have.class", "h-full")
         .and("have.class", "will-change-transform");
       cy.get('img[alt=""]').should("have.attr", "aria-hidden", "true");
-      cy.get("a").should("not.exist");
+      cy.get('nav[aria-label="Portfolio documents"]').within(() => {
+        cy.contains("a", "Artist Statement")
+          .should("have.attr", "href", "/#artist-statement")
+          .and("have.attr", "id", "artist-statement-link")
+          .and("have.class", "font-tangerine");
+        cy.contains("a", "Resume")
+          .should("have.attr", "target", "_blank")
+          .and("have.attr", "rel", "noopener")
+          .and("have.class", "font-tangerine");
+      });
+      cy.get('nav[aria-label="Portfolio documents"]')
+        .should("have.class", "inset-0")
+        .and("have.class", "items-center")
+        .and("have.class", "justify-center")
+        .and("have.class", "flex-row")
+        .and("not.have.class", "flex-col")
+        .and("not.have.class", "left-4");
       cy.contains("Copyright @Avi Dixit 2026")
         .should("have.class", "font-footer")
         .and("have.class", "text-footer-copy")
@@ -104,5 +127,14 @@ describe("Footer", () => {
         )
         .should("have.css", "font-size", "10px");
     });
+
+    mount(
+      <MotionProvider>
+        <MemoryRouter initialEntries={["/contact"]}>
+          <Footer landingEnabled />
+        </MemoryRouter>
+      </MotionProvider>,
+    );
+    cy.get('nav[aria-label="Portfolio documents"]').should("not.exist");
   });
 });

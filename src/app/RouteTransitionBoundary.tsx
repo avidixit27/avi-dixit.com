@@ -4,6 +4,7 @@ import { lazy, Suspense, useLayoutEffect, useRef } from "react";
 import type { ReactNode, Ref } from "react";
 import {
   matchPath,
+  Navigate,
   Route,
   Routes,
   useLocation,
@@ -21,7 +22,6 @@ import RouteLoadingFallback from "./RouteLoadingFallback";
 
 const Shop = lazy(() => import("../features/shop/Shop"));
 const Contact = lazy(() => import("../features/inquiries/Contact"));
-
 interface RouteTransitionBoundaryProps {
   availability: FeatureAvailability;
   portfolioGridRef: Ref<HTMLDivElement>;
@@ -29,6 +29,7 @@ interface RouteTransitionBoundaryProps {
 
 function getRouteLabel(pathname: string, availability: FeatureAvailability) {
   if (matchPath(ROUTES.home, pathname)) return "Portfolio";
+  if (matchPath(ROUTES.artistStatement, pathname)) return "Portfolio";
   if (availability.shop && matchPath(ROUTES.shop, pathname))
     return "Print shop";
   if (availability.contact && matchPath(ROUTES.contact, pathname)) {
@@ -39,16 +40,15 @@ function getRouteLabel(pathname: string, availability: FeatureAvailability) {
 
 function RouteFrame({
   children,
-  locationKey,
   navigationType,
   label,
 }: {
   children: ReactNode;
-  locationKey: string;
   navigationType: ReturnType<typeof useNavigationType>;
   label: string;
 }) {
   const routeRef = useRef<HTMLDivElement>(null);
+  const navigationTypeOnMount = useRef(navigationType);
   const isPresent = useIsPresent();
   const reduceMotion = useReducedMotion();
 
@@ -65,7 +65,7 @@ function RouteFrame({
   }, [isPresent]);
 
   useLayoutEffect(() => {
-    if (!isPresent || navigationType === "POP") return undefined;
+    if (!isPresent || navigationTypeOnMount.current === "POP") return undefined;
 
     window.scrollTo(0, 0);
     const frame = window.requestAnimationFrame(() => {
@@ -73,7 +73,7 @@ function RouteFrame({
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [isPresent, locationKey, navigationType]);
+  }, [isPresent]);
 
   return (
     <m.div
@@ -113,8 +113,7 @@ export default function RouteTransitionBoundary({
     <div className="relative">
       <AnimatePresence initial={false}>
         <RouteFrame
-          key={location.key}
-          locationKey={location.key}
+          key={location.pathname}
           navigationType={navigationType}
           label={getRouteLabel(location.pathname, availability)}
         >
@@ -123,6 +122,12 @@ export default function RouteTransitionBoundary({
               <Route
                 path={ROUTES.home}
                 element={<Portfolio gridMarkerRef={portfolioGridRef} />}
+              />
+              <Route
+                path={ROUTES.artistStatement}
+                element={
+                  <Navigate to={`${ROUTES.home}#artist-statement`} replace />
+                }
               />
               {availability.shop && (
                 <Route path={ROUTES.shop} element={<Shop />} />

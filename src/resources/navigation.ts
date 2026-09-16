@@ -1,5 +1,6 @@
 export const ROUTES = Object.freeze({
   home: "/",
+  artistStatement: "/artist-statement",
   shop: "/shop",
   contact: "/contact",
 } as const);
