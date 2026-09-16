@@ -48,7 +48,7 @@ describe("validateBrowserRun", () => {
       "src/**/*.cy.tsx",
     ]);
     expect(selectedSpecs(["--e2e", "--browser", "chrome"])).toEqual([
-      "cypress/e2e/**/*.cy.ts",
+      "cypress/e2e/**/!(all-features).cy.ts",
     ]);
   });
 
