@@ -28,6 +28,19 @@ export default function ArtistStatement({
     };
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      sectionRef.current?.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [isOpen, reduceMotion]);
+
   const close = () => {
     if (reduceMotion) {
       onClose();
@@ -69,19 +82,18 @@ export default function ArtistStatement({
       <m.div
         initial={false}
         animate={{ height: isOpen ? "auto" : 0 }}
+        onUpdate={() => {
+          if (!isOpen || reduceMotion) return;
+          sectionRef.current?.scrollIntoView({
+            behavior: "auto",
+            block: "start",
+          });
+        }}
         transition={
           reduceMotion
             ? { duration: 0 }
-            : isOpen
-              ? { duration: 0 }
-              : { duration: 0.75, ease: "easeInOut" }
+            : { duration: isOpen ? 1.25 : 0.75, ease: "easeInOut" }
         }
-        onAnimationComplete={() => {
-          if (!isOpen || panelRef.current === null) return;
-          const panelTop =
-            panelRef.current.getBoundingClientRect().top + window.scrollY;
-          window.scrollTo(0, panelTop);
-        }}
       >
         <m.section
           ref={sectionRef}
@@ -98,7 +110,7 @@ export default function ArtistStatement({
               ? { duration: 0 }
               : isOpen
                 ? {
-                    opacity: { duration: 1, ease: "easeInOut" },
+                    opacity: { duration: 0 },
                     y: { duration: 0 },
                   }
                 : { duration: 0.75, ease: "easeInOut" }

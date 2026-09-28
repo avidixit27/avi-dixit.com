@@ -3,16 +3,26 @@ import ArtistStatement from "./ArtistStatement";
 
 describe("ArtistStatement", () => {
   it("is inert until opened, then presents the approved statement", () => {
-    mount(<ArtistStatement isOpen={false} onClose={cy.stub().as("close")} />);
-    cy.get("#artist-statement")
-      .should("not.be.visible")
-      .parent()
-      .parent()
-      .should("have.attr", "aria-hidden", "true");
-    cy.contains("button", "Close statement").should("be.disabled");
+    const onClose = cy.stub().as("close");
+    cy.window().then((window) => {
+      cy.stub(window.HTMLElement.prototype, "scrollIntoView").as("scroll");
+    });
+    mount(<ArtistStatement isOpen={false} onClose={onClose} />).then(
+      ({ rerender }) => {
+        cy.get("#artist-statement")
+          .should("not.be.visible")
+          .parent()
+          .parent()
+          .should("have.attr", "aria-hidden", "true");
+        cy.contains("button", "Close statement").should("be.disabled");
+        cy.then(() => rerender(<ArtistStatement isOpen onClose={onClose} />));
+      },
+    );
 
-    mount(<ArtistStatement isOpen onClose={cy.stub().as("close")} />);
-
+    cy.get("@scroll").should("have.been.calledWith", {
+      behavior: "auto",
+      block: "start",
+    });
     cy.get("#artist-statement").within(() => {
       cy.get("h2")
         .should("have.text", "Artist Statement")
