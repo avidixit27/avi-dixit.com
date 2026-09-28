@@ -105,25 +105,50 @@ describe("Footer", () => {
         cy.contains("a", "Artist Statement")
           .should("have.attr", "href", "/#artist-statement")
           .and("have.attr", "id", "artist-statement-link")
-          .and("have.class", "font-tangerine");
+          .and("have.class", "font-tangerine")
+          .and("have.class", "text-text-muted")
+          .and("have.class", "hover:text-focus")
+          .and("have.class", "focus-visible:outline-none")
+          .and("not.have.class", "underline")
+          .and("not.have.class", "focus:underline");
         cy.contains("a", "Resume")
           .should("have.attr", "target", "_blank")
           .and("have.attr", "rel", "noopener")
-          .and("have.class", "font-tangerine");
+          .and("have.class", "font-tangerine")
+          .and("have.class", "text-text-muted")
+          .and("have.class", "hover:text-focus")
+          .and("have.class", "focus-visible:outline-none")
+          .and("not.have.class", "underline")
+          .and("not.have.class", "focus:underline");
       });
       cy.get('nav[aria-label="Portfolio documents"]')
-        .should("have.class", "inset-0")
-        .and("have.class", "items-center")
-        .and("have.class", "justify-center")
-        .and("have.class", "flex-row")
-        .and("not.have.class", "flex-col")
+        .should("have.class", "bottom-7")
+        .and("have.class", "right-4")
+        .and("have.class", "text-[28px]")
+        .and("have.class", "items-end")
+        .and("have.class", "flex-col")
+        .and("have.class", "text-right")
+        .and("have.class", "md:inset-x-0")
+        .and(
+          "have.class",
+          "md:bottom-[max(0.25rem,env(safe-area-inset-bottom))]",
+        )
+        .and("have.class", "md:flex-row")
+        .and("have.class", "lg:text-[36px]")
+        .and("have.class", "md:justify-center")
+        .and("not.have.class", "inset-0")
+        .and("not.have.class", "items-center")
         .and("not.have.class", "left-4");
+      cy.get('img[aria-hidden="true"]')
+        .should("have.class", "max-w-none")
+        .and("not.have.class", "max-w-[28vw]");
       cy.contains("Copyright @Avi Dixit 2026")
         .should("have.class", "font-footer")
         .and("have.class", "text-footer-copy")
+        .and("have.class", "right-4")
         .and(
           "have.class",
-          "right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))]",
+          "md:right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))]",
         )
         .should("have.css", "font-size", "10px");
     });

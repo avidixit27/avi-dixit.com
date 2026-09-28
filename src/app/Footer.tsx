@@ -18,6 +18,9 @@ interface FooterProps {
   landingEnabled: boolean;
 }
 
+const DOCUMENT_LINK_CLASS =
+  "rounded-sm font-tangerine leading-none text-text-muted transition-colors hover:text-focus focus:text-focus focus-visible:text-focus focus-visible:outline-none";
+
 export default function Footer({ landingEnabled }: FooterProps) {
   const location = useLocation();
   const isHome = matchPath(ROUTES.home, location.pathname) !== null;
@@ -203,12 +206,12 @@ export default function Footer({ landingEnabled }: FooterProps) {
             src={signatureLogo}
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-0 left-0 h-full max-w-[55vw] w-auto select-none object-contain opacity-95"
+            className="pointer-events-none absolute bottom-0 left-0 h-full max-w-none w-auto select-none object-contain opacity-95"
           />
           {isHome && (
             <nav
               aria-label="Portfolio documents"
-              className="absolute inset-0 z-10 flex flex-row items-center justify-center gap-8 text-center text-[36px] sm:gap-12"
+              className="absolute right-4 bottom-7 z-10 flex flex-col items-end text-right text-[28px] md:inset-x-0 md:bottom-[max(0.25rem,env(safe-area-inset-bottom))] md:flex-row md:items-stretch md:justify-center md:gap-8 md:text-center lg:gap-12 lg:text-[36px]"
             >
               <Link
                 id="artist-statement-link"
@@ -222,7 +225,7 @@ export default function Footer({ landingEnabled }: FooterProps) {
                     block: "start",
                   });
                 }}
-                className="rounded-sm font-tangerine leading-none text-text underline decoration-border-strong decoration-1 underline-offset-4 transition-colors hover:text-focus focus-visible:text-focus"
+                className={DOCUMENT_LINK_CLASS}
               >
                 Artist Statement
               </Link>
@@ -230,13 +233,15 @@ export default function Footer({ landingEnabled }: FooterProps) {
                 href={resumeUrl}
                 target="_blank"
                 rel="noopener"
-                className="rounded-sm font-tangerine leading-none text-text underline decoration-border-strong decoration-1 underline-offset-4 transition-colors hover:text-focus focus-visible:text-focus"
+                className={DOCUMENT_LINK_CLASS}
               >
                 Resume
               </a>
             </nav>
           )}
-          <p className="absolute right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))] bottom-[max(0.25rem,env(safe-area-inset-bottom))] z-10 font-footer text-footer-copy text-text-muted">
+          <p
+            className={`absolute bottom-[max(0.25rem,env(safe-area-inset-bottom))] z-10 font-footer text-footer-copy text-text-muted ${isHome ? "right-4 text-right md:right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))]" : "right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))]"}`}
+          >
             {SITE_DETAILS.copyright}
           </p>
         </m.div>
