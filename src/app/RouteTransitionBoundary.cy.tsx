@@ -23,6 +23,32 @@ function LocationPath() {
 }
 
 describe("RouteTransitionBoundary", () => {
+  it("finishes the outgoing route before resetting the incoming route", () => {
+    cy.window().then((window) => cy.stub(window, "scrollTo").as("scrollTo"));
+    mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <Link to="/contact">Open contact</Link>
+        <RouteTransitionBoundary
+          availability={resolveFeatureAvailability({
+            shop: false,
+            contact: true,
+          })}
+          portfolioGridRef={() => undefined}
+        />
+      </MemoryRouter>,
+    );
+
+    cy.contains("a", "Open contact").click();
+    cy.get('[data-route-content="true"]')
+      .should("have.length", 1)
+      .and("have.attr", "aria-label", "Portfolio");
+    cy.get("@scrollTo").should("not.have.been.called");
+    cy.get('[data-route-content="true"]')
+      .should("have.length", 1)
+      .and("have.attr", "aria-label", "Contact");
+    cy.get("@scrollTo").should("have.been.calledOnceWith", 0, 0);
+  });
+
   it("uses the existing fallback and accessible label for disabled routes", () => {
     mountRoute("/shop/", false, false);
 

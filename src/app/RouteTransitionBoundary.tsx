@@ -83,12 +83,10 @@ function RouteFrame({
       role="region"
       aria-label={label}
       aria-hidden={isPresent ? undefined : true}
-      className={
-        isPresent
-          ? "relative min-h-screen bg-canvas"
-          : "pointer-events-none absolute inset-x-0 top-0 z-20 min-h-screen w-full bg-canvas"
-      }
-      initial={false}
+      className={`relative min-h-screen bg-canvas ${
+        isPresent ? "" : "pointer-events-none"
+      }`}
+      initial={reduceMotion ? false : { opacity: 0, y: -ROUTE_EXIT_OFFSET_PX }}
       animate={{ opacity: 1, y: 0 }}
       exit={
         reduceMotion
@@ -111,7 +109,7 @@ export default function RouteTransitionBoundary({
 
   return (
     <div className="relative">
-      <AnimatePresence initial={false}>
+      <AnimatePresence initial={false} mode="wait">
         <RouteFrame
           key={location.pathname}
           navigationType={navigationType}
