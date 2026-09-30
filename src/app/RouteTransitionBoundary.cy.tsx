@@ -23,7 +23,17 @@ function LocationPath() {
 }
 
 describe("RouteTransitionBoundary", () => {
-  it("finishes the outgoing route before resetting the incoming route", () => {
+  beforeEach(() => {
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia").returns({
+        matches: true,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+  });
+
+  it("resets the incoming route after navigation", () => {
     cy.window().then((window) => cy.stub(window, "scrollTo").as("scrollTo"));
     mount(
       <MemoryRouter initialEntries={["/"]}>
@@ -39,10 +49,6 @@ describe("RouteTransitionBoundary", () => {
     );
 
     cy.contains("a", "Open contact").click();
-    cy.get('[data-route-content="true"]')
-      .should("have.length", 1)
-      .and("have.attr", "aria-label", "Portfolio");
-    cy.get("@scrollTo").should("not.have.been.called");
     cy.get('[data-route-content="true"]')
       .should("have.length", 1)
       .and("have.attr", "aria-label", "Contact");

@@ -371,7 +371,7 @@ describe("photography portfolio", () => {
       .should(
         "have.attr",
         "alt",
-        "A person photographing their reflection in a tall mirror outdoors",
+        "Two hands reaching toward each other across a mirror frame",
       )
       .click();
 

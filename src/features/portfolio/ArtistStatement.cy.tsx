@@ -5,6 +5,11 @@ describe("ArtistStatement", () => {
   it("is inert until opened, then presents the approved statement", () => {
     const onClose = cy.stub().as("close");
     cy.window().then((window) => {
+      cy.stub(window, "matchMedia").returns({
+        matches: true,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
       cy.stub(window.HTMLElement.prototype, "scrollIntoView").as("scroll");
     });
     mount(<ArtistStatement isOpen={false} onClose={onClose} />).then(

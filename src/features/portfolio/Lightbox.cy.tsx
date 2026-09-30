@@ -286,67 +286,67 @@ describe("Lightbox", () => {
       .should("have.attr", "aria-busy", "true")
       .should("have.attr", "style")
       .and("include", "width: 95vw")
-      .and("include", "height: 95vh")
-      .then(($stage) => {
-        const initialRect = $stage.get(0)?.getBoundingClientRect();
-        if (!initialRect) throw new Error("Expected a lightbox stage");
+      .and("include", "height: 95vh");
+    cy.get('[data-lightbox-stage="true"]').then(($stage) => {
+      const initialRect = $stage.get(0)?.getBoundingClientRect();
+      if (!initialRect) throw new Error("Expected a lightbox stage");
 
-        cy.get('img[alt="First test photo"]').then(($image) => {
-          const image = $image.get(0) as HTMLImageElement | undefined;
-          if (!image) throw new Error("Expected a full lightbox image");
-          cy.stub(image, "decode").returns(decodePromise);
-          cy.wrap(image).trigger("load");
-        });
-
-        cy.get('[data-lightbox-preview="true"]').should(
-          "have.class",
-          "opacity-100",
-        );
-        cy.get('[data-lightbox-preview="true"]')
-          .should("not.have.class", "blur-sm")
-          .then(($preview) => {
-            cy.get('img[alt="First test photo"]').then(($fullImage) => {
-              const fullImage = $fullImage.get(0);
-              const preview = $preview.get(0);
-              expect(
-                fullImage.compareDocumentPosition(preview) &
-                  Node.DOCUMENT_POSITION_FOLLOWING,
-              ).to.equal(Node.DOCUMENT_POSITION_FOLLOWING);
-            });
-          });
-        cy.get('[aria-label="Next image"]')
-          .should("not.be.disabled")
-          .and("not.have.attr", "aria-disabled");
-        cy.get('[aria-label="Next image"]').should(
-          "not.have.class",
-          "disabled:opacity-50",
-        );
-        cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
-        cy.then(() => finishDecode?.());
-        cy.get('img[alt="First test photo"]')
-          .should("have.class", "opacity-100")
-          .and("not.have.class", "transition-opacity")
-          .then(() => {
-            const finalRect = $stage.get(0)?.getBoundingClientRect();
-            expect(finalRect?.width).to.equal(initialRect.width);
-            expect(finalRect?.height).to.equal(initialRect.height);
-          });
-        cy.get('[aria-label="Next image"]').should(
-          "not.have.attr",
-          "aria-disabled",
-        );
-        cy.tick(250);
-        cy.get('[data-lightbox-preview="true"]').should("not.exist");
-        cy.get('[data-lightbox-stage="true"]').should(
-          "have.attr",
-          "aria-busy",
-          "false",
-        );
-        cy.get('[aria-label="Next image"]').should(
-          "not.have.attr",
-          "aria-disabled",
-        );
+      cy.get('img[alt="First test photo"]').then(($image) => {
+        const image = $image.get(0) as HTMLImageElement | undefined;
+        if (!image) throw new Error("Expected a full lightbox image");
+        cy.stub(image, "decode").returns(decodePromise);
+        cy.wrap(image).trigger("load");
       });
+
+      cy.get('[data-lightbox-preview="true"]').should(
+        "have.class",
+        "opacity-100",
+      );
+      cy.get('[data-lightbox-preview="true"]')
+        .should("not.have.class", "blur-sm")
+        .then(($preview) => {
+          cy.get('img[alt="First test photo"]').then(($fullImage) => {
+            const fullImage = $fullImage.get(0);
+            const preview = $preview.get(0);
+            expect(
+              fullImage.compareDocumentPosition(preview) &
+                Node.DOCUMENT_POSITION_FOLLOWING,
+            ).to.equal(Node.DOCUMENT_POSITION_FOLLOWING);
+          });
+        });
+      cy.get('[aria-label="Next image"]')
+        .should("not.be.disabled")
+        .and("not.have.attr", "aria-disabled");
+      cy.get('[aria-label="Next image"]').should(
+        "not.have.class",
+        "disabled:opacity-50",
+      );
+      cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
+      cy.then(() => finishDecode?.());
+      cy.get('img[alt="First test photo"]')
+        .should("have.class", "opacity-100")
+        .and("not.have.class", "transition-opacity")
+        .then(() => {
+          const finalRect = $stage.get(0)?.getBoundingClientRect();
+          expect(finalRect?.width).to.equal(initialRect.width);
+          expect(finalRect?.height).to.equal(initialRect.height);
+        });
+      cy.get('[aria-label="Next image"]').should(
+        "not.have.attr",
+        "aria-disabled",
+      );
+      cy.tick(250);
+      cy.get('[data-lightbox-preview="true"]').should("not.exist");
+      cy.get('[data-lightbox-stage="true"]').should(
+        "have.attr",
+        "aria-busy",
+        "false",
+      );
+      cy.get('[aria-label="Next image"]').should(
+        "not.have.attr",
+        "aria-disabled",
+      );
+    });
   });
 
   it("keeps the outgoing full-resolution frame until its replacement settles", () => {
