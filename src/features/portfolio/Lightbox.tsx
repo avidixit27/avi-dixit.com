@@ -15,6 +15,7 @@ import {
   LIGHTBOX_PRELOAD_BACKWARD_COUNT,
   LIGHTBOX_PRELOAD_FORWARD_COUNT,
 } from "./portfolioPresentationPolicy";
+import "./Lightbox.css";
 
 interface LightboxProps {
   photos: readonly Photo[];
@@ -204,42 +205,49 @@ export default function Lightbox({
       aria-modal="true"
       aria-label="Photo viewer"
     >
-      <p
-        data-lightbox-photo-number="true"
-        aria-label={`Photo ${photo.sequence} of ${photos.length}`}
-        className="pointer-events-none fixed top-[max(0.75rem,env(safe-area-inset-top))]
-                   left-[max(0.75rem,env(safe-area-inset-left))] z-[200]
-                   grid h-11 -translate-y-[8px] place-items-center select-none font-photo-number text-[52px] leading-none text-text
-                   drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
-      >
-        {photo.sequence}
-      </p>
       <button
         type="button"
         className="fixed inset-0 z-0 cursor-default"
         onClick={requestClose}
         aria-label="Close photo viewer"
       />
-      <button
-        type="button"
-        onMouseDown={(event) => {
-          event.stopPropagation();
-          requestClose();
-        }}
-        onClick={(event) => {
-          event.stopPropagation();
-          requestClose();
-        }}
-        className="fixed top-[max(0.75rem,env(safe-area-inset-top))]
+      <div
+        data-lightbox-controls="true"
+        className="pointer-events-none fixed top-[max(0.75rem,env(safe-area-inset-top))]
+                   left-[max(0.75rem,env(safe-area-inset-left))]
                    right-[max(0.75rem,env(safe-area-inset-right))]
-                   z-[200] grid h-11 w-11 place-items-center text-4xl font-light text-text
-                   drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]
-                   opacity-90 hover:text-brand-warm hover:opacity-100 focus-visible:text-brand-warm
-                   active:text-brand-warm transition-colors transition-opacity motion-reduce:transition-none"
-        aria-label="Close"
+                   max-[160px]:left-1 max-[160px]:right-1 z-[200]
+                   flex items-start justify-between gap-1"
       >
-        ×
-      </button>
+        <p
+          data-lightbox-photo-number="true"
+          aria-label={`Photo ${photo.sequence} of ${photos.length}`}
+          className="grid h-11 min-w-0 -translate-y-[8px] place-items-center overflow-hidden
+                     select-none font-photo-number text-[clamp(20px,20vw,52px)] leading-none text-brand-warm
+                     drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
+        >
+          {photo.sequence}
+        </p>
+        <button
+          type="button"
+          data-closing={isClosing}
+          onMouseDown={(event) => {
+            event.stopPropagation();
+            requestClose();
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            requestClose();
+          }}
+          className="lightbox-close-button pointer-events-auto relative z-[200] grid h-11 w-11 shrink-0
+                     place-items-center opacity-90 hover:opacity-100 focus-visible:opacity-100
+                     transition-opacity motion-reduce:transition-none"
+          aria-label="Close"
+        >
+          <span className="lightbox-close-stroke" aria-hidden="true" />
+          <span className="lightbox-close-stroke" aria-hidden="true" />
+        </button>
+      </div>
 
       {navigationIndices.length > 0 && (
         <>

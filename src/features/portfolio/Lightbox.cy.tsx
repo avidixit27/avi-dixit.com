@@ -89,14 +89,13 @@ describe("Lightbox", () => {
     cy.get('[data-lightbox-photo-number="true"]')
       .should("have.text", "3")
       .and("have.attr", "aria-label", "Photo 3 of 3")
-      .and("have.class", "font-photo-number")
-      .and("have.class", "text-[52px]")
-      .and("have.class", "h-11")
-      .and("have.class", "-translate-y-[8px]")
-      .and("have.class", "place-items-center")
-      .and("have.class", "fixed")
-      .and("have.class", "top-[max(0.75rem,env(safe-area-inset-top))]")
-      .and("have.class", "left-[max(0.75rem,env(safe-area-inset-left))]");
+      .and("have.css", "font-size", "52px")
+      .and("have.css", "color", "rgb(253, 113, 0)");
+    cy.get('[data-lightbox-controls="true"]').should(
+      "have.css",
+      "position",
+      "fixed",
+    );
   });
 
   it("keeps the close control accessible on a small viewport", () => {
@@ -120,6 +119,31 @@ describe("Lightbox", () => {
       expect(buttonRect.height).to.be.at.least(44);
 
       expect(getComputedStyle(button).zIndex).to.equal("200");
+    });
+  });
+
+  it("keeps a two-digit photo number clear of close at narrow widths", () => {
+    cy.viewport(80, 600);
+    mount(
+      <Lightbox
+        photos={[createPhoto("twelfth", "Twelfth test photo", 12)]}
+        selectedIndex={0}
+        previewSrc="/twelfth-preview.jpg"
+        navigationIndices={[]}
+        onSelect={cy.stub()}
+        onClosed={cy.stub()}
+      />,
+    );
+
+    cy.document().then((document) => document.fonts.ready);
+    cy.get('[data-lightbox-photo-number="true"]').then(($number) => {
+      const number = $number.get(0)?.getBoundingClientRect();
+      if (!number) throw new Error("Expected the photo number");
+      cy.get('[aria-label="Close"]').then(($button) => {
+        const button = $button.get(0)?.getBoundingClientRect();
+        if (!button) throw new Error("Expected the close button");
+        expect(number.right).to.be.lessThan(button.left);
+      });
     });
   });
 
@@ -163,10 +187,23 @@ describe("Lightbox", () => {
     );
 
     cy.get('[aria-label="Close"]')
-      .should("have.class", "hover:text-brand-warm")
-      .and("have.class", "focus-visible:text-brand-warm")
-      .and("have.class", "active:text-brand-warm")
-      .and("have.class", "motion-reduce:transition-none");
+      .should("have.class", "lightbox-close-button")
+      .find(".lightbox-close-stroke")
+      .should("have.length", 2)
+      .first()
+      .should("have.css", "background-image")
+      .and("include", "rgb(253, 113, 0)");
+
+    cy.get('[aria-label="Close"]')
+      .click()
+      .should("have.attr", "data-closing", "true");
+    cy.get(".lightbox-close-stroke").each(($stroke) => {
+      cy.wrap($stroke).should(
+        "have.css",
+        "transform",
+        "matrix(1, 0, 0, 1, 0, 0)",
+      );
+    });
   });
 
   it("preloads and decodes a bounded responsive navigation window", () => {
