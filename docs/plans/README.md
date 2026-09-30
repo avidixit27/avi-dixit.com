@@ -45,19 +45,19 @@ Completed tickets are historical records. Read one only when its outcome or impl
 | [013 — Route and layout transitions](013-route-and-layout-transitions.md)                              | Completed | `feat/route-layout-transitions`           | [#31](https://github.com/avidixit27/avi-dixit.com/pull/31)                                                                             |
 | [014 — UI stability regressions](014-ui-stability-regressions.md)                                      | Completed | `fix/restore-ui-stability-regressions`    | [#41](https://github.com/avidixit27/avi-dixit.com/pull/41); original review [#38](https://github.com/avidixit27/avi-dixit.com/pull/38) |
 | [015 — Browser-test reliability](015-browser-test-reliability.md)                                      | Completed | `test/browser-test-reliability`           | [#43](https://github.com/avidixit27/avi-dixit.com/pull/43)                                                                             |
+| [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md)                   | Completed | `perf/brand-and-photo-payloads`           | [#45](https://github.com/avidixit27/avi-dixit.com/pull/45)                                                                             |
+| [017 — Feature availability controls](017-feature-availability-controls.md)                            | Completed | `feat/feature-availability-controls`      | [#47](https://github.com/avidixit27/avi-dixit.com/pull/47)                                                                             |
+| [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md)                          | Completed | `feat/portfolio-statement-resume`         | [#50](https://github.com/avidixit27/avi-dixit.com/pull/50)                                                                             |
 
 ## Current sequence
 
-Plan 017 reached `main` through PR #47. Plan 018 is in progress.
+Plan 018 reached `main` through PR #50. Plans 019–021 remain planned.
 
-| Plan                                                                                         | Status      | Planned branch                          | Depends on |
-| -------------------------------------------------------------------------------------------- | ----------- | --------------------------------------- | ---------- |
-| [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md)         | Completed   | `perf/brand-and-photo-payloads`         | 015        |
-| [017 — Feature availability controls](017-feature-availability-controls.md)                  | Completed   | `feat/feature-availability-controls`    | 016        |
-| [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md)                | In progress | `feat/portfolio-statement-resume`       | 017        |
-| [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md) | Planned     | `feat/portfolio-collection-routes`      | 018        |
-| [020 — Portfolio discovery index](020-portfolio-discovery-index.md)                          | Planned     | `feat/portfolio-discovery-index`        | 019        |
-| [021 — Instagram feed sync architecture](021-instagram-feed-sync-architecture.md)            | Planned     | `docs/instagram-feed-sync-architecture` | 017        |
+| Plan                                                                                         | Status  | Planned branch                          | Depends on |
+| -------------------------------------------------------------------------------------------- | ------- | --------------------------------------- | ---------- |
+| [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md) | Planned | `feat/portfolio-collection-routes`      | 018        |
+| [020 — Portfolio discovery index](020-portfolio-discovery-index.md)                          | Planned | `feat/portfolio-discovery-index`        | 019        |
+| [021 — Instagram feed sync architecture](021-instagram-feed-sync-architecture.md)            | Planned | `docs/instagram-feed-sync-architecture` | 017        |
 
 Plans 015–017 are approved. Plan 015 completed CT and related E2E reliability fixes, execution evidence, diagnostics, and a measured container evaluation; required container adoption was deferred. Former plans 015–020 were renumbered to 016–021 at the user's request.
 
