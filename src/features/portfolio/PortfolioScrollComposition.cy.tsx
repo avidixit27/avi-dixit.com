@@ -5,6 +5,7 @@ import type { Photo } from "./photoCatalog";
 function createPhoto(id: string, alt: string): Photo {
   return {
     id,
+    sequence: 1,
     src: `/${id}.jpg`,
     srcSet: `/${id}-480.jpg 480w, /${id}-960.jpg 960w`,
     sources: [

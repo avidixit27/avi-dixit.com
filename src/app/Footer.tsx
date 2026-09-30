@@ -1,7 +1,10 @@
 import { useReducedMotion, useScroll, useTransform } from "motion/react";
 import * as m from "motion/react-m";
 import { useEffect, useRef } from "react";
+import { Link, matchPath, useLocation } from "react-router-dom";
+import resumeUrl from "../assets/documents/avi-dixit-resume.pdf";
 import signatureLogo from "../assets/icons/avi-signature-logo.svg";
+import { ROUTES } from "../resources/navigation";
 import { SITE_DETAILS } from "../resources/site";
 import {
   FOOTER_LANDING_OPACITY_START,
@@ -15,8 +18,14 @@ interface FooterProps {
   landingEnabled: boolean;
 }
 
+const DOCUMENT_LINK_CLASS =
+  "rounded-sm font-tangerine leading-none text-text-muted transition-colors hover:text-focus focus:text-focus focus-visible:text-focus focus-visible:outline-none";
+
 export default function Footer({ landingEnabled }: FooterProps) {
+  const location = useLocation();
+  const isHome = matchPath(ROUTES.home, location.pathname) !== null;
   const footerRef = useRef<HTMLDivElement>(null);
+  const artistStatementLinkRef = useRef<HTMLAnchorElement>(null);
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: footerRef,
@@ -33,6 +42,14 @@ export default function Footer({ landingEnabled }: FooterProps) {
     [FOOTER_LANDING_OPACITY_START, 1],
   );
   const motionProps = reduceMotion ? {} : { style: { y, opacity } };
+
+  useEffect(() => {
+    if (location.state !== "restore-artist-statement-focus") return;
+    const frame = window.requestAnimationFrame(() => {
+      artistStatementLinkRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [location.key, location.state]);
 
   useEffect(() => {
     if (reduceMotion || !landingEnabled) return;
@@ -189,9 +206,42 @@ export default function Footer({ landingEnabled }: FooterProps) {
             src={signatureLogo}
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-0 left-0 h-full max-w-[55vw] w-auto select-none object-contain opacity-95"
+            className="pointer-events-none absolute bottom-0 left-0 h-full max-w-none w-auto select-none object-contain opacity-95"
           />
-          <p className="absolute right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))] bottom-[max(0.25rem,env(safe-area-inset-bottom))] z-10 font-footer text-footer-copy text-text-muted">
+          {isHome && (
+            <nav
+              aria-label="Portfolio documents"
+              className="absolute right-4 bottom-7 z-10 flex flex-col items-end text-right text-[28px] md:inset-x-0 md:bottom-[max(0.25rem,env(safe-area-inset-bottom))] md:flex-row md:items-stretch md:justify-center md:gap-8 md:text-center lg:gap-12 lg:text-[36px]"
+            >
+              <Link
+                id="artist-statement-link"
+                ref={artistStatementLinkRef}
+                to={`${ROUTES.home}#artist-statement`}
+                onClick={(event) => {
+                  if (location.hash !== "#artist-statement") return;
+                  event.preventDefault();
+                  document.getElementById("artist-statement")?.scrollIntoView({
+                    behavior: reduceMotion ? "auto" : "smooth",
+                    block: "start",
+                  });
+                }}
+                className={DOCUMENT_LINK_CLASS}
+              >
+                Artist Statement
+              </Link>
+              <a
+                href={resumeUrl}
+                target="_blank"
+                rel="noopener"
+                className={DOCUMENT_LINK_CLASS}
+              >
+                Resume
+              </a>
+            </nav>
+          )}
+          <p
+            className={`absolute bottom-[max(0.25rem,env(safe-area-inset-bottom))] z-10 font-footer text-footer-copy text-text-muted ${isHome ? "right-4 text-right md:right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))]" : "right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))]"}`}
+          >
             {SITE_DETAILS.copyright}
           </p>
         </m.div>

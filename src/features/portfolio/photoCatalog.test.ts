@@ -32,6 +32,32 @@ describe("photo catalog", () => {
     ).toBe(true);
   });
 
+  it("uses the approved chronological sequence", () => {
+    const sources = {
+      "../../assets/photography/portfolio/college_film_portfolio_6.JPG":
+        "/sixth.jpg",
+      "../../assets/photography/portfolio/college_film_portfolio_4.JPG":
+        "/fourth.jpg",
+      "../../assets/photography/portfolio/college_film_portfolio_8.JPG":
+        "/eighth.jpg",
+      "../../assets/photography/portfolio/college_film_portfolio_1.JPG":
+        "/first.jpg",
+      "../../assets/photography/portfolio/college_film_portfolio_7.JPG":
+        "/seventh.jpg",
+    };
+
+    const catalog = buildPhotoCatalog(sources, sources, sources, sources);
+
+    expect(catalog.map((photo) => photo.sequence)).toEqual([1, 2, 4, 5, 8]);
+    expect(catalog.map((photo) => photo.id)).toEqual([
+      "figures-behind-chair",
+      "reaching-hands-reflection",
+      "low-angle-mirror-portrait",
+      "tilted-bedroom-mirror",
+      "ground-mirror-portrait",
+    ]);
+  });
+
   it("fails fast when a bundled photograph is missing metadata or a generated source", () => {
     const fallbackModules = {
       "../../assets/photography/portfolio/unknown.JPG": "/unknown.jpg",

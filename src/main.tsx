@@ -9,9 +9,7 @@ if (!rootElement) {
 }
 
 const bootstrapElement = document.getElementById("app-bootstrap");
-void document.fonts.ready.then(() => {
-  window.requestAnimationFrame(() => bootstrapElement?.remove());
-});
+window.requestAnimationFrame(() => bootstrapElement?.remove());
 
 ReactDOM.createRoot(rootElement).render(
   <StrictMode>

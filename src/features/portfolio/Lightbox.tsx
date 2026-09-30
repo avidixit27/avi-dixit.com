@@ -20,7 +20,7 @@ interface LightboxProps {
   photos: readonly Photo[];
   selectedIndex: number;
   previewSrc: string;
-  landscapeIndices: readonly number[];
+  navigationIndices: readonly number[];
   onSelect: (index: number, previewSrc: string) => void;
   onClosed: () => void;
 }
@@ -59,7 +59,7 @@ export default function Lightbox({
   photos,
   selectedIndex,
   previewSrc,
-  landscapeIndices,
+  navigationIndices,
   onSelect,
   onClosed,
 }: LightboxProps) {
@@ -107,18 +107,18 @@ export default function Lightbox({
       }
       const nextIndex = getPhotoIndexByOffset(
         selectedIndex,
-        landscapeIndices,
+        navigationIndices,
         direction,
       );
       if (nextIndex != null) openPhoto(nextIndex);
     },
-    [landscapeIndices, openPhoto, photos, selectedIndex, settledPhotoId],
+    [navigationIndices, openPhoto, photos, selectedIndex, settledPhotoId],
   );
 
   useEffect(() => {
     const preloadIndices = getSurroundingPhotoIndices(
       selectedIndex,
-      landscapeIndices,
+      navigationIndices,
       LIGHTBOX_PRELOAD_FORWARD_COUNT,
       LIGHTBOX_PRELOAD_BACKWARD_COUNT,
     );
@@ -139,7 +139,7 @@ export default function Lightbox({
         preloadCacheRef.current.delete(photoId);
       }
     });
-  }, [landscapeIndices, photos, selectedIndex]);
+  }, [navigationIndices, photos, selectedIndex]);
 
   useEffect(() => {
     const selectedPhoto = photos[selectedIndex];
@@ -153,13 +153,13 @@ export default function Lightbox({
       if (pendingOffset === 0) return;
       const pendingIndex = getPhotoIndexByOffset(
         selectedIndex,
-        landscapeIndices,
+        navigationIndices,
         pendingOffset,
       );
       if (pendingIndex != null) openPhoto(pendingIndex);
     }, LIGHTBOX_IMAGE_TRANSITION_MS);
     return () => window.clearTimeout(transitionTimer);
-  }, [landscapeIndices, loadedPhotoId, openPhoto, photos, selectedIndex]);
+  }, [navigationIndices, loadedPhotoId, openPhoto, photos, selectedIndex]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -194,9 +194,6 @@ export default function Lightbox({
   if (!photo) return null;
   const isFullImageReady = loadedPhotoId === photo.id;
   const isNavigationReady = settledPhotoId === photo.id;
-  const stageWidth = `min(${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw, ${
-    LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT * photo.aspectRatio
-  }vh)`;
 
   return (
     <div
@@ -207,6 +204,16 @@ export default function Lightbox({
       aria-modal="true"
       aria-label="Photo viewer"
     >
+      <p
+        data-lightbox-photo-number="true"
+        aria-label={`Photo ${photo.sequence} of ${photos.length}`}
+        className="pointer-events-none fixed top-[max(0.75rem,env(safe-area-inset-top))]
+                   left-[max(0.75rem,env(safe-area-inset-left))] z-[200]
+                   grid h-11 -translate-y-[8px] place-items-center select-none font-photo-number text-[52px] leading-none text-text
+                   drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
+      >
+        {photo.sequence}
+      </p>
       <button
         type="button"
         className="fixed inset-0 z-0 cursor-default"
@@ -234,7 +241,7 @@ export default function Lightbox({
         ×
       </button>
 
-      {landscapeIndices.length > 0 && (
+      {navigationIndices.length > 0 && (
         <>
           <button
             type="button"
@@ -293,10 +300,10 @@ export default function Lightbox({
       <div
         data-lightbox-stage="true"
         aria-busy={!isNavigationReady}
-        className="pointer-events-none relative z-10 grid overflow-hidden rounded-lg shadow-2xl"
+        className="pointer-events-none relative z-10 overflow-hidden"
         style={{
-          width: stageWidth,
-          aspectRatio: `${photo.width} / ${photo.height}`,
+          width: `${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw`,
+          height: `${LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT}vh`,
         }}
       >
         <ResponsiveImage
@@ -312,9 +319,10 @@ export default function Lightbox({
           loading="eager"
           fetchPriority="high"
           pictureClassName="contents"
-          className={`pointer-events-auto col-start-1 row-start-1 w-full h-full object-contain ${
-            isFullImageReady ? "opacity-100" : "opacity-0"
-          }`}
+          className={`pointer-events-auto absolute left-1/2 top-1/2 h-auto max-h-full w-auto max-w-full
+                      -translate-x-1/2 -translate-y-1/2 object-contain ${
+                        isFullImageReady ? "opacity-100" : "opacity-0"
+                      }`}
           onLoad={() => {
             const loadedImage = imageRef.current;
             if (!loadedImage) return;
@@ -341,9 +349,10 @@ export default function Lightbox({
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity ${
-              isFullImageReady ? "opacity-0" : "opacity-100"
-            }`}
+            className={`pointer-events-none absolute left-1/2 top-1/2 h-auto max-h-full w-auto max-w-full
+                        -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity ${
+                          isFullImageReady ? "opacity-0" : "opacity-100"
+                        }`}
             style={{ transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms` }}
           />
         )}
@@ -356,9 +365,10 @@ export default function Lightbox({
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`pointer-events-none col-start-1 row-start-1 w-full h-full object-contain transition-opacity ${
-              isFullImageReady ? "opacity-0" : "opacity-100"
-            }`}
+            className={`pointer-events-none absolute left-1/2 top-1/2 h-auto max-h-full w-auto max-w-full
+                        -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity ${
+                          isFullImageReady ? "opacity-0" : "opacity-100"
+                        }`}
             style={{ transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms` }}
           />
         )}

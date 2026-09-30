@@ -16,6 +16,22 @@
   font-weight: 400;
 }
 
+@font-face {
+  font-family: "Tangerine";
+  src: url("./assets/fonts/Tangerine-Regular.woff2") format("woff2");
+  font-display: optional;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Zen Tokyo Zoo";
+  src: url("./assets/fonts/ZenTokyoZoo-Regular.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
 @theme {
   --color-canvas: #0e0e0e;
   --color-surface: #171717;
@@ -34,6 +50,9 @@
     ui-sans-serif, system-ui, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-display: "Zina", ui-sans-serif, system-ui, sans-serif;
   --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-tangerine: "Tangerine", cursive;
+  --font-photo-number:
+    "Zen Tokyo Zoo", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-footer: "Inter", ui-sans-serif, system-ui, sans-serif;
   --text-footer-copy: 0.625rem;
   --spacing-footer: 16rem;
@@ -48,16 +67,16 @@
 @layer base {
   html {
     overflow-x: clip;
-    overflow-y: scroll;
+    overflow-y: auto;
     background: var(--color-canvas);
     color-scheme: dark;
     font-family: var(--font-sans);
     font-synthesis: none;
-    scrollbar-color: var(--color-border-strong) var(--color-canvas);
   }
 
   html.modal-open {
     overflow: hidden;
+    scrollbar-gutter: stable;
   }
 
   body {
@@ -67,20 +86,6 @@
     overflow-x: clip;
     background: var(--color-canvas);
     color: var(--color-text);
-  }
-
-  html::-webkit-scrollbar {
-    width: 0.75rem;
-  }
-
-  html::-webkit-scrollbar-track {
-    background: var(--color-canvas);
-  }
-
-  html::-webkit-scrollbar-thumb {
-    border: 0.2rem solid var(--color-canvas);
-    border-radius: 999px;
-    background: var(--color-border-strong);
   }
 
   :focus-visible {

@@ -1,5 +1,5 @@
 import { mount } from "@cypress/react";
-import { MemoryRouter } from "react-router-dom";
+import { Link, MemoryRouter, useLocation } from "react-router-dom";
 import { resolveFeatureAvailability } from "./featureAvailability";
 import RouteTransitionBoundary from "./RouteTransitionBoundary";
 
@@ -10,11 +10,51 @@ function mountRoute(path: string, shop: boolean, contact: boolean) {
         availability={resolveFeatureAvailability({ shop, contact })}
         portfolioGridRef={() => undefined}
       />
+      <LocationPath />
     </MemoryRouter>,
   );
 }
 
+function LocationPath() {
+  const location = useLocation();
+  return (
+    <output data-location>{`${location.pathname}${location.hash}`}</output>
+  );
+}
+
 describe("RouteTransitionBoundary", () => {
+  beforeEach(() => {
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia").returns({
+        matches: true,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+  });
+
+  it("resets the incoming route after navigation", () => {
+    cy.window().then((window) => cy.stub(window, "scrollTo").as("scrollTo"));
+    mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <Link to="/contact">Open contact</Link>
+        <RouteTransitionBoundary
+          availability={resolveFeatureAvailability({
+            shop: false,
+            contact: true,
+          })}
+          portfolioGridRef={() => undefined}
+        />
+      </MemoryRouter>,
+    );
+
+    cy.contains("a", "Open contact").click();
+    cy.get('[data-route-content="true"]')
+      .should("have.length", 1)
+      .and("have.attr", "aria-label", "Contact");
+    cy.get("@scrollTo").should("have.been.calledOnceWith", 0, 0);
+  });
+
   it("uses the existing fallback and accessible label for disabled routes", () => {
     mountRoute("/shop/", false, false);
 
@@ -50,5 +90,37 @@ describe("RouteTransitionBoundary", () => {
       "aria-label",
       "Contact",
     );
+  });
+
+  it("redirects the legacy artist statement route to the expanded portfolio", () => {
+    mountRoute("/artist-statement", false, true);
+
+    cy.get("[data-location]").should("have.text", "/#artist-statement");
+    cy.get("#artist-statement").should("be.visible");
+    cy.get('[data-route-content="true"]').should(
+      "have.attr",
+      "aria-label",
+      "Portfolio",
+    );
+  });
+
+  it("does not reset scroll for the Home statement hash", () => {
+    cy.window().then((window) => cy.stub(window, "scrollTo").as("scrollTo"));
+    mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <Link to="/#artist-statement">Open statement</Link>
+        <RouteTransitionBoundary
+          availability={resolveFeatureAvailability({
+            shop: false,
+            contact: true,
+          })}
+          portfolioGridRef={() => undefined}
+        />
+      </MemoryRouter>,
+    );
+
+    cy.contains("a", "Open statement").click();
+    cy.get("#artist-statement").should("be.visible");
+    cy.get("@scrollTo").should("not.have.been.called");
   });
 });
