@@ -362,7 +362,7 @@ describe("photography portfolio", () => {
       .should("be.visible");
   });
 
-  it("keeps the hero gallery and its separate close target accessible on mobile", () => {
+  it("uses portrait hero media and a separate accessible close target on mobile", () => {
     cy.viewport(390, 844);
     cy.visit("/");
 
@@ -371,7 +371,7 @@ describe("photography portfolio", () => {
       .should(
         "have.attr",
         "alt",
-        "Two hands reaching toward each other across a mirror frame",
+        "A person photographing their reflection in a tall mirror outdoors",
       );
     cy.get('[aria-label="Open hero image gallery"]').click();
 

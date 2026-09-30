@@ -1,4 +1,4 @@
-export const HERO_PHOTO_COUNT = 8;
+export const HERO_PHOTO_COUNT = 10;
 export const HERO_ROTATION_DELAY_MS = 2500;
 export const HERO_CROSSFADE_DURATION_MS = 700;
 export const HERO_IMAGE_SIZES = "100vw";

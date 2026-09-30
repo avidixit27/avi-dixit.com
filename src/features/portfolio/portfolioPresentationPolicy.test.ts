@@ -15,7 +15,7 @@ import {
 
 describe("portfolio presentation policy", () => {
   it("keeps approved hero timing and source selection", () => {
-    expect(HERO_PHOTO_COUNT).toBe(8);
+    expect(HERO_PHOTO_COUNT).toBe(10);
     expect(HERO_ROTATION_DELAY_MS).toBe(2500);
     expect(HERO_CROSSFADE_DURATION_MS).toBe(700);
     expect(HERO_IMAGE_SIZES).toBe("100vw");
