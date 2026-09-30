@@ -10,7 +10,7 @@ describe("ArtistStatement", () => {
         addEventListener: cy.stub(),
         removeEventListener: cy.stub(),
       } as unknown as MediaQueryList);
-      cy.stub(window.HTMLElement.prototype, "scrollIntoView").as("scroll");
+      cy.spy(window.HTMLElement.prototype, "scrollIntoView").as("scroll");
     });
     mount(<ArtistStatement isOpen={false} onClose={onClose} />).then(
       ({ rerender }) => {
@@ -28,6 +28,7 @@ describe("ArtistStatement", () => {
       behavior: "auto",
       block: "start",
     });
+    cy.get("#artist-statement").should("be.visible");
     cy.get("#artist-statement").within(() => {
       cy.get("h2")
         .should("have.text", "Artist Statement")

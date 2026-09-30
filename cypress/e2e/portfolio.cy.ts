@@ -362,7 +362,7 @@ describe("photography portfolio", () => {
       .should("be.visible");
   });
 
-  it("uses portrait hero media and a separate accessible close target on mobile", () => {
+  it("keeps the hero gallery and its separate close target accessible on mobile", () => {
     cy.viewport(390, 844);
     cy.visit("/");
 
@@ -372,27 +372,29 @@ describe("photography portfolio", () => {
         "have.attr",
         "alt",
         "Two hands reaching toward each other across a mirror frame",
-      )
-      .click();
+      );
+    cy.get('[aria-label="Open hero image gallery"]').click();
 
     cy.get('[aria-label="Close"]')
       .should("be.visible")
       .then(($close) => {
         const close = $close.get(0);
-        const stage = Cypress.$('[data-lightbox-stage="true"]').get(0);
-        if (!close || !stage) {
-          throw new Error("Expected lightbox close target and stage");
+        const photo = Cypress.$(
+          '[data-lightbox-stage="true"] img:not([aria-hidden])',
+        ).get(0);
+        if (!close || !photo) {
+          throw new Error("Expected lightbox close target and photo");
         }
 
         const closeRect = close.getBoundingClientRect();
-        const stageRect = stage.getBoundingClientRect();
+        const photoRect = photo.getBoundingClientRect();
         expect(closeRect.width).to.be.at.least(44);
         expect(closeRect.height).to.be.at.least(44);
         expect(
-          closeRect.right <= stageRect.left ||
-            closeRect.left >= stageRect.right ||
-            closeRect.bottom <= stageRect.top ||
-            closeRect.top >= stageRect.bottom,
+          closeRect.right <= photoRect.left ||
+            closeRect.left >= photoRect.right ||
+            closeRect.bottom <= photoRect.top ||
+            closeRect.top >= photoRect.bottom,
         ).to.equal(true);
       })
       .click();

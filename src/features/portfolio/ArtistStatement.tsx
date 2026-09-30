@@ -81,7 +81,8 @@ export default function ArtistStatement({
     >
       <m.div
         initial={false}
-        animate={{ height: isOpen ? "auto" : 0 }}
+        animate={reduceMotion ? false : { height: isOpen ? "auto" : 0 }}
+        style={reduceMotion ? { height: isOpen ? "auto" : 0 } : {}}
         onUpdate={() => {
           if (!isOpen || reduceMotion) return;
           sectionRef.current?.scrollIntoView({
@@ -101,10 +102,12 @@ export default function ArtistStatement({
           aria-labelledby="artist-statement-title"
           className="min-h-screen border-t border-border bg-surface"
           initial={false}
-          animate={{
-            opacity: isOpen ? 1 : 0,
-            y: isOpen || reduceMotion ? 0 : "-18vh",
-          }}
+          animate={
+            reduceMotion
+              ? false
+              : { opacity: isOpen ? 1 : 0, y: isOpen ? 0 : "-18vh" }
+          }
+          style={reduceMotion ? { opacity: isOpen ? 1 : 0 } : {}}
           transition={
             reduceMotion
               ? { duration: 0 }
