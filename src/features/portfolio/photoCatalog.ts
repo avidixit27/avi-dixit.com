@@ -2,6 +2,7 @@ import type { ImageSource } from "../../components/ResponsiveImage";
 
 export interface Photo {
   readonly id: string;
+  readonly sequence: number;
   readonly src: string;
   readonly srcSet: string;
   readonly sources: readonly ImageSource[];
@@ -93,6 +94,10 @@ const PHOTO_DETAILS = {
   },
 } as const satisfies Record<string, PhotoDetails>;
 
+const CHRONOLOGICAL_PHOTO_NUMBERS = [
+  6, 1, 2, 8, 7, 9, 11, 4, 5, 3, 10, 12,
+] as const;
+
 const fallbackModules = import.meta.glob<string>(
   "../../assets/photography/portfolio/*.JPG",
   {
@@ -143,6 +148,18 @@ function getPhotoDetails(path: string): PhotoDetails {
   return details;
 }
 
+function getPhotoSequence(path: string): number {
+  const fileNumber = Number(path.match(/_(\d+)\.JPG$/)?.[1]);
+  const sequence =
+    CHRONOLOGICAL_PHOTO_NUMBERS.findIndex(
+      (photoNumber) => photoNumber === fileNumber,
+    ) + 1;
+  if (sequence === 0) {
+    throw new Error(`Missing photo sequence for ${path}`);
+  }
+  return sequence;
+}
+
 function getGeneratedSource(
   modules: Readonly<Record<string, string>>,
   path: string,
@@ -159,25 +176,33 @@ export function buildPhotoCatalog(
   webpSources: Readonly<Record<string, string>>,
 ): readonly Photo[] {
   return Object.freeze(
-    Object.entries(fallbackSources).map(([path, src]) => {
-      const details = getPhotoDetails(path);
-      return Object.freeze({
-        ...details,
+    Object.entries(fallbackSources)
+      .map(([path, src]) => ({
+        details: getPhotoDetails(path),
+        path,
+        sequence: getPhotoSequence(path),
         src,
-        srcSet: getGeneratedSource(jpegSources, path),
-        sources: Object.freeze([
-          Object.freeze({
-            type: "image/avif",
-            srcSet: getGeneratedSource(avifSources, path),
-          }),
-          Object.freeze({
-            type: "image/webp",
-            srcSet: getGeneratedSource(webpSources, path),
-          }),
-        ]),
-        aspectRatio: details.width / details.height,
-      });
-    }),
+      }))
+      .sort((first, second) => first.sequence - second.sequence)
+      .map(({ details, path, sequence, src }) =>
+        Object.freeze({
+          ...details,
+          sequence,
+          src,
+          srcSet: getGeneratedSource(jpegSources, path),
+          sources: Object.freeze([
+            Object.freeze({
+              type: "image/avif",
+              srcSet: getGeneratedSource(avifSources, path),
+            }),
+            Object.freeze({
+              type: "image/webp",
+              srcSet: getGeneratedSource(webpSources, path),
+            }),
+          ]),
+          aspectRatio: details.width / details.height,
+        }),
+      ),
   );
 }
 

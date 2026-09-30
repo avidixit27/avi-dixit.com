@@ -7,9 +7,16 @@ import {
   LIGHTBOX_IMAGE_TRANSITION_MS,
 } from "./portfolioPresentationPolicy";
 
-function createPhoto(id: string, alt: string): Photo {
+function createPhoto(
+  id: string,
+  alt: string,
+  sequence: number,
+  width = 6000,
+  height = 4000,
+): Photo {
   return {
     id,
+    sequence,
     src: `/${id}.jpg`,
     srcSet: `/${id}-480.jpg 480w, /${id}-960.jpg 960w`,
     sources: [
@@ -22,17 +29,17 @@ function createPhoto(id: string, alt: string): Photo {
         srcSet: `/${id}-480.webp 480w, /${id}-960.webp 960w`,
       },
     ],
-    width: 6000,
-    height: 4000,
-    aspectRatio: 1.5,
+    width,
+    height,
+    aspectRatio: width / height,
     alt,
   };
 }
 
 const photos = [
-  createPhoto("first", "First test photo"),
-  createPhoto("portrait", "Portrait test photo"),
-  createPhoto("last", "Last test photo"),
+  createPhoto("first", "First test photo", 1),
+  createPhoto("portrait", "Portrait test photo", 2, 4000, 6000),
+  createPhoto("last", "Last test photo", 3),
 ] as const satisfies readonly Photo[];
 
 function pressKey(key: string) {
@@ -56,7 +63,7 @@ function StatefulLightbox({
       photos={photos}
       selectedIndex={selection.index}
       previewSrc={selection.previewSrc}
-      landscapeIndices={[0, 2]}
+      navigationIndices={[0, 2]}
       onSelect={(index, previewSrc) => {
         onSelect(index, previewSrc);
         setSelection({ index, previewSrc });
@@ -67,14 +74,39 @@ function StatefulLightbox({
 }
 
 describe("Lightbox", () => {
-  it("keeps the close control outside the image stage on a small viewport", () => {
+  it("shows the filename sequence number in the viewer's top-left corner", () => {
+    mount(
+      <Lightbox
+        photos={photos}
+        selectedIndex={2}
+        previewSrc="/last-preview.jpg"
+        navigationIndices={[0, 1, 2]}
+        onSelect={cy.stub()}
+        onClosed={cy.stub()}
+      />,
+    );
+
+    cy.get('[data-lightbox-photo-number="true"]')
+      .should("have.text", "3")
+      .and("have.attr", "aria-label", "Photo 3 of 3")
+      .and("have.class", "font-photo-number")
+      .and("have.class", "text-[52px]")
+      .and("have.class", "h-11")
+      .and("have.class", "-translate-y-[8px]")
+      .and("have.class", "place-items-center")
+      .and("have.class", "fixed")
+      .and("have.class", "top-[max(0.75rem,env(safe-area-inset-top))]")
+      .and("have.class", "left-[max(0.75rem,env(safe-area-inset-left))]");
+  });
+
+  it("keeps the close control accessible on a small viewport", () => {
     cy.viewport(390, 844);
     mount(
       <Lightbox
         photos={photos}
         selectedIndex={0}
         previewSrc="/first-preview.jpg"
-        landscapeIndices={[0, 2]}
+        navigationIndices={[0, 1, 2]}
         onSelect={cy.stub()}
         onClosed={cy.stub()}
       />,
@@ -87,17 +119,35 @@ describe("Lightbox", () => {
       expect(buttonRect.width).to.be.at.least(44);
       expect(buttonRect.height).to.be.at.least(44);
 
-      cy.get('[data-lightbox-stage="true"]').then(($stage) => {
-        const stageRect = $stage.get(0)?.getBoundingClientRect();
-        if (!stageRect) throw new Error("Expected a lightbox stage");
-        const intersects =
-          buttonRect.left < stageRect.right &&
-          buttonRect.right > stageRect.left &&
-          buttonRect.top < stageRect.bottom &&
-          buttonRect.bottom > stageRect.top;
-        expect(intersects).to.equal(false);
-      });
+      expect(getComputedStyle(button).zIndex).to.equal("200");
     });
+  });
+
+  it("includes portrait photos against the black viewer canvas", () => {
+    mount(
+      <Lightbox
+        photos={photos}
+        selectedIndex={1}
+        previewSrc="/portrait-preview.jpg"
+        navigationIndices={[0, 1, 2]}
+        onSelect={cy.stub()}
+        onClosed={cy.stub()}
+      />,
+    );
+
+    cy.get('[role="dialog"]').should("have.class", "bg-canvas/95");
+    cy.get('[data-lightbox-stage="true"]')
+      .should("have.attr", "style")
+      .and("include", "width: 95vw")
+      .and("include", "height: 95vh")
+      .and("not.include", "aspect-ratio");
+    cy.get('img[alt="Portrait test photo"]')
+      .should("have.class", "object-contain")
+      .and("have.class", "absolute")
+      .and("have.class", "max-h-full")
+      .and("have.class", "max-w-full")
+      .and("have.class", "h-auto")
+      .and("have.class", "w-auto");
   });
 
   it("gives the close control an accessible warm-orange fill interaction", () => {
@@ -106,7 +156,7 @@ describe("Lightbox", () => {
         photos={photos}
         selectedIndex={0}
         previewSrc="/first-preview.jpg"
-        landscapeIndices={[0, 2]}
+        navigationIndices={[0, 1, 2]}
         onSelect={cy.stub()}
         onClosed={cy.stub()}
       />,
@@ -121,7 +171,7 @@ describe("Lightbox", () => {
 
   it("preloads and decodes a bounded responsive navigation window", () => {
     const preloadPhotos = Array.from({ length: 6 }, (_, index) =>
-      createPhoto(`preload-${index}`, `Preload photo ${index}`),
+      createPhoto(`preload-${index}`, `Preload photo ${index}`, index + 1),
     );
 
     mount(
@@ -129,7 +179,7 @@ describe("Lightbox", () => {
         photos={preloadPhotos}
         selectedIndex={0}
         previewSrc="/preload-preview.jpg"
-        landscapeIndices={[0, 1, 2, 3, 4, 5]}
+        navigationIndices={[0, 1, 2, 3, 4, 5]}
         onSelect={cy.stub()}
         onClosed={cy.stub()}
       />,
@@ -155,7 +205,7 @@ describe("Lightbox", () => {
         photos={photos}
         selectedIndex={0}
         previewSrc="/first-preview.jpg"
-        landscapeIndices={[0, 2]}
+        navigationIndices={[0, 1, 2]}
         onSelect={onSelect}
         onClosed={cy.stub()}
       />,
@@ -174,9 +224,9 @@ describe("Lightbox", () => {
       "false",
     );
     cy.get('[aria-label="Next image"]').click();
-    cy.get("@onSelect").should("have.been.calledOnceWith", 2, "/last.jpg");
+    cy.get("@onSelect").should("have.been.calledOnceWith", 1, "/portrait.jpg");
     pressKey("ArrowLeft");
-    cy.get("@onSelect").should("have.been.calledWith", 2, "/last.jpg");
+    cy.get("@onSelect").should("have.been.calledWith", 1, "/portrait.jpg");
   });
 
   it("shows the clicked preview immediately and closes only from the backdrop", () => {
@@ -187,7 +237,7 @@ describe("Lightbox", () => {
         photos={photos}
         selectedIndex={0}
         previewSrc="/already-visible.jpg"
-        landscapeIndices={[0, 2]}
+        navigationIndices={[0, 1, 2]}
         onSelect={cy.stub()}
         onClosed={onClosed}
       />,
@@ -226,7 +276,7 @@ describe("Lightbox", () => {
         photos={photos}
         selectedIndex={0}
         previewSrc="/first-preview.jpg"
-        landscapeIndices={[0, 2]}
+        navigationIndices={[0, 1, 2]}
         onSelect={cy.stub()}
         onClosed={cy.stub()}
       />,
@@ -234,7 +284,9 @@ describe("Lightbox", () => {
 
     cy.get('[data-lightbox-stage="true"]')
       .should("have.attr", "aria-busy", "true")
-      .should("have.css", "aspect-ratio", "6000 / 4000")
+      .should("have.attr", "style")
+      .and("include", "width: 95vw")
+      .and("include", "height: 95vh")
       .then(($stage) => {
         const initialRect = $stage.get(0)?.getBoundingClientRect();
         if (!initialRect) throw new Error("Expected a lightbox stage");
@@ -364,7 +416,7 @@ describe("Lightbox", () => {
         photos={photos}
         selectedIndex={0}
         previewSrc="/first-preview.jpg"
-        landscapeIndices={[0, 2]}
+        navigationIndices={[0, 1, 2]}
         onSelect={cy.stub()}
         onClosed={onClosed}
       />,
@@ -388,7 +440,7 @@ describe("Lightbox", () => {
         photos={photos}
         selectedIndex={0}
         previewSrc="/first-preview.jpg"
-        landscapeIndices={[0, 2]}
+        navigationIndices={[0, 1, 2]}
         onSelect={onSelect}
         onClosed={cy.stub()}
       />,

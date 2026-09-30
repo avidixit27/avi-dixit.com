@@ -20,7 +20,7 @@ export default function PhotoGrid({
     <>
       <div ref={gridMarkerRef} className="h-0 w-full" />
       <main className="page-container py-16 sm:py-20">
-        <div className="columns-1 gap-6 space-y-6 md:columns-2 lg:columns-3 lg:gap-8 lg:space-y-8">
+        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {photos.map((photo, index) => (
             <button
               type="button"

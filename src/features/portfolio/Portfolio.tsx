@@ -5,16 +5,13 @@ import ArtistStatement from "./ArtistStatement";
 import HeroSlideshow from "./HeroSlideshow";
 import Lightbox from "./Lightbox";
 import { PHOTO_CATALOG } from "./photoCatalog";
-import { getLandscapePhotoIndices } from "./photoNavigation";
 import { HERO_PHOTO_COUNT } from "./portfolioPresentationPolicy";
 import PhotoGrid from "./PhotoGrid";
 import PortfolioScrollComposition from "./PortfolioScrollComposition";
 import { ROUTES } from "../../resources/navigation";
 
 const HERO_PHOTOS = Object.freeze(PHOTO_CATALOG.slice(0, HERO_PHOTO_COUNT));
-const LANDSCAPE_PHOTO_INDICES = Object.freeze(
-  getLandscapePhotoIndices(PHOTO_CATALOG),
-);
+const PHOTO_INDICES = Object.freeze(PHOTO_CATALOG.map((_, index) => index));
 
 interface PortfolioProps {
   gridMarkerRef: Ref<HTMLDivElement>;
@@ -69,7 +66,7 @@ export default function Portfolio({ gridMarkerRef }: PortfolioProps) {
           photos={PHOTO_CATALOG}
           selectedIndex={selection.index}
           previewSrc={selection.previewSrc}
-          landscapeIndices={LANDSCAPE_PHOTO_INDICES}
+          navigationIndices={PHOTO_INDICES}
           onSelect={selectPhoto}
           onClosed={closeLightbox}
         />
