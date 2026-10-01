@@ -9,6 +9,7 @@ import {
 import {
   LIGHTBOX_IMAGE_SIZES,
   LIGHTBOX_CLOSE_DURATION_MS,
+  LIGHTBOX_CLOSE_FADE_DELAY_MS,
   LIGHTBOX_IMAGE_TRANSITION_MS,
   LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT,
   LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT,
@@ -80,7 +81,7 @@ export default function Lightbox({
     closeTimerRef.current = window.setTimeout(() => {
       closeTimerRef.current = null;
       onClosed();
-    }, LIGHTBOX_CLOSE_DURATION_MS);
+    }, LIGHTBOX_CLOSE_FADE_DELAY_MS + LIGHTBOX_CLOSE_DURATION_MS);
   }, [onClosed]);
 
   const openPhoto = useCallback(
@@ -202,7 +203,10 @@ export default function Lightbox({
                   ${isClosing ? "opacity-0" : "opacity-100"}`}
       style={
         isClosing
-          ? { transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS}ms` }
+          ? {
+              transitionDelay: `${LIGHTBOX_CLOSE_FADE_DELAY_MS}ms`,
+              transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS}ms`,
+            }
           : undefined
       }
       role="dialog"
