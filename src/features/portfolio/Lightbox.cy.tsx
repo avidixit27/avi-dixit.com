@@ -89,14 +89,13 @@ describe("Lightbox", () => {
     cy.get('[data-lightbox-photo-number="true"]')
       .should("have.text", "3")
       .and("have.attr", "aria-label", "Photo 3 of 3")
-      .and("have.class", "font-photo-number")
-      .and("have.class", "text-[52px]")
-      .and("have.class", "h-11")
-      .and("have.class", "-translate-y-[8px]")
-      .and("have.class", "place-items-center")
-      .and("have.class", "fixed")
-      .and("have.class", "top-[max(0.75rem,env(safe-area-inset-top))]")
-      .and("have.class", "left-[max(0.75rem,env(safe-area-inset-left))]");
+      .and("have.css", "font-size", "52px")
+      .and("have.css", "color", "rgb(253, 113, 0)");
+    cy.get('[data-lightbox-controls="true"]').should(
+      "have.css",
+      "position",
+      "fixed",
+    );
   });
 
   it("keeps the close control accessible on a small viewport", () => {
@@ -123,6 +122,31 @@ describe("Lightbox", () => {
     });
   });
 
+  it("keeps a two-digit photo number clear of close at narrow widths", () => {
+    cy.viewport(80, 600);
+    mount(
+      <Lightbox
+        photos={[createPhoto("twelfth", "Twelfth test photo", 12)]}
+        selectedIndex={0}
+        previewSrc="/twelfth-preview.jpg"
+        navigationIndices={[]}
+        onSelect={cy.stub()}
+        onClosed={cy.stub()}
+      />,
+    );
+
+    cy.document().then((document) => document.fonts.ready);
+    cy.get('[data-lightbox-photo-number="true"]').then(($number) => {
+      const number = $number.get(0)?.getBoundingClientRect();
+      if (!number) throw new Error("Expected the photo number");
+      cy.get('[aria-label="Close"]').then(($button) => {
+        const button = $button.get(0)?.getBoundingClientRect();
+        if (!button) throw new Error("Expected the close button");
+        expect(number.right).to.be.lessThan(button.left);
+      });
+    });
+  });
+
   it("includes portrait photos against the black viewer canvas", () => {
     mount(
       <Lightbox
@@ -135,7 +159,11 @@ describe("Lightbox", () => {
       />,
     );
 
-    cy.get('[role="dialog"]').should("have.class", "bg-canvas/95");
+    cy.get('[role="dialog"]').should(
+      "have.css",
+      "background-color",
+      "rgb(14, 14, 14)",
+    );
     cy.get('[data-lightbox-stage="true"]')
       .should("have.attr", "style")
       .and("include", "width: 95vw")
@@ -151,6 +179,7 @@ describe("Lightbox", () => {
   });
 
   it("gives the close control an accessible warm-orange fill interaction", () => {
+    const onViewerFade = cy.spy().as("onViewerFade");
     mount(
       <Lightbox
         photos={photos}
@@ -163,10 +192,54 @@ describe("Lightbox", () => {
     );
 
     cy.get('[aria-label="Close"]')
-      .should("have.class", "hover:text-brand-warm")
-      .and("have.class", "focus-visible:text-brand-warm")
-      .and("have.class", "active:text-brand-warm")
-      .and("have.class", "motion-reduce:transition-none");
+      .should("have.class", "lightbox-close-button")
+      .find(".lightbox-close-stroke")
+      .should("have.length", 2)
+      .first()
+      .should("have.css", "background-image")
+      .and("include", "rgb(253, 113, 0)");
+    cy.get('[role="dialog"]').should(
+      "have.css",
+      "transition-duration",
+      "0.18s",
+    );
+    cy.get(".lightbox-close-stroke")
+      .first()
+      .should("have.css", "background-size", "200% 100%")
+      .and("have.css", "background-position", "100% 50%");
+    cy.get(".lightbox-close-stroke")
+      .last()
+      .should("have.css", "background-position", "0% 50%");
+
+    cy.get('[role="dialog"]')
+      .should("have.css", "opacity", "1")
+      .then(($dialog) => {
+        const dialog = $dialog.get(0);
+        if (!dialog) throw new Error("Expected the photo viewer");
+        dialog.addEventListener("transitionstart", (event) => {
+          if (event.target !== dialog || event.propertyName !== "opacity")
+            return;
+          const close = dialog.querySelector('[aria-label="Close"]');
+          if (!close) throw new Error("Expected the close control");
+          onViewerFade(getComputedStyle(close).opacity);
+        });
+      });
+
+    cy.get('[aria-label="Close"]')
+      .click()
+      .should("have.attr", "data-closing", "true");
+    cy.get('[role="dialog"]')
+      .should("have.css", "--lightbox-close-fold-duration", "200ms")
+      .and("have.css", "transition-delay", "0.2s")
+      .and("have.css", "transition-duration", "0.1s");
+    cy.get("@onViewerFade").should("have.been.calledOnceWith", "0");
+    cy.get(".lightbox-close-stroke").each(($stroke) => {
+      cy.wrap($stroke).should(
+        "have.css",
+        "transform",
+        "matrix(1, 0, 0, 1, 0, 0)",
+      );
+    });
   });
 
   it("preloads and decodes a bounded responsive navigation window", () => {
@@ -260,7 +333,9 @@ describe("Lightbox", () => {
     cy.tick(LIGHTBOX_CLOSE_DURATION_MS);
     cy.get("@onClosed").should("not.have.been.called");
     cy.get('[aria-label="Close photo viewer"]').click("topLeft");
-    cy.tick(LIGHTBOX_CLOSE_DURATION_MS);
+    cy.tick(LIGHTBOX_CLOSE_DURATION_MS - 1);
+    cy.get("@onClosed").should("not.have.been.called");
+    cy.tick(1);
     cy.get("@onClosed").should("have.been.calledOnce");
   });
 
@@ -424,8 +499,30 @@ describe("Lightbox", () => {
 
     cy.get("@addEventListener").should("have.been.calledWith", "keydown");
     pressKey("Escape");
-    cy.get('[role="dialog"]').should("have.class", "opacity-0");
+    cy.get('[role="dialog"]').should("have.class", "opacity-100");
     cy.tick(LIGHTBOX_CLOSE_DURATION_MS);
+    cy.get("@onClosed").should("have.been.calledOnce");
+  });
+
+  it("closes immediately when reduced motion is preferred", () => {
+    const onClosed = cy.spy().as("onClosed");
+    mount(
+      <Lightbox
+        photos={photos}
+        selectedIndex={0}
+        previewSrc="/first-preview.jpg"
+        navigationIndices={[0, 1, 2]}
+        onSelect={cy.stub()}
+        onClosed={onClosed}
+      />,
+    );
+
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia")
+        .withArgs("(prefers-reduced-motion: reduce)")
+        .returns({ matches: true } as MediaQueryList);
+    });
+    cy.get('[aria-label="Close"]').click();
     cy.get("@onClosed").should("have.been.calledOnce");
   });
 

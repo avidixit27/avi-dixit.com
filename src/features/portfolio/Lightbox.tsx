@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
 import type { PhotoDirection } from "./photoNavigation";
@@ -15,6 +21,9 @@ import {
   LIGHTBOX_PRELOAD_BACKWARD_COUNT,
   LIGHTBOX_PRELOAD_FORWARD_COUNT,
 } from "./portfolioPresentationPolicy";
+import "./Lightbox.css";
+
+const LIGHTBOX_CLOSE_FOLD_MS = (LIGHTBOX_CLOSE_DURATION_MS * 2) / 3;
 
 interface LightboxProps {
   photos: readonly Photo[];
@@ -65,6 +74,7 @@ export default function Lightbox({
 }: LightboxProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const closeTimerRef = useRef<number | null>(null);
+  const closingRef = useRef(false);
   const navigationLockedRef = useRef(true);
   const pendingNavigationOffsetRef = useRef(0);
   const preloadCacheRef = useRef(new Map<string, PreloadedPhoto>());
@@ -74,7 +84,12 @@ export default function Lightbox({
   const [outgoingSrc, setOutgoingSrc] = useState<string | null>(null);
 
   const requestClose = useCallback(() => {
-    if (closeTimerRef.current) return;
+    if (closingRef.current) return;
+    closingRef.current = true;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      onClosed();
+      return;
+    }
     setIsClosing(true);
     closeTimerRef.current = window.setTimeout(() => {
       closeTimerRef.current = null;
@@ -197,49 +212,74 @@ export default function Lightbox({
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas/95
-                  transition-opacity ${isClosing ? "opacity-0" : "opacity-100"}`}
-      style={{ transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS}ms` }}
+      className={`lightbox-dialog fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas ${isClosing ? "opacity-0" : "opacity-100"}`}
+      style={
+        {
+          "--lightbox-close-fold-duration": `${LIGHTBOX_CLOSE_FOLD_MS}ms`,
+          ...(isClosing
+            ? {
+                transitionDelay: `${LIGHTBOX_CLOSE_FOLD_MS}ms`,
+                transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS - LIGHTBOX_CLOSE_FOLD_MS}ms`,
+              }
+            : {}),
+        } as CSSProperties
+      }
       role="dialog"
       aria-modal="true"
       aria-label="Photo viewer"
     >
-      <p
-        data-lightbox-photo-number="true"
-        aria-label={`Photo ${photo.sequence} of ${photos.length}`}
-        className="pointer-events-none fixed top-[max(0.75rem,env(safe-area-inset-top))]
-                   left-[max(0.75rem,env(safe-area-inset-left))] z-[200]
-                   grid h-11 -translate-y-[8px] place-items-center select-none font-photo-number text-[52px] leading-none text-text
-                   drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
-      >
-        {photo.sequence}
-      </p>
       <button
         type="button"
         className="fixed inset-0 z-0 cursor-default"
         onClick={requestClose}
         aria-label="Close photo viewer"
       />
-      <button
-        type="button"
-        onMouseDown={(event) => {
-          event.stopPropagation();
-          requestClose();
-        }}
-        onClick={(event) => {
-          event.stopPropagation();
-          requestClose();
-        }}
-        className="fixed top-[max(0.75rem,env(safe-area-inset-top))]
+      <div
+        data-lightbox-controls="true"
+        className="pointer-events-none fixed top-[max(0.75rem,env(safe-area-inset-top))]
+                   left-[max(0.75rem,env(safe-area-inset-left))]
                    right-[max(0.75rem,env(safe-area-inset-right))]
-                   z-[200] grid h-11 w-11 place-items-center text-4xl font-light text-text
-                   drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]
-                   opacity-90 hover:text-brand-warm hover:opacity-100 focus-visible:text-brand-warm
-                   active:text-brand-warm transition-colors transition-opacity motion-reduce:transition-none"
-        aria-label="Close"
+                   max-[160px]:left-1 max-[160px]:right-1 z-[200]
+                   flex items-start justify-between gap-1"
       >
-        ×
-      </button>
+        <p
+          data-lightbox-photo-number="true"
+          aria-label={`Photo ${photo.sequence} of ${photos.length}`}
+          className="grid h-11 min-w-0 -translate-y-[12px] place-items-center overflow-hidden
+                     select-none font-photo-number text-[clamp(20px,20vw,52px)] leading-none text-brand-warm
+                     drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
+        >
+          {photo.sequence}
+        </p>
+        <button
+          type="button"
+          data-closing={isClosing}
+          style={
+            isClosing
+              ? {
+                  opacity: 0,
+                  transitionDelay: `${LIGHTBOX_CLOSE_FOLD_MS * 0.75}ms`,
+                  transitionDuration: `${LIGHTBOX_CLOSE_FOLD_MS * 0.25}ms`,
+                }
+              : undefined
+          }
+          onMouseDown={(event) => {
+            event.stopPropagation();
+            requestClose();
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            requestClose();
+          }}
+          className="lightbox-close-button pointer-events-auto relative z-[200] grid h-11 w-11 shrink-0
+                     place-items-center opacity-90 hover:opacity-100 focus-visible:opacity-100
+                     transition-opacity motion-reduce:transition-none"
+          aria-label="Close"
+        >
+          <span className="lightbox-close-stroke" aria-hidden="true" />
+          <span className="lightbox-close-stroke" aria-hidden="true" />
+        </button>
+      </div>
 
       {navigationIndices.length > 0 && (
         <>
