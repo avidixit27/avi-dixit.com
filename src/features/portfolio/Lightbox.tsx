@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
 import type { PhotoDirection } from "./photoNavigation";
@@ -9,7 +15,6 @@ import {
 import {
   LIGHTBOX_IMAGE_SIZES,
   LIGHTBOX_CLOSE_DURATION_MS,
-  LIGHTBOX_CLOSE_FADE_DELAY_MS,
   LIGHTBOX_IMAGE_TRANSITION_MS,
   LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT,
   LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT,
@@ -77,11 +82,15 @@ export default function Lightbox({
 
   const requestClose = useCallback(() => {
     if (closeTimerRef.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      onClosed();
+      return;
+    }
     setIsClosing(true);
     closeTimerRef.current = window.setTimeout(() => {
       closeTimerRef.current = null;
       onClosed();
-    }, LIGHTBOX_CLOSE_FADE_DELAY_MS + LIGHTBOX_CLOSE_DURATION_MS);
+    }, LIGHTBOX_CLOSE_DURATION_MS);
   }, [onClosed]);
 
   const openPhoto = useCallback(
@@ -199,15 +208,11 @@ export default function Lightbox({
 
   return (
     <div
-      className={`lightbox-dialog fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas
-                  ${isClosing ? "opacity-0" : "opacity-100"}`}
+      className="lightbox-dialog fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas opacity-100"
       style={
-        isClosing
-          ? {
-              transitionDelay: `${LIGHTBOX_CLOSE_FADE_DELAY_MS}ms`,
-              transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS}ms`,
-            }
-          : undefined
+        {
+          "--lightbox-close-duration": `${LIGHTBOX_CLOSE_DURATION_MS}ms`,
+        } as CSSProperties
       }
       role="dialog"
       aria-modal="true"
@@ -243,8 +248,8 @@ export default function Lightbox({
             isClosing
               ? {
                   opacity: 0,
-                  transitionDelay: `${LIGHTBOX_CLOSE_FADE_DELAY_MS * 0.75}ms`,
-                  transitionDuration: `${LIGHTBOX_CLOSE_FADE_DELAY_MS * 0.25}ms`,
+                  transitionDelay: `${LIGHTBOX_CLOSE_DURATION_MS * 0.75}ms`,
+                  transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS * 0.25}ms`,
                 }
               : undefined
           }

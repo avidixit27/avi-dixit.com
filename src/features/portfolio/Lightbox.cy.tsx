@@ -4,7 +4,6 @@ import Lightbox from "./Lightbox";
 import type { Photo } from "./photoCatalog";
 import {
   LIGHTBOX_CLOSE_DURATION_MS,
-  LIGHTBOX_CLOSE_FADE_DELAY_MS,
   LIGHTBOX_IMAGE_TRANSITION_MS,
 } from "./portfolioPresentationPolicy";
 
@@ -180,7 +179,6 @@ describe("Lightbox", () => {
   });
 
   it("gives the close control an accessible warm-orange fill interaction", () => {
-    const onViewerFade = cy.spy().as("onViewerFade");
     mount(
       <Lightbox
         photos={photos}
@@ -212,26 +210,12 @@ describe("Lightbox", () => {
       .last()
       .should("have.css", "background-position", "0% 50%");
 
-    cy.get('[role="dialog"]')
-      .should("have.css", "opacity", "1")
-      .then(($dialog) => {
-        const dialog = $dialog.get(0);
-        if (!dialog) throw new Error("Expected the photo viewer");
-        dialog.addEventListener("transitionstart", (event) => {
-          if (event.target !== dialog || event.propertyName !== "opacity")
-            return;
-          const close = dialog.querySelector('[aria-label="Close"]');
-          if (!close) throw new Error("Expected the close control");
-          onViewerFade(getComputedStyle(close).opacity);
-        });
-      });
-
     cy.get('[aria-label="Close"]')
       .click()
       .should("have.attr", "data-closing", "true");
-    cy.get('[role="dialog"]').should("have.css", "transition-duration", "0.5s");
-    cy.get('[role="dialog"]').should("have.css", "transition-delay", "0.4s");
-    cy.get("@onViewerFade").should("have.been.calledOnceWith", "0");
+    cy.get('[role="dialog"]')
+      .should("have.css", "opacity", "1")
+      .and("have.css", "--lightbox-close-duration", "400ms");
     cy.get(".lightbox-close-stroke").each(($stroke) => {
       cy.wrap($stroke).should(
         "have.css",
@@ -332,7 +316,9 @@ describe("Lightbox", () => {
     cy.tick(LIGHTBOX_CLOSE_DURATION_MS);
     cy.get("@onClosed").should("not.have.been.called");
     cy.get('[aria-label="Close photo viewer"]').click("topLeft");
-    cy.tick(LIGHTBOX_CLOSE_FADE_DELAY_MS + LIGHTBOX_CLOSE_DURATION_MS);
+    cy.tick(LIGHTBOX_CLOSE_DURATION_MS - 1);
+    cy.get("@onClosed").should("not.have.been.called");
+    cy.tick(1);
     cy.get("@onClosed").should("have.been.calledOnce");
   });
 
@@ -496,8 +482,30 @@ describe("Lightbox", () => {
 
     cy.get("@addEventListener").should("have.been.calledWith", "keydown");
     pressKey("Escape");
-    cy.get('[role="dialog"]').should("have.class", "opacity-0");
-    cy.tick(LIGHTBOX_CLOSE_FADE_DELAY_MS + LIGHTBOX_CLOSE_DURATION_MS);
+    cy.get('[role="dialog"]').should("have.class", "opacity-100");
+    cy.tick(LIGHTBOX_CLOSE_DURATION_MS);
+    cy.get("@onClosed").should("have.been.calledOnce");
+  });
+
+  it("closes immediately when reduced motion is preferred", () => {
+    const onClosed = cy.spy().as("onClosed");
+    mount(
+      <Lightbox
+        photos={photos}
+        selectedIndex={0}
+        previewSrc="/first-preview.jpg"
+        navigationIndices={[0, 1, 2]}
+        onSelect={cy.stub()}
+        onClosed={onClosed}
+      />,
+    );
+
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia")
+        .withArgs("(prefers-reduced-motion: reduce)")
+        .returns({ matches: true } as MediaQueryList);
+    });
+    cy.get('[aria-label="Close"]').click();
     cy.get("@onClosed").should("have.been.calledOnce");
   });
 

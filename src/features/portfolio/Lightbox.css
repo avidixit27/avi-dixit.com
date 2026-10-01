@@ -22,8 +22,8 @@
   background-position: right center;
   transform: rotate(45deg);
   transition:
-    background-position 400ms ease,
-    transform 400ms ease;
+    background-position var(--lightbox-close-duration) ease,
+    transform var(--lightbox-close-duration) ease;
 }
 
 .lightbox-close-stroke:last-child {
