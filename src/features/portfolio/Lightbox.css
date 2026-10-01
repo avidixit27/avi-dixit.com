@@ -4,16 +4,16 @@
   height: 2px;
   border-radius: 999px;
   background: linear-gradient(
-    to right,
+    to bottom,
     var(--color-brand-warm) 50%,
     var(--color-text) 50%
   );
-  background-size: 200% 100%;
-  background-position: right center;
+  background-size: 100% 200%;
+  background-position: center bottom;
   transform: rotate(45deg);
   transition:
     background-position 180ms ease,
-    transform 150ms ease;
+    transform 250ms ease;
 }
 
 .lightbox-close-stroke:last-child {
@@ -22,7 +22,7 @@
 
 .lightbox-close-button:is(:hover, :focus-visible) .lightbox-close-stroke,
 .lightbox-close-button[data-closing="true"] .lightbox-close-stroke {
-  background-position: left center;
+  background-position: center top;
 }
 
 .lightbox-close-button[data-closing="true"] .lightbox-close-stroke {

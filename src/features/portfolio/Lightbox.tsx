@@ -222,7 +222,7 @@ export default function Lightbox({
         <p
           data-lightbox-photo-number="true"
           aria-label={`Photo ${photo.sequence} of ${photos.length}`}
-          className="grid h-11 min-w-0 -translate-y-[8px] place-items-center overflow-hidden
+          className="grid h-11 min-w-0 -translate-y-[12px] place-items-center overflow-hidden
                      select-none font-photo-number text-[clamp(20px,20vw,52px)] leading-none text-brand-warm
                      drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
         >
