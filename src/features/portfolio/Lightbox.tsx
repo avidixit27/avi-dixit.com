@@ -199,7 +199,7 @@ export default function Lightbox({
 
   return (
     <div
-      className={`lightbox-dialog fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas/95
+      className={`lightbox-dialog fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas
                   ${isClosing ? "opacity-0" : "opacity-100"}`}
       style={
         isClosing
@@ -239,6 +239,15 @@ export default function Lightbox({
         <button
           type="button"
           data-closing={isClosing}
+          style={
+            isClosing
+              ? {
+                  opacity: 0,
+                  transitionDelay: `${LIGHTBOX_CLOSE_FADE_DELAY_MS * 0.75}ms`,
+                  transitionDuration: `${LIGHTBOX_CLOSE_FADE_DELAY_MS * 0.25}ms`,
+                }
+              : undefined
+          }
           onMouseDown={(event) => {
             event.stopPropagation();
             requestClose();

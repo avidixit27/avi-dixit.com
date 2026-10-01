@@ -23,7 +23,7 @@
   transform: rotate(45deg);
   transition:
     background-position 400ms ease,
-    transform 500ms ease;
+    transform 400ms ease;
 }
 
 .lightbox-close-stroke:last-child {
