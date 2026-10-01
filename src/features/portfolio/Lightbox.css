@@ -4,25 +4,38 @@
   height: 2px;
   border-radius: 999px;
   background: linear-gradient(
-    to bottom,
+    to right,
     var(--color-brand-warm) 50%,
     var(--color-text) 50%
   );
-  background-size: 100% 200%;
-  background-position: center bottom;
+  background-size: 200% 100%;
+  background-position: right center;
   transform: rotate(45deg);
   transition:
-    background-position 180ms ease,
-    transform 250ms ease;
+    background-position 400ms ease,
+    transform 350ms ease;
 }
 
 .lightbox-close-stroke:last-child {
+  background: linear-gradient(
+    to left,
+    var(--color-brand-warm) 50%,
+    var(--color-text) 50%
+  );
+  background-size: 200% 100%;
+  background-position: left center;
   transform: rotate(-45deg);
 }
 
 .lightbox-close-button:is(:hover, :focus-visible) .lightbox-close-stroke,
 .lightbox-close-button[data-closing="true"] .lightbox-close-stroke {
-  background-position: center top;
+  background-position: left center;
+}
+
+.lightbox-close-button:is(:hover, :focus-visible)
+  .lightbox-close-stroke:last-child,
+.lightbox-close-button[data-closing="true"] .lightbox-close-stroke:last-child {
+  background-position: right center;
 }
 
 .lightbox-close-button[data-closing="true"] .lightbox-close-stroke {

@@ -195,8 +195,11 @@ describe("Lightbox", () => {
       .and("include", "rgb(253, 113, 0)");
     cy.get(".lightbox-close-stroke")
       .first()
-      .should("have.css", "background-size", "100% 200%")
-      .and("have.css", "background-position", "50% 100%");
+      .should("have.css", "background-size", "200% 100%")
+      .and("have.css", "background-position", "100% 50%");
+    cy.get(".lightbox-close-stroke")
+      .last()
+      .should("have.css", "background-position", "0% 50%");
 
     cy.get('[aria-label="Close"]')
       .click()
