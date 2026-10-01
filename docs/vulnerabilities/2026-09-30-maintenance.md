@@ -2,7 +2,7 @@
 
 | Field        | Value                                                      |
 | ------------ | ---------------------------------------------------------- |
-| Status       | In progress                                                |
+| Status       | Completed                                                  |
 | Base         | `main` at `7d50d43`                                        |
 | Branch       | `chore/dependency-maintenance-september`                   |
 | Pull request | [#52](https://github.com/avidixit27/avi-dixit.com/pull/52) |
@@ -59,7 +59,7 @@ No removal or simplification was justified by the versions reviewed.
 - `npm run test:component` — 38 tests across 10 specs passed with a completion report. The initial launch after the Cypress upgrade ended before a report was written; the completed rerun is the verified result.
 - `npm run build` and `npm run test:e2e` — passed; E2E completed 13 tests with a completion report.
 - `git diff --check` — passed before the record was added.
-- GitHub PR checks: pending.
+- GitHub PR checks: all passed for the dependency update at `c2172a6`.
 
 ## Follow-up
 
