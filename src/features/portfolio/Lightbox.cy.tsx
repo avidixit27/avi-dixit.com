@@ -179,6 +179,7 @@ describe("Lightbox", () => {
   });
 
   it("gives the close control an accessible warm-orange fill interaction", () => {
+    const onViewerFade = cy.spy().as("onViewerFade");
     mount(
       <Lightbox
         photos={photos}
@@ -210,12 +211,28 @@ describe("Lightbox", () => {
       .last()
       .should("have.css", "background-position", "0% 50%");
 
+    cy.get('[role="dialog"]')
+      .should("have.css", "opacity", "1")
+      .then(($dialog) => {
+        const dialog = $dialog.get(0);
+        if (!dialog) throw new Error("Expected the photo viewer");
+        dialog.addEventListener("transitionstart", (event) => {
+          if (event.target !== dialog || event.propertyName !== "opacity")
+            return;
+          const close = dialog.querySelector('[aria-label="Close"]');
+          if (!close) throw new Error("Expected the close control");
+          onViewerFade(getComputedStyle(close).opacity);
+        });
+      });
+
     cy.get('[aria-label="Close"]')
       .click()
       .should("have.attr", "data-closing", "true");
     cy.get('[role="dialog"]')
-      .should("have.css", "opacity", "1")
-      .and("have.css", "--lightbox-close-duration", "400ms");
+      .should("have.css", "--lightbox-close-fold-duration", "200ms")
+      .and("have.css", "transition-delay", "0.2s")
+      .and("have.css", "transition-duration", "0.1s");
+    cy.get("@onViewerFade").should("have.been.calledOnceWith", "0");
     cy.get(".lightbox-close-stroke").each(($stroke) => {
       cy.wrap($stroke).should(
         "have.css",

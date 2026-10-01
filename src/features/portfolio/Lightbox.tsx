@@ -23,6 +23,8 @@ import {
 } from "./portfolioPresentationPolicy";
 import "./Lightbox.css";
 
+const LIGHTBOX_CLOSE_FOLD_MS = (LIGHTBOX_CLOSE_DURATION_MS * 2) / 3;
+
 interface LightboxProps {
   photos: readonly Photo[];
   selectedIndex: number;
@@ -208,10 +210,16 @@ export default function Lightbox({
 
   return (
     <div
-      className="lightbox-dialog fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas opacity-100"
+      className={`lightbox-dialog fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas ${isClosing ? "opacity-0" : "opacity-100"}`}
       style={
         {
-          "--lightbox-close-duration": `${LIGHTBOX_CLOSE_DURATION_MS}ms`,
+          "--lightbox-close-fold-duration": `${LIGHTBOX_CLOSE_FOLD_MS}ms`,
+          ...(isClosing
+            ? {
+                transitionDelay: `${LIGHTBOX_CLOSE_FOLD_MS}ms`,
+                transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS - LIGHTBOX_CLOSE_FOLD_MS}ms`,
+              }
+            : {}),
         } as CSSProperties
       }
       role="dialog"
@@ -248,8 +256,8 @@ export default function Lightbox({
             isClosing
               ? {
                   opacity: 0,
-                  transitionDelay: `${LIGHTBOX_CLOSE_DURATION_MS * 0.75}ms`,
-                  transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS * 0.25}ms`,
+                  transitionDelay: `${LIGHTBOX_CLOSE_FOLD_MS * 0.75}ms`,
+                  transitionDuration: `${LIGHTBOX_CLOSE_FOLD_MS * 0.25}ms`,
                 }
               : undefined
           }
