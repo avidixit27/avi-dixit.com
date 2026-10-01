@@ -74,6 +74,7 @@ export default function Lightbox({
 }: LightboxProps) {
   const imageRef = useRef<HTMLImageElement>(null);
   const closeTimerRef = useRef<number | null>(null);
+  const closingRef = useRef(false);
   const navigationLockedRef = useRef(true);
   const pendingNavigationOffsetRef = useRef(0);
   const preloadCacheRef = useRef(new Map<string, PreloadedPhoto>());
@@ -83,7 +84,8 @@ export default function Lightbox({
   const [outgoingSrc, setOutgoingSrc] = useState<string | null>(null);
 
   const requestClose = useCallback(() => {
-    if (closeTimerRef.current) return;
+    if (closingRef.current) return;
+    closingRef.current = true;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       onClosed();
       return;
