@@ -193,6 +193,11 @@ describe("Lightbox", () => {
       .first()
       .should("have.css", "background-image")
       .and("include", "rgb(253, 113, 0)");
+    cy.get('[role="dialog"]').should(
+      "have.css",
+      "transition-duration",
+      "0.18s",
+    );
     cy.get(".lightbox-close-stroke")
       .first()
       .should("have.css", "background-size", "200% 100%")
@@ -204,6 +209,7 @@ describe("Lightbox", () => {
     cy.get('[aria-label="Close"]')
       .click()
       .should("have.attr", "data-closing", "true");
+    cy.get('[role="dialog"]').should("have.css", "transition-duration", "0.5s");
     cy.get(".lightbox-close-stroke").each(($stroke) => {
       cy.wrap($stroke).should(
         "have.css",

@@ -198,9 +198,13 @@ export default function Lightbox({
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas/95
-                  transition-opacity ${isClosing ? "opacity-0" : "opacity-100"}`}
-      style={{ transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS}ms` }}
+      className={`lightbox-dialog fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-canvas/95
+                  ${isClosing ? "opacity-0" : "opacity-100"}`}
+      style={
+        isClosing
+          ? { transitionDuration: `${LIGHTBOX_CLOSE_DURATION_MS}ms` }
+          : undefined
+      }
       role="dialog"
       aria-modal="true"
       aria-label="Photo viewer"

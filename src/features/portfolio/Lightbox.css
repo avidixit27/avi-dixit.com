@@ -1,3 +1,13 @@
+.lightbox-dialog {
+  transition: opacity 180ms ease-out;
+}
+
+@starting-style {
+  .lightbox-dialog {
+    opacity: 0;
+  }
+}
+
 .lightbox-close-stroke {
   position: absolute;
   width: 26px;
@@ -13,7 +23,7 @@
   transform: rotate(45deg);
   transition:
     background-position 400ms ease,
-    transform 350ms ease;
+    transform 500ms ease;
 }
 
 .lightbox-close-stroke:last-child {
@@ -43,6 +53,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .lightbox-dialog,
   .lightbox-close-stroke {
     transition: none;
   }
