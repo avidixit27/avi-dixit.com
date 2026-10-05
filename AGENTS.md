@@ -129,6 +129,8 @@ After pushing:
 
 Browser-test commands write a fresh machine-readable completion report to `cypress/results/`. A run is successful only when Cypress exits successfully and that report proves nonzero completed tests and specs, no failures, and no pending or skipped tests. When a browser test fails, first inspect its matching report and retained screenshot/video artifacts, then rerun the smallest affected spec under Node 22.22.2; do not treat a command with no Cypress summary as a pass.
 
+On this macOS host, launching Cypress from the Codex filesystem sandbox aborts its Electron shell during macOS Launch Services registration before a test starts. Run local Cypress verification and browser-test commands outside that sandbox; they already target Chrome rather than Electron as the test browser. Do not treat this host-level startup abort as an application or test-memory failure.
+
 Husky and lint-staged check staged files before commits. GitHub Actions validates pull requests and pushes to `main`; its unit job runs the 90% coverage gate. A separate workflow runs the production audit and CodeQL. Pull requests also receive dependency review.
 
 Dependabot checks npm and GitHub Actions weekly. For dependency maintenance, use `.agents/commands/dependency-maintenance.md` and record the result under `docs/vulnerabilities/`. Secret scanning and push protection are repository settings. Do not silence a security finding merely to pass; determine production impact, update when possible, and record any accepted risk.

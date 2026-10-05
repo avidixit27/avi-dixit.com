@@ -50,8 +50,10 @@ function pressKey(key: string) {
 
 function StatefulLightbox({
   onSelect,
+  navigationIndices = [0, 2],
 }: {
   onSelect: (index: number, previewSrc: string) => void;
+  navigationIndices?: readonly number[];
 }) {
   const [selection, setSelection] = useState({
     index: 0,
@@ -63,7 +65,7 @@ function StatefulLightbox({
       photos={photos}
       selectedIndex={selection.index}
       previewSrc={selection.previewSrc}
-      navigationIndices={[0, 2]}
+      navigationIndices={navigationIndices}
       onSelect={(index, previewSrc) => {
         onSelect(index, previewSrc);
         setSelection({ index, previewSrc });
@@ -96,6 +98,26 @@ describe("Lightbox", () => {
       "position",
       "fixed",
     );
+  });
+
+  it("can omit photo numbering without moving the close control", () => {
+    mount(
+      <Lightbox
+        photos={photos}
+        selectedIndex={0}
+        previewSrc="/first-preview.jpg"
+        navigationIndices={[0, 1, 2]}
+        showPhotoNumber={false}
+        onSelect={cy.stub()}
+        onClosed={cy.stub()}
+      />,
+    );
+
+    cy.get('[data-lightbox-photo-number="true"]').should("not.exist");
+    cy.get('[data-lightbox-controls="true"]')
+      .should("have.class", "justify-end")
+      .find('[aria-label="Close"]')
+      .should("be.visible");
   });
 
   it("keeps the close control accessible on a small viewport", () => {
@@ -478,6 +500,83 @@ describe("Lightbox", () => {
     cy.tick(250);
     cy.get("@statefulOnSelect").should("have.been.calledWith", 0, "/first.jpg");
     cy.get("@statefulOnSelect").should("have.been.calledTwice");
+  });
+
+  it("preserves outgoing dimensions while entering a portrait photo", () => {
+    const onSelect = cy.spy().as("portraitOnSelect");
+
+    mount(
+      <StatefulLightbox onSelect={onSelect} navigationIndices={[0, 1, 2]} />,
+    );
+    cy.get('img[alt="First test photo"]').then(($image) => {
+      const image = $image.get(0) as HTMLImageElement | undefined;
+      if (!image) throw new Error("Expected the initial full image");
+      cy.stub(image, "decode").resolves();
+      cy.wrap(image).trigger("load");
+    });
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+
+    cy.get('[aria-label="Next image"]').click();
+    cy.get("@portraitOnSelect").should(
+      "have.been.calledOnceWith",
+      1,
+      "/portrait.jpg",
+    );
+    cy.get('[data-lightbox-outgoing="true"]')
+      .should("have.attr", "width", "6000")
+      .and("have.attr", "height", "4000");
+    cy.get('img[alt="Portrait test photo"]')
+      .should("have.attr", "width", "4000")
+      .and("have.attr", "height", "6000");
+  });
+
+  it("preserves portrait dimensions while returning to landscape", () => {
+    const onSelect = cy.spy().as("landscapeOnSelect");
+
+    mount(
+      <StatefulLightbox onSelect={onSelect} navigationIndices={[0, 1, 2]} />,
+    );
+    cy.get('img[alt="First test photo"]').then(($image) => {
+      const image = $image.get(0) as HTMLImageElement | undefined;
+      if (!image) throw new Error("Expected the initial full image");
+      cy.stub(image, "decode").resolves();
+      cy.wrap(image).trigger("load");
+    });
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('img[alt="Portrait test photo"]').then(($image) => {
+      const image = $image.get(0) as HTMLImageElement | undefined;
+      if (!image) throw new Error("Expected the portrait full image");
+      cy.stub(image, "decode").resolves();
+      cy.wrap(image).trigger("load");
+    });
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+
+    cy.get('[aria-label="Next image"]').click();
+    cy.get("@landscapeOnSelect").should("have.been.calledWith", 2, "/last.jpg");
+    cy.get('[data-lightbox-outgoing="true"]')
+      .should("have.attr", "width", "4000")
+      .and("have.attr", "height", "6000")
+      .and(
+        "have.css",
+        "transition-duration",
+        `${LIGHTBOX_IMAGE_TRANSITION_MS / 1000}s`,
+      );
+    cy.get('img[alt="Last test photo"]')
+      .should("have.attr", "width", "6000")
+      .and("have.attr", "height", "4000");
   });
 
   it("closes on Escape after the exit transition", () => {

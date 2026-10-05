@@ -7,7 +7,7 @@ const GRID_IMAGE_SIZES =
 
 interface PhotoGridProps {
   photos: readonly Photo[];
-  gridMarkerRef: Ref<HTMLDivElement>;
+  gridMarkerRef?: Ref<HTMLDivElement>;
   onOpen: (index: number, previewSrc: string) => void;
 }
 

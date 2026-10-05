@@ -3,7 +3,7 @@
 | Field          | Value                                                                         |
 | -------------- | ----------------------------------------------------------------------------- |
 | Type           | Feature                                                                       |
-| Status         | Tracked in the [plan index](README.md)                                        |
+| Status         | In progress                                                                   |
 | Depends on     | [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md) |
 | Blocks         | [020 — Portfolio discovery index](020-portfolio-discovery-index.md)           |
 | Planned branch | `feat/portfolio-collection-routes`                                            |
@@ -42,7 +42,7 @@ Anticipated ownership includes `src/features/portfolio/` and focused project sub
 ## Non-goals
 
 - Do not replace Home with a project index, redirect `/` to a slug, or move the film portfolio away from `/`.
-- Do not build the visual portfolio selector, footer columns, hover preview, or cross-project animation; the following discovery plan owns that interface.
+- Do not build a standalone portfolio index, hover preview, or cross-project animation; the user moved basic collection discovery into this ticket through the shared navigation dropdown.
 - Do not force every project to use the Entropy/Chaos sections, artist statement, résumé links, identical hero count, or identical page rhythm.
 - Do not invent placeholder destinations, photographs, titles, descriptions, dates, or alt text.
 - Do not add a CMS, database, API, backend repository, dynamic upload system, or runtime image service.
@@ -55,6 +55,7 @@ Anticipated ownership includes `src/features/portfolio/` and focused project sub
 - Lightweight typed portfolio summary catalog with stable unique IDs, short slugs, destinations, and routes.
 - Project-owned film and secondary-project content modules with literal, bounded image discovery.
 - Shared gallery orchestration extracted from two demonstrated implementations.
+- Responsive shared navigation with secondary collections under `Portfolios`; Home remains available only through its navigation item and the brand link.
 - Preserved Home film experience and one real, directly addressable secondary portfolio.
 - Lazy secondary route and existing 404 behavior for unknown slugs.
 - Regression coverage proving catalog validity, project isolation, route behavior, image loading, lightbox behavior, and unchanged Home presentation.
@@ -84,6 +85,9 @@ Anticipated ownership includes `src/features/portfolio/` and focused project sub
 - Lightweight project summaries can render links without importing photo catalogs, project route components, or original photographs.
 - Film and secondary project photo discovery is isolated to their own literal asset paths, with complete unique IDs, alt text, intrinsic dimensions, responsive source sets, and stable order.
 - Both projects reuse responsive hero, grid, lightbox, navigation, preload, and cleanup behavior without duplicating that orchestration.
+- Roomy viewports show `Home`, `Contact`, and `Portfolios`; compact viewports collapse those destinations into a right-aligned hamburger, and the portfolio submenu excludes Home. The content-width charcoal menu centers below the desktop disclosure while keeping its collection links right-aligned, preserves the navigation separator, folds down from behind the navigation, reverses that motion after selection, Escape, or click-away dismissal, and becomes immediate under reduced motion. Selecting a project does not reveal its route content until the menu exit completes.
+- Lightbox numbering remains specific to Home; secondary project lightboxes omit it.
+- Secondary project footers show the résumé centered at roomy widths and right-aligned at compact widths without duplicating portfolio discovery links.
 - The film-specific Entropy/Chaos composition and statement/resume links do not appear on another project unless explicitly added there.
 - A secondary project can omit editorial sections or supply a different composition without changing the shared gallery implementation.
 - Home does not request a secondary route chunk or secondary-project images before navigation; secondary routes do not request unrelated project images.
@@ -135,4 +139,26 @@ After the user approves both project experiences and requests no further visual 
 
 ## Implementation record
 
-Not started. Before implementation, record the first secondary project's title, short slug, destination, optional date, source asset location, approved order, hero selection, alt-text decisions, and editorial requirements. At completion, record extraction decisions, route and bundle measurements, visual approval, checks, remaining limitations, and PR link.
+Implementation started on 2026-10-01 from clean, current `main` at `48c2067`.
+
+Supplied secondary projects:
+
+- `paris-fr` — country `france`, city/title `paris`; three finished JPEGs from `/Users/avidixit/Documents/photography/india_2024_finished_photos`: hand holding flowers, hanging shoes, and merry-go-round horse. Filename order is the initial implementation sequence; the first image is the initial hero.
+- `kerala` — country `india`, region/title `kerala`; three finished JPEGs from the same source folder: a person before a field in Alleppey, a palm tree in Alleppey, and Kochi port/ocean/sky. Filename order is the initial implementation sequence; the first image is the initial hero.
+
+Alt text is derived from the supplied descriptive filenames. Neither project has an approved date label or editorial copy, so neither is included. At completion, record extraction decisions, route and bundle measurements, visual approval, checks, remaining limitations, and PR link.
+
+Implementation to date:
+
+- Extracted the shared `Photo` contract and catalog builder; the film, `paris-fr`, and `kerala` catalogs each retain a bounded, literal project asset glob.
+- Kept the film composition eager at `/`; `PortfolioProjectRoute` lazily imports only the visited secondary project's gallery module. The 2026-10-01 production build produced 0.87 kB gzip chunks for each project view, while the Home entry did not contain either project's image identifiers.
+- Passed `npm run test:unit` (20 files, 50 tests), `npm run typecheck`, `npm run lint`, `npm run format:check`, `git diff --check`, `npm run build`, and focused Chrome Cypress coverage for direct project routes (6 tests).
+- Manually reviewed direct `/portfolio/paris-fr` and `/portfolio/kerala` production-preview URLs, including opening Kerala's shared lightbox. Both rendered their lower-case country/location hierarchy and three ordered supplied images.
+- Incorporated the first visual-review corrections: country above city/region, context-aware links to the other portfolios in the shared footer, the Home portfolio navigation visibility policy on every portfolio route, and outgoing-frame dimensions preserved across landscape-to-portrait lightbox navigation.
+- Rechecked the production preview in desktop and compact Chrome viewports. Focused component coverage proves the 390×844 footer stack remains right-aligned and non-overlapping, and the portrait handoff retains its landscape predecessor until the replacement settles.
+- Replaced the temporary footer collection links with one shared responsive navigation menu after user review: desktop keeps destinations visible and places secondary collections in a right-edge `Portfolios` dropdown; compact viewports use a hamburger with the same order and nested collection list. Home is deliberately absent from that submenu.
+- Refined both responsive disclosures into controlled Motion panels: they size from the longest label plus one padding value, use `#4A4A4A`, preserve the navigation separator above canvas-black outer edges, stagger right-aligned portfolio links, share selection/Escape/click-away dismissal, pause navigation auto-hide while open, and remove animation under reduced motion. The desktop panel is centered beneath its disclosure label, and project routing begins only after its 450 ms exit finishes.
+- Passed the 16-test focused Chrome navigation component spec plus typecheck, lint, formatting, production build, and diff checks. Production-preview inspection measured the desktop panel within 0.004 px of its disclosure center, verified `rgb(74, 74, 74)` and the intended split border colors, proved Paris remains visible during the exit before Kerala loads, and found no browser console warnings or errors.
+- Kept Home lightbox numbering opt-in, omitted numbering from secondary projects, added the résumé to secondary footers, and protected both landscape-to-portrait and portrait-to-landscape handoffs with the shared lightbox implementation and focused component coverage while retaining the approved 200 ms handoff timing.
+
+Awaiting user visual approval before the final E2E/release checks and PR.

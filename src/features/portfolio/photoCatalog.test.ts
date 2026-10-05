@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { buildPhotoCatalog, PHOTO_CATALOG } from "./photoCatalog";
+import { buildPhotoCatalog } from "./photoCatalog";
+import { FILM_PHOTO_CATALOG } from "./projects/film/photoCatalog";
 
 describe("photo catalog", () => {
   it("provides uniquely identified photographs with complete intrinsic metadata", () => {
-    const ids = PHOTO_CATALOG.map((photo) => photo.id);
+    const ids = FILM_PHOTO_CATALOG.map((photo) => photo.id);
 
-    expect(PHOTO_CATALOG).not.toHaveLength(0);
+    expect(FILM_PHOTO_CATALOG).not.toHaveLength(0);
     expect(new Set(ids).size).toBe(ids.length);
     expect(
-      PHOTO_CATALOG.every(
+      FILM_PHOTO_CATALOG.every(
         (photo) =>
           photo.alt.trim().length > 0 &&
           photo.width > 0 &&
@@ -20,7 +21,7 @@ describe("photo catalog", () => {
 
   it("provides fallback and responsive source contracts for every photograph", () => {
     expect(
-      PHOTO_CATALOG.every(
+      FILM_PHOTO_CATALOG.every(
         (photo) =>
           photo.src.length > 0 &&
           photo.srcSet.length > 0 &&
@@ -46,7 +47,51 @@ describe("photo catalog", () => {
         "/seventh.jpg",
     };
 
-    const catalog = buildPhotoCatalog(sources, sources, sources, sources);
+    const details = {
+      "college_film_portfolio_6.JPG": {
+        id: "figures-behind-chair",
+        sequence: 1,
+        alt: "Figures behind a chair",
+        width: 6000,
+        height: 4000,
+      },
+      "college_film_portfolio_1.JPG": {
+        id: "reaching-hands-reflection",
+        sequence: 2,
+        alt: "Hands reflected in a mirror",
+        width: 6000,
+        height: 4000,
+      },
+      "college_film_portfolio_8.JPG": {
+        id: "low-angle-mirror-portrait",
+        sequence: 4,
+        alt: "Low-angle mirror portrait",
+        width: 6000,
+        height: 4000,
+      },
+      "college_film_portfolio_7.JPG": {
+        id: "tilted-bedroom-mirror",
+        sequence: 5,
+        alt: "Tilted bedroom mirror",
+        width: 6000,
+        height: 4000,
+      },
+      "college_film_portfolio_4.JPG": {
+        id: "ground-mirror-portrait",
+        sequence: 8,
+        alt: "Ground mirror portrait",
+        width: 6000,
+        height: 4000,
+      },
+    };
+
+    const catalog = buildPhotoCatalog(
+      details,
+      sources,
+      sources,
+      sources,
+      sources,
+    );
 
     expect(catalog.map((photo) => photo.sequence)).toEqual([1, 2, 4, 5, 8]);
     expect(catalog.map((photo) => photo.id)).toEqual([
@@ -67,11 +112,25 @@ describe("photo catalog", () => {
         "/first.jpg",
     };
 
-    expect(() => buildPhotoCatalog(fallbackModules, {}, {}, {})).toThrow(
+    expect(() => buildPhotoCatalog({}, fallbackModules, {}, {}, {})).toThrow(
       "Missing photo metadata",
     );
-    expect(() => buildPhotoCatalog(knownFallbackModules, {}, {}, {})).toThrow(
-      "Missing generated media",
-    );
+    expect(() =>
+      buildPhotoCatalog(
+        {
+          "college_film_portfolio_1.JPG": {
+            id: "first",
+            sequence: 1,
+            alt: "First photo",
+            width: 6000,
+            height: 4000,
+          },
+        },
+        knownFallbackModules,
+        {},
+        {},
+        {},
+      ),
+    ).toThrow("Missing generated media");
   });
 });

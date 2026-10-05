@@ -22,6 +22,9 @@ import RouteLoadingFallback from "./RouteLoadingFallback";
 
 const Shop = lazy(() => import("../features/shop/Shop"));
 const Contact = lazy(() => import("../features/inquiries/Contact"));
+const PortfolioProjectRoute = lazy(
+  () => import("../features/portfolio/projects/PortfolioProjectRoute"),
+);
 interface RouteTransitionBoundaryProps {
   availability: FeatureAvailability;
   portfolioGridRef: Ref<HTMLDivElement>;
@@ -30,6 +33,7 @@ interface RouteTransitionBoundaryProps {
 function getRouteLabel(pathname: string, availability: FeatureAvailability) {
   if (matchPath(ROUTES.home, pathname)) return "Portfolio";
   if (matchPath(ROUTES.artistStatement, pathname)) return "Portfolio";
+  if (matchPath(`${ROUTES.portfolio}/:slug`, pathname)) return "Portfolio";
   if (availability.shop && matchPath(ROUTES.shop, pathname))
     return "Print shop";
   if (availability.contact && matchPath(ROUTES.contact, pathname)) {
@@ -125,6 +129,12 @@ export default function RouteTransitionBoundary({
                 path={ROUTES.artistStatement}
                 element={
                   <Navigate to={`${ROUTES.home}#artist-statement`} replace />
+                }
+              />
+              <Route
+                path={`${ROUTES.portfolio}/:slug`}
+                element={
+                  <PortfolioProjectRoute gridMarkerRef={portfolioGridRef} />
                 }
               />
               {availability.shop && (

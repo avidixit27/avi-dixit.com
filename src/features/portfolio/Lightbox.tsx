@@ -30,6 +30,7 @@ interface LightboxProps {
   selectedIndex: number;
   previewSrc: string;
   navigationIndices: readonly number[];
+  showPhotoNumber?: boolean;
   onSelect: (index: number, previewSrc: string) => void;
   onClosed: () => void;
 }
@@ -37,6 +38,12 @@ interface LightboxProps {
 interface PreloadedPhoto {
   readonly image: HTMLImageElement;
   readonly picture: HTMLPictureElement;
+}
+
+interface OutgoingFrame {
+  readonly height: number;
+  readonly src: string;
+  readonly width: number;
 }
 
 function createPreload(photo: Photo, imageDocument: Document): PreloadedPhoto {
@@ -69,6 +76,7 @@ export default function Lightbox({
   selectedIndex,
   previewSrc,
   navigationIndices,
+  showPhotoNumber = true,
   onSelect,
   onClosed,
 }: LightboxProps) {
@@ -81,7 +89,9 @@ export default function Lightbox({
   const [isClosing, setIsClosing] = useState(false);
   const [loadedPhotoId, setLoadedPhotoId] = useState<string | null>(null);
   const [settledPhotoId, setSettledPhotoId] = useState<string | null>(null);
-  const [outgoingSrc, setOutgoingSrc] = useState<string | null>(null);
+  const [outgoingFrame, setOutgoingFrame] = useState<OutgoingFrame | null>(
+    null,
+  );
 
   const requestClose = useCallback(() => {
     if (closingRef.current) return;
@@ -103,9 +113,13 @@ export default function Lightbox({
       if (!nextPhoto || nextIndex === selectedIndex) return;
       navigationLockedRef.current = true;
       const currentImage = imageRef.current;
-      setOutgoingSrc(
-        currentImage?.currentSrc || currentImage?.src || previewSrc,
-      );
+      const currentPhoto = photos[selectedIndex];
+      if (!currentPhoto) return;
+      setOutgoingFrame({
+        src: currentImage?.currentSrc || currentImage?.src || previewSrc,
+        width: currentPhoto.width,
+        height: currentPhoto.height,
+      });
       setIsClosing(false);
       onSelect(nextIndex, nextPhoto.src);
     },
@@ -161,7 +175,7 @@ export default function Lightbox({
     if (!selectedPhoto || loadedPhotoId !== selectedPhoto.id) return undefined;
     const transitionTimer = window.setTimeout(() => {
       setSettledPhotoId(selectedPhoto.id);
-      setOutgoingSrc(null);
+      setOutgoingFrame(null);
       navigationLockedRef.current = false;
       const pendingOffset = pendingNavigationOffsetRef.current;
       pendingNavigationOffsetRef.current = 0;
@@ -236,21 +250,23 @@ export default function Lightbox({
       />
       <div
         data-lightbox-controls="true"
-        className="pointer-events-none fixed top-[max(0.75rem,env(safe-area-inset-top))]
+        className={`pointer-events-none fixed top-[max(0.75rem,env(safe-area-inset-top))]
                    left-[max(0.75rem,env(safe-area-inset-left))]
                    right-[max(0.75rem,env(safe-area-inset-right))]
                    max-[160px]:left-1 max-[160px]:right-1 z-[200]
-                   flex items-start justify-between gap-1"
+                   flex items-start gap-1 ${showPhotoNumber ? "justify-between" : "justify-end"}`}
       >
-        <p
-          data-lightbox-photo-number="true"
-          aria-label={`Photo ${photo.sequence} of ${photos.length}`}
-          className="grid h-11 min-w-0 -translate-y-[12px] place-items-center overflow-hidden
-                     select-none font-photo-number text-[clamp(20px,20vw,52px)] leading-none text-brand-warm
-                     drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
-        >
-          {photo.sequence}
-        </p>
+        {showPhotoNumber && (
+          <p
+            data-lightbox-photo-number="true"
+            aria-label={`Photo ${photo.sequence} of ${photos.length}`}
+            className="grid h-11 min-w-0 -translate-y-[12px] place-items-center overflow-hidden
+                       select-none font-photo-number text-[clamp(20px,20vw,52px)] leading-none text-brand-warm
+                       drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
+          >
+            {photo.sequence}
+          </p>
+        )}
         <button
           type="button"
           data-closing={isClosing}
@@ -380,12 +396,12 @@ export default function Lightbox({
               .then(revealLoadedImage);
           }}
         />
-        {outgoingSrc && (
+        {outgoingFrame && (
           <img
             data-lightbox-outgoing="true"
-            src={outgoingSrc}
-            width={photo.width}
-            height={photo.height}
+            src={outgoingFrame.src}
+            width={outgoingFrame.width}
+            height={outgoingFrame.height}
             alt=""
             aria-hidden="true"
             draggable="false"
@@ -396,7 +412,7 @@ export default function Lightbox({
             style={{ transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms` }}
           />
         )}
-        {!outgoingSrc && !isNavigationReady && (
+        {!outgoingFrame && !isNavigationReady && (
           <img
             data-lightbox-preview="true"
             src={previewSrc}

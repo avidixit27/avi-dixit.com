@@ -92,6 +92,24 @@ describe("RouteTransitionBoundary", () => {
     );
   });
 
+  it("loads supplied secondary portfolio routes without changing Home", () => {
+    mountRoute("/portfolio/paris-fr", false, true);
+    cy.contains("h1", "paris").should("be.visible");
+    cy.contains("p", "france").should("be.visible");
+    cy.get('[data-route-content="true"]').should(
+      "have.attr",
+      "aria-label",
+      "Portfolio",
+    );
+
+    mountRoute("/portfolio/kerala", false, true);
+    cy.contains("h1", "kerala").should("be.visible");
+    cy.contains("p", "india").should("be.visible");
+
+    mountRoute("/portfolio/unknown", false, true);
+    cy.contains("h1", "Page not found").should("be.visible");
+  });
+
   it("redirects the legacy artist statement route to the expanded portfolio", () => {
     mountRoute("/artist-statement", false, true);
 

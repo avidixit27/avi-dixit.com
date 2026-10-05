@@ -20,10 +20,11 @@ interface FooterProps {
 
 const DOCUMENT_LINK_CLASS =
   "rounded-sm font-tangerine leading-none text-text-muted transition-colors hover:text-focus focus:text-focus focus-visible:text-focus focus-visible:outline-none";
-
 export default function Footer({ landingEnabled }: FooterProps) {
   const location = useLocation();
   const isHome = matchPath(ROUTES.home, location.pathname) !== null;
+  const isPortfolio =
+    matchPath(`${ROUTES.portfolio}/:slug`, location.pathname) !== null;
   const footerRef = useRef<HTMLDivElement>(null);
   const artistStatementLinkRef = useRef<HTMLAnchorElement>(null);
   const reduceMotion = useReducedMotion();
@@ -208,42 +209,46 @@ export default function Footer({ landingEnabled }: FooterProps) {
             aria-hidden="true"
             className="pointer-events-none absolute bottom-0 left-0 h-full max-w-none w-auto select-none object-contain opacity-95"
           />
-          {isHome && (
-            <nav
-              aria-label="Portfolio documents"
-              className="absolute right-4 bottom-7 z-10 flex flex-col items-end text-right text-[28px] md:inset-x-0 md:bottom-[max(0.25rem,env(safe-area-inset-bottom))] md:flex-row md:items-stretch md:justify-center md:gap-8 md:text-center lg:gap-12 lg:text-[36px]"
-            >
-              <Link
-                id="artist-statement-link"
-                ref={artistStatementLinkRef}
-                to={`${ROUTES.home}#artist-statement`}
-                onClick={(event) => {
-                  if (location.hash !== "#artist-statement") return;
-                  event.preventDefault();
-                  document.getElementById("artist-statement")?.scrollIntoView({
-                    behavior: reduceMotion ? "auto" : "smooth",
-                    block: "start",
-                  });
-                }}
-                className={DOCUMENT_LINK_CLASS}
+          <div className="absolute inset-x-4 bottom-[max(0.25rem,env(safe-area-inset-bottom))] z-10 grid justify-items-end gap-y-1 text-right md:grid-cols-[1fr_auto_1fr] md:items-end">
+            {(isHome || isPortfolio) && (
+              <nav
+                aria-label="Portfolio documents"
+                className="flex flex-col items-end text-[28px] md:col-start-2 md:flex-row md:items-stretch md:justify-center md:gap-8 md:text-center lg:gap-12 lg:text-[36px]"
               >
-                Artist Statement
-              </Link>
-              <a
-                href={resumeUrl}
-                target="_blank"
-                rel="noopener"
-                className={DOCUMENT_LINK_CLASS}
-              >
-                Resume
-              </a>
-            </nav>
-          )}
-          <p
-            className={`absolute bottom-[max(0.25rem,env(safe-area-inset-bottom))] z-10 font-footer text-footer-copy text-text-muted ${isHome ? "right-4 text-right md:right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))]" : "right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))]"}`}
-          >
-            {SITE_DETAILS.copyright}
-          </p>
+                {isHome && (
+                  <Link
+                    id="artist-statement-link"
+                    ref={artistStatementLinkRef}
+                    to={`${ROUTES.home}#artist-statement`}
+                    onClick={(event) => {
+                      if (location.hash !== "#artist-statement") return;
+                      event.preventDefault();
+                      document
+                        .getElementById("artist-statement")
+                        ?.scrollIntoView({
+                          behavior: reduceMotion ? "auto" : "smooth",
+                          block: "start",
+                        });
+                    }}
+                    className={DOCUMENT_LINK_CLASS}
+                  >
+                    Artist Statement
+                  </Link>
+                )}
+                <a
+                  href={resumeUrl}
+                  target="_blank"
+                  rel="noopener"
+                  className={DOCUMENT_LINK_CLASS}
+                >
+                  Resume
+                </a>
+              </nav>
+            )}
+            <p className="font-footer text-footer-copy text-text-muted md:col-start-3 md:justify-self-end">
+              {SITE_DETAILS.copyright}
+            </p>
+          </div>
         </m.div>
       </footer>
     </div>

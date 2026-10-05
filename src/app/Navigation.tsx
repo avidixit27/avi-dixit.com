@@ -1,19 +1,32 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, useReducedMotion } from "motion/react";
+import * as m from "motion/react-m";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { Link, matchPath, useLocation } from "react-router-dom";
+import { Link, matchPath, useLocation, useNavigate } from "react-router-dom";
 import portrait from "../assets/brand/avi-dixit-portrait.webp";
 import wordmark from "../assets/brand/avi-dixit-wordmark.svg";
+import { PORTFOLIO_PROJECTS } from "../features/portfolio/projects/portfolioProjects";
 import { NAVIGATION_ITEMS, ROUTES } from "../resources/navigation";
 import type { FeatureAvailability } from "./featureAvailability";
 
 const NAV_FALLBACK_HEIGHT_PX = 64;
-const HOME_HIDE_DELAY_MS = 2000;
+const PORTFOLIO_HIDE_DELAY_MS = 2000;
 const HOME_RESET_DURATION_MS = 900;
 const TOP_REVEAL_DISTANCE_PX = 80;
-const HOME_UPWARD_REVEAL_DELTA_PX = -40;
+const PORTFOLIO_UPWARD_REVEAL_DELTA_PX = -40;
 const PAGE_HIDE_DELTA_PX = 6;
 const PAGE_REVEAL_DELTA_PX = -8;
 const REDUCED_MOTION_MEDIA_QUERY = "(prefers-reduced-motion: reduce)";
+const MENU_ANIMATION_MS = 450;
+const MENU_ANIMATION_SECONDS = MENU_ANIMATION_MS / 1000;
+const MENU_ITEM_STAGGER_SECONDS = 0.07;
 
 interface NavigationProps {
   availability: FeatureAvailability;
@@ -45,16 +58,25 @@ export default function Navigation({
   portfolioGridElement,
 }: NavigationProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const isHome = matchPath(ROUTES.home, location.pathname) !== null;
+  const isPortfolioRoute =
+    matchPath(`${ROUTES.portfolio}/:slug`, location.pathname) !== null;
+  const isPortfolio = isHome || isPortfolioRoute;
   const navRef = useRef<HTMLElement>(null);
   const linksWrapRef = useRef<HTMLDivElement>(null);
-  const linkRefs = useRef(new Map<string, HTMLAnchorElement>());
+  const linkRefs = useRef(new Map<string, HTMLElement>());
   const pastGridRef = useRef(false);
   const observerReadyRef = useRef(true);
   const lastYRef = useRef(0);
   const inactivityTimerRef = useRef<number | null>(null);
   const homeResetFrameRef = useRef<number | null>(null);
+  const portfolioNavigationTimerRef = useRef<number | null>(null);
   const [isHidden, setIsHidden] = useState(false);
+  const [isDesktopPortfolioOpen, setIsDesktopPortfolioOpen] = useState(false);
+  const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
+  const [isMobilePortfolioOpen, setIsMobilePortfolioOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
   const [indicator, setIndicator] = useState<IndicatorPosition>({
     left: 0,
     width: 0,
@@ -67,11 +89,51 @@ export default function Navigation({
       ),
     [availability],
   );
+  const secondaryPortfolios = PORTFOLIO_PROJECTS.filter(
+    (project) => project.available && project.route !== ROUTES.home,
+  );
+  const isMenuOpen =
+    isDesktopPortfolioOpen || isMobileNavigationOpen || isMobilePortfolioOpen;
+
+  const closeMenus = useCallback(() => {
+    setIsDesktopPortfolioOpen(false);
+    setIsMobilePortfolioOpen(false);
+    setIsMobileNavigationOpen(false);
+  }, []);
+
+  const keepMenuVisible = () => {
+    setIsHidden(false);
+    if (inactivityTimerRef.current !== null) {
+      window.clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (!navRef.current?.contains(event.target as Node)) closeMenus();
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeMenus();
+    };
+
+    window.addEventListener("pointerdown", closeOnOutsidePointer);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.removeEventListener("pointerdown", closeOnOutsidePointer);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [closeMenus, isMenuOpen]);
 
   useEffect(
     () => () => {
       if (homeResetFrameRef.current !== null) {
         window.cancelAnimationFrame(homeResetFrameRef.current);
+      }
+      if (portfolioNavigationTimerRef.current !== null) {
+        window.clearTimeout(portfolioNavigationTimerRef.current);
       }
     },
     [],
@@ -87,16 +149,20 @@ export default function Navigation({
 
   useEffect(() => {
     linkRefs.current.forEach((_, path) => {
-      if (!visibleItems.some((item) => item.path === path)) {
+      if (
+        path !== ROUTES.portfolio &&
+        !visibleItems.some((item) => item.path === path)
+      ) {
         linkRefs.current.delete(path);
       }
     });
 
     const positionIndicator = () => {
       const wrapper = linksWrapRef.current;
-      const activeLink = visibleItems.find((item) =>
-        matchPath(item.path, location.pathname),
-      )?.path;
+      const activeLink = isPortfolioRoute
+        ? ROUTES.portfolio
+        : visibleItems.find((item) => matchPath(item.path, location.pathname))
+            ?.path;
       const activeElement = activeLink
         ? linkRefs.current.get(activeLink)
         : undefined;
@@ -120,13 +186,13 @@ export default function Navigation({
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", positionIndicator);
     };
-  }, [location.pathname, visibleItems]);
+  }, [isPortfolioRoute, location.pathname, visibleItems]);
 
   useEffect(() => {
     if (inactivityTimerRef.current !== null) {
       window.clearTimeout(inactivityTimerRef.current);
     }
-    if (!isHome) {
+    if (!isPortfolio) {
       return undefined;
     }
 
@@ -134,9 +200,13 @@ export default function Navigation({
       if (inactivityTimerRef.current !== null) {
         window.clearTimeout(inactivityTimerRef.current);
       }
+      if (isMenuOpen) {
+        inactivityTimerRef.current = null;
+        return;
+      }
       inactivityTimerRef.current = window.setTimeout(
         () => setIsHidden(true),
-        HOME_HIDE_DELAY_MS,
+        PORTFOLIO_HIDE_DELAY_MS,
       );
     };
     const revealTemporarily = () => {
@@ -154,10 +224,10 @@ export default function Navigation({
         window.clearTimeout(inactivityTimerRef.current);
       }
     };
-  }, [isHome]);
+  }, [isMenuOpen, isPortfolio]);
 
   useEffect(() => {
-    if (!isHome || !portfolioGridElement) {
+    if (!isPortfolio || !portfolioGridElement) {
       pastGridRef.current = false;
       observerReadyRef.current = true;
       return undefined;
@@ -185,7 +255,7 @@ export default function Navigation({
       observer?.disconnect();
       window.removeEventListener("resize", observeGrid);
     };
-  }, [isHome, portfolioGridElement]);
+  }, [isPortfolio, portfolioGridElement]);
 
   useEffect(() => {
     lastYRef.current = window.scrollY;
@@ -193,10 +263,10 @@ export default function Navigation({
       const nextY = window.scrollY;
       const delta = nextY - lastYRef.current;
 
-      if (isHome && observerReadyRef.current) {
+      if (isPortfolio && observerReadyRef.current) {
         if (nextY > 1 && !pastGridRef.current) setIsHidden(false);
-        if (delta < HOME_UPWARD_REVEAL_DELTA_PX) setIsHidden(false);
-      } else if (!isHome) {
+        if (delta < PORTFOLIO_UPWARD_REVEAL_DELTA_PX) setIsHidden(false);
+      } else {
         if (delta > PAGE_HIDE_DELTA_PX) setIsHidden(true);
         if (delta < PAGE_REVEAL_DELTA_PX) setIsHidden(false);
       }
@@ -206,10 +276,10 @@ export default function Navigation({
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [isHome]);
+  }, [isPortfolio]);
 
   useEffect(() => {
-    if (!isHome) return undefined;
+    if (!isPortfolio) return undefined;
     const revealNearTop = (event: MouseEvent) => {
       if (!pastGridRef.current && event.clientY < TOP_REVEAL_DISTANCE_PX) {
         setIsHidden(false);
@@ -217,7 +287,7 @@ export default function Navigation({
     };
     window.addEventListener("mousemove", revealNearTop);
     return () => window.removeEventListener("mousemove", revealNearTop);
-  }, [isHome]);
+  }, [isPortfolio]);
 
   const handleNavigationClick = (
     event: ReactMouseEvent<HTMLAnchorElement>,
@@ -226,6 +296,11 @@ export default function Navigation({
     setIsHidden(false);
 
     if (event.defaultPrevented || isModifiedActivation(event)) return;
+    if (portfolioNavigationTimerRef.current !== null) {
+      window.clearTimeout(portfolioNavigationTimerRef.current);
+      portfolioNavigationTimerRef.current = null;
+    }
+    closeMenus();
 
     if (path !== ROUTES.home || !isHome) {
       if (homeResetFrameRef.current !== null) {
@@ -276,6 +351,34 @@ export default function Navigation({
     homeResetFrameRef.current = window.requestAnimationFrame(animateHomeReset);
   };
 
+  const handlePortfolioNavigationClick = (
+    event: ReactMouseEvent<HTMLAnchorElement>,
+    path: string,
+  ) => {
+    setIsHidden(false);
+    if (event.defaultPrevented || isModifiedActivation(event)) return;
+
+    event.preventDefault();
+    if (portfolioNavigationTimerRef.current !== null) return;
+
+    closeMenus();
+    if (homeResetFrameRef.current !== null) {
+      window.cancelAnimationFrame(homeResetFrameRef.current);
+      homeResetFrameRef.current = null;
+      onHomeResetEnd?.();
+    }
+
+    if (reduceMotion) {
+      navigate(path);
+      return;
+    }
+
+    portfolioNavigationTimerRef.current = window.setTimeout(() => {
+      portfolioNavigationTimerRef.current = null;
+      navigate(path);
+    }, MENU_ANIMATION_MS);
+  };
+
   return (
     <nav
       ref={navRef}
@@ -311,9 +414,11 @@ export default function Navigation({
 
         <div
           ref={linksWrapRef}
-          className="relative flex gap-4 text-sm md:gap-8 md:text-base"
+          data-desktop-navigation="true"
+          className="relative hidden items-start gap-4 text-sm sm:flex md:gap-8 md:text-base"
         >
           <span
+            data-navigation-indicator="true"
             className={`absolute bottom-0 h-[1px] bg-brand-vivid transition-[transform,width] duration-250 ease-[cubic-bezier(.22,.61,.36,1)]
                         ${indicator.visible ? "opacity-100" : "opacity-0"}`}
             style={{
@@ -343,6 +448,198 @@ export default function Navigation({
               </Link>
             );
           })}
+
+          <div className="relative">
+            <button
+              type="button"
+              ref={(element) => {
+                if (element) linkRefs.current.set(ROUTES.portfolio, element);
+                else linkRefs.current.delete(ROUTES.portfolio);
+              }}
+              aria-expanded={isDesktopPortfolioOpen}
+              aria-controls="desktop-portfolio-menu"
+              onClick={() => {
+                keepMenuVisible();
+                setIsDesktopPortfolioOpen((isOpen) => !isOpen);
+              }}
+              className={`cursor-pointer pb-1 font-display ${
+                isPortfolioRoute
+                  ? "text-brand-warm"
+                  : "text-text-muted hover:text-focus"
+              }`}
+            >
+              PORTFOLIOS
+            </button>
+            <AnimatePresence>
+              {isDesktopPortfolioOpen && (
+                <m.nav
+                  id="desktop-portfolio-menu"
+                  aria-label="Portfolios"
+                  className="absolute top-[calc(100%+1.125rem)] left-1/2 flex w-max -translate-x-1/2 flex-col items-end gap-2 overflow-hidden border-t border-r border-b border-l border-t-border border-r-canvas border-b-canvas border-l-canvas bg-[#4A4A4A] px-5 pt-3 pb-4 text-right shadow-panel"
+                  initial={
+                    reduceMotion ? false : { clipPath: "inset(0 0 100% 0)" }
+                  }
+                  animate={{ clipPath: "inset(0 0 0% 0)" }}
+                  exit={
+                    reduceMotion
+                      ? { opacity: 0 }
+                      : { clipPath: "inset(0 0 100% 0)" }
+                  }
+                  transition={{
+                    duration: reduceMotion ? 0 : MENU_ANIMATION_SECONDS,
+                    ease: "easeInOut",
+                  }}
+                >
+                  {secondaryPortfolios.map((project, index) => (
+                    <m.div
+                      key={project.id}
+                      initial={reduceMotion ? false : { opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={
+                        reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }
+                      }
+                      transition={{
+                        duration: reduceMotion ? 0 : 0.2,
+                        delay: reduceMotion
+                          ? 0
+                          : index * MENU_ITEM_STAGGER_SECONDS,
+                      }}
+                    >
+                      <Link
+                        to={project.route}
+                        aria-label={project.title}
+                        onClick={(event) =>
+                          handlePortfolioNavigationClick(event, project.route)
+                        }
+                        className="font-display text-text-muted hover:text-focus focus-visible:text-focus focus-visible:outline-none"
+                      >
+                        {project.title}
+                      </Link>
+                    </m.div>
+                  ))}
+                </m.nav>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        <div data-mobile-navigation="true" className="sm:hidden">
+          <button
+            type="button"
+            aria-label="Navigation menu"
+            aria-expanded={isMobileNavigationOpen}
+            aria-controls="mobile-navigation-menu"
+            onClick={() => {
+              keepMenuVisible();
+              setIsMobileNavigationOpen((isOpen) => !isOpen);
+              if (isMobileNavigationOpen) setIsMobilePortfolioOpen(false);
+            }}
+            className="grid h-11 w-11 cursor-pointer place-content-center gap-1.5"
+          >
+            <span className="h-px w-6 bg-text" />
+            <span className="h-px w-6 bg-text" />
+            <span className="h-px w-6 bg-text" />
+          </button>
+          <AnimatePresence>
+            {isMobileNavigationOpen && (
+              <m.div
+                id="mobile-navigation-menu"
+                className="fixed top-16 right-0 flex w-max origin-top flex-col items-end gap-3 overflow-hidden border-t border-r border-b border-l border-t-border border-r-canvas border-b-canvas border-l-canvas bg-[#4A4A4A] px-5 py-4 text-right text-base shadow-panel"
+                initial={
+                  reduceMotion
+                    ? false
+                    : { clipPath: "inset(0 0 100% 0)", y: -12 }
+                }
+                animate={{ clipPath: "inset(0 0 0% 0)", y: 0 }}
+                exit={
+                  reduceMotion
+                    ? { opacity: 0 }
+                    : { clipPath: "inset(0 0 100% 0)", y: -12 }
+                }
+                transition={{
+                  duration: reduceMotion ? 0 : MENU_ANIMATION_SECONDS,
+                  ease: "easeInOut",
+                }}
+              >
+                {visibleItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={(event) => handleNavigationClick(event, item.path)}
+                    className={`font-display ${
+                      matchPath(item.path, location.pathname)
+                        ? "text-brand-warm"
+                        : "text-text-muted hover:text-focus"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <button
+                  type="button"
+                  aria-label="Portfolios"
+                  aria-expanded={isMobilePortfolioOpen}
+                  aria-controls="mobile-portfolio-menu"
+                  onClick={() => {
+                    keepMenuVisible();
+                    setIsMobilePortfolioOpen((isOpen) => !isOpen);
+                  }}
+                  className={`cursor-pointer font-display ${
+                    isPortfolioRoute
+                      ? "text-brand-warm"
+                      : "text-text-muted hover:text-focus"
+                  }`}
+                >
+                  PORTFOLIOS
+                </button>
+                <AnimatePresence>
+                  {isMobilePortfolioOpen && (
+                    <m.nav
+                      id="mobile-portfolio-menu"
+                      aria-label="Portfolios"
+                      className="flex origin-top flex-col items-end gap-2 overflow-hidden border-r border-brand-vivid pr-3"
+                      initial={reduceMotion ? false : { height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{
+                        duration: reduceMotion ? 0 : MENU_ANIMATION_SECONDS,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      {secondaryPortfolios.map((project, index) => (
+                        <m.div
+                          key={project.id}
+                          initial={reduceMotion ? false : { opacity: 0, y: -8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          transition={{
+                            duration: reduceMotion ? 0 : 0.2,
+                            delay: reduceMotion
+                              ? 0
+                              : index * MENU_ITEM_STAGGER_SECONDS,
+                          }}
+                        >
+                          <Link
+                            to={project.route}
+                            aria-label={project.title}
+                            onClick={(event) =>
+                              handlePortfolioNavigationClick(
+                                event,
+                                project.route,
+                              )
+                            }
+                            className="font-display text-text-muted hover:text-focus focus-visible:text-focus focus-visible:outline-none"
+                          >
+                            {project.title}
+                          </Link>
+                        </m.div>
+                      ))}
+                    </m.nav>
+                  )}
+                </AnimatePresence>
+              </m.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </nav>
