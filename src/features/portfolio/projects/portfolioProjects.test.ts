@@ -21,6 +21,9 @@ describe("portfolio project summaries", () => {
       expect(project.destination?.trim()).not.toBe("");
       expect(project.route).toBe(`/portfolio/${project.slug}`);
       expect(getPortfolioProject(project.slug)).toEqual(project);
+      expect(project.coverPhotoIds.landscape).not.toBe(
+        project.coverPhotoIds.portrait,
+      );
     }
   });
 });

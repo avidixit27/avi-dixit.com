@@ -5,6 +5,10 @@ export interface PortfolioProjectSummary {
   readonly destination?: string;
   readonly route: string;
   readonly available: boolean;
+  readonly coverPhotoIds?: {
+    readonly landscape: string;
+    readonly portrait: string;
+  };
 }
 
 export const PORTFOLIO_PROJECTS = Object.freeze([
@@ -22,6 +26,10 @@ export const PORTFOLIO_PROJECTS = Object.freeze([
     destination: "france",
     route: "/portfolio/paris-fr",
     available: true,
+    coverPhotoIds: {
+      landscape: "hand-holding-flowers",
+      portrait: "hanging-shoes",
+    },
   }),
   Object.freeze({
     id: "kerala",
@@ -30,6 +38,10 @@ export const PORTFOLIO_PROJECTS = Object.freeze([
     destination: "india",
     route: "/portfolio/kerala",
     available: true,
+    coverPhotoIds: {
+      landscape: "kochi-port-ocean-sky",
+      portrait: "palm-tree-sunset",
+    },
   }),
 ] as const satisfies readonly PortfolioProjectSummary[]);
 

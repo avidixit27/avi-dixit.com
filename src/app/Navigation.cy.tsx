@@ -6,6 +6,10 @@ import MotionProvider from "./MotionProvider";
 import Navigation from "./Navigation";
 
 const allFeatures = resolveFeatureAvailability({ shop: true, contact: true });
+const releasedFeatures = resolveFeatureAvailability({
+  shop: false,
+  contact: true,
+});
 
 function LocationKey() {
   const location = useLocation();
@@ -159,7 +163,7 @@ describe("Navigation", () => {
     });
   });
 
-  it("lists secondary portfolios in the right-aligned desktop dropdown", () => {
+  it("opens secondary portfolios in the full-screen desktop menu", () => {
     cy.clock();
     cy.viewport(1280, 800);
     mount(
@@ -174,65 +178,41 @@ describe("Navigation", () => {
       .contains("PORTFOLIOS")
       .click();
     cy.tick(500);
-    cy.get('[data-desktop-navigation="true"] nav[aria-label="Portfolios"]')
+    cy.get('nav[data-portfolio-menu="true"]')
       .should("be.visible")
-      .and("have.class", "left-1/2")
-      .and("have.class", "w-max")
-      .and("have.class", "bg-[#4A4A4A]")
-      .and("have.class", "border-t-border")
-      .and("have.class", "border-l-canvas")
+      .and("have.class", "fixed")
+      .and("have.class", "inset-0")
       .within(() => {
-        cy.contains("a", "paris").should(
-          "have.attr",
-          "href",
-          "/portfolio/paris-fr",
-        );
-        cy.contains("a", "kerala").should(
-          "have.attr",
-          "href",
-          "/portfolio/kerala",
-        );
+        cy.contains("a", "paris")
+          .should("have.attr", "href", "/portfolio/paris-fr")
+          .and("have.class", "uppercase")
+          .and("have.class", "font-photo-number")
+          .and("have.class", "justify-center")
+          .and("have.class", "text-center")
+          .and("have.class", "[text-shadow:0_3px_12px_rgb(0_0_0_/_0.7)]");
+        cy.contains("a", "kerala")
+          .should("have.attr", "href", "/portfolio/kerala")
+          .and("have.class", "uppercase")
+          .and("have.class", "font-photo-number");
         cy.contains("a", "entropy, chaos").should("not.exist");
+        cy.contains("a", "paris").trigger("pointerover", {
+          pointerType: "mouse",
+        });
+        cy.get('picture img[alt=""]')
+          .should("have.attr", "width", "5626")
+          .and("have.attr", "height", "4000");
       });
-    cy.get(
-      '[data-desktop-navigation="true"] nav[aria-label="Portfolios"]',
-    ).then(($menu) => {
+    cy.get('nav[data-portfolio-menu="true"] > div.z-10').should(
+      "have.class",
+      "w-[80vw]",
+    );
+    cy.get('nav[data-portfolio-menu="true"]').then(($menu) => {
       const menuRect = $menu.get(0)?.getBoundingClientRect();
       if (!menuRect) throw new Error("Expected the portfolio menu");
-
-      cy.contains("button", "PORTFOLIOS").then(($button) => {
-        const buttonRect = $button.get(0)?.getBoundingClientRect();
-        if (!buttonRect) throw new Error("Expected the portfolio button");
-        expect(
-          Math.abs(
-            menuRect.left +
-              menuRect.width / 2 -
-              (buttonRect.left + buttonRect.width / 2),
-          ),
-        ).to.be.lessThan(1);
-      });
-
-      const menuStyle = getComputedStyle($menu.get(0));
-      expect(menuStyle.backgroundColor).to.equal("rgb(74, 74, 74)");
-      expect(menuStyle.borderTopColor).to.equal("rgb(60, 57, 52)");
-      expect(menuStyle.borderLeftColor).to.equal("rgb(14, 14, 14)");
-
-      cy.wrap($menu)
-        .find("a")
-        .then(($links) => {
-          const linkRects = [...$links].map((link) =>
-            link.getBoundingClientRect(),
-          );
-          const widestLink = Math.max(
-            ...linkRects.map((linkRect) => linkRect.width),
-          );
-          const firstLink = linkRects[0];
-          if (!firstLink) throw new Error("Expected a portfolio link");
-
-          expect(menuRect.width - widestLink).to.be.within(41, 43);
-          expect(menuRect.right - firstLink.right).to.be.within(20, 22);
-          expect(firstLink.top - menuRect.top).to.be.within(5, 13);
-        });
+      expect(menuRect.left).to.equal(0);
+      expect(menuRect.right).to.equal(1280);
+      expect(menuRect.top).to.equal(0);
+      expect(menuRect.bottom).to.equal(800);
     });
     cy.tick(2000);
     cy.get('[data-desktop-navigation="true"]')
@@ -247,6 +227,7 @@ describe("Navigation", () => {
       <MemoryRouter>
         <MotionProvider>
           <Navigation availability={allFeatures} portfolioGridElement={null} />
+          <LocationPath />
         </MotionProvider>
       </MemoryRouter>,
     );
@@ -255,20 +236,67 @@ describe("Navigation", () => {
     cy.get('button[aria-label="Navigation menu"]')
       .click()
       .should("have.attr", "aria-expanded", "true");
-    cy.tick(500);
-    cy.get("#mobile-navigation-menu").should(($menu) => {
-      expect(getComputedStyle($menu.get(0)).clipPath).not.to.contain("100%");
-    });
+    cy.tick(240);
+    cy.get("#mobile-navigation-menu")
+      .should("have.class", "bg-border")
+      .then(($menu) => {
+        expect(getComputedStyle($menu.get(0)).clipPath).to.contain("polygon");
+      });
     cy.get('[data-mobile-navigation="true"]').within(() => {
       cy.contains("a", "HOME").should("be.visible");
       cy.contains("a", "CONTACT").should("be.visible");
       cy.contains("button", "PORTFOLIOS").click();
-      cy.tick(500);
-      cy.get('nav[aria-label="Portfolios"]').within(() => {
-        cy.contains("a", "paris").should("be.visible");
-        cy.contains("a", "kerala").should("be.visible");
+      cy.tick(239);
+    });
+    cy.get("#mobile-navigation-menu").should("exist");
+    cy.get('nav[data-portfolio-menu="true"]').should("not.exist");
+    cy.tick(1);
+    cy.get("#mobile-navigation-menu").should("not.exist");
+    cy.get('nav[data-portfolio-menu="true"]').within(() => {
+      cy.contains("a", "paris")
+        .should("be.visible")
+        .trigger("pointerover", { pointerType: "touch" });
+      cy.contains("a", "kerala").should("be.visible");
+      cy.get('picture img[alt=""]')
+        .should("have.attr", "width", "3915")
+        .and("have.attr", "height", "5872");
+    });
+    cy.get('button[aria-label="Close navigation"]').should(
+      "have.attr",
+      "aria-expanded",
+      "true",
+    );
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click();
+    cy.get("output[data-location]").should("have.text", "/portfolio/paris-fr");
+  });
+
+  it("keeps the full navigation until its labels risk colliding", () => {
+    cy.viewport(480, 844);
+    mount(
+      <MemoryRouter>
+        <Navigation
+          availability={releasedFeatures}
+          portfolioGridElement={null}
+        />
+      </MemoryRouter>,
+    );
+
+    cy.get('[data-desktop-navigation="true"]').should("be.visible");
+    cy.get('[data-mobile-navigation="true"]').should("not.be.visible");
+    cy.get('a[aria-label="Home"]').then(($home) => {
+      cy.get('[data-desktop-navigation="true"]').then(($navigation) => {
+        const homeRect = $home.get(0)?.getBoundingClientRect();
+        const navigationRect = $navigation.get(0)?.getBoundingClientRect();
+        if (!homeRect || !navigationRect) {
+          throw new Error("Expected the logo and full navigation");
+        }
+        expect(homeRect.right).to.be.lessThan(navigationRect.left);
       });
     });
+
+    cy.viewport(479, 844);
+    cy.get('[data-desktop-navigation="true"]').should("not.be.visible");
+    cy.get('[data-mobile-navigation="true"]').should("be.visible");
   });
 
   it("folds the desktop portfolio menu away after clicking outside it", () => {
@@ -282,17 +310,17 @@ describe("Navigation", () => {
     );
 
     cy.contains("button", "PORTFOLIOS").click();
-    cy.get('nav[aria-label="Portfolios"]').should("be.visible");
+    cy.get('nav[data-portfolio-menu="true"]').should("be.visible");
     cy.get("body").click(10, 300);
     cy.contains("button", "PORTFOLIOS").should(
       "have.attr",
       "aria-expanded",
       "false",
     );
-    cy.get('nav[aria-label="Portfolios"]').should("not.exist");
+    cy.get('nav[data-portfolio-menu="true"]').should("not.exist");
   });
 
-  it("finishes folding the portfolio menu before changing projects", () => {
+  it("navigates immediately while the labels collapse over the selected cover", () => {
     cy.clock();
     mount(
       <MemoryRouter>
@@ -305,12 +333,32 @@ describe("Navigation", () => {
 
     cy.contains("button", "PORTFOLIOS").click();
     cy.tick(500);
-    cy.contains('nav[aria-label="Portfolios"] a', "paris").click();
-    cy.get("output[data-location]").should("have.text", "/");
-    cy.tick(449);
-    cy.get("output[data-location]").should("have.text", "/");
-    cy.tick(1);
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").trigger(
+      "pointerover",
+      { pointerType: "mouse" },
+    );
+    cy.get('[data-portfolio-cover="true"]').should("exist");
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click();
     cy.get("output[data-location]").should("have.text", "/portfolio/paris-fr");
+    cy.get('nav[data-portfolio-menu="true"]')
+      .should("have.attr", "data-navigating", "true")
+      .and("have.class", "bg-transparent");
+    cy.get('[data-portfolio-cover="true"]').should("exist");
+    cy.get('[data-portfolio-labels="true"]').should(
+      "have.attr",
+      "aria-hidden",
+      "true",
+    );
+    cy.get('[data-desktop-navigation="true"]')
+      .closest("nav")
+      .should("have.class", "-translate-y-full");
+    cy.get('[data-portfolio-transition-curtain="true"]').should("not.exist");
+    cy.tick(450 + 180);
+    cy.get('nav[data-portfolio-menu="true"]').should("not.exist");
+    cy.window().trigger("mousemove");
+    cy.get('[data-desktop-navigation="true"]')
+      .closest("nav")
+      .should("have.class", "translate-y-0");
   });
 
   it("uses the Home portfolio visibility behavior on project routes", () => {

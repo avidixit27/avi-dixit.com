@@ -1,5 +1,6 @@
 import PortfolioExperience from "../PortfolioExperience";
 import type { Ref } from "react";
+import { useLocation } from "react-router-dom";
 import type { Photo } from "../photoTypes";
 import type { PortfolioProjectSummary } from "./portfolioProjects";
 
@@ -14,8 +15,14 @@ export default function ProjectPortfolio({
   photos,
   gridMarkerRef,
 }: ProjectPortfolioProps) {
+  const location = useLocation();
+
   return (
-    <PortfolioExperience photos={photos} gridMarkerRef={gridMarkerRef}>
+    <PortfolioExperience
+      photos={photos}
+      heroResetKey={location.key}
+      gridMarkerRef={gridMarkerRef}
+    >
       {() => (
         <header className="page-container py-16 sm:py-20">
           <p className="font-inter text-sm tracking-[0.18em] text-text-muted">

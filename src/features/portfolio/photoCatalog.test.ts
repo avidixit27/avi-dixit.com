@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildPhotoCatalog } from "./photoCatalog";
 import { FILM_PHOTO_CATALOG } from "./projects/film/photoCatalog";
+import { KERALA_PHOTO_CATALOG } from "./projects/kerala/photoCatalog";
 
 describe("photo catalog", () => {
   it("provides uniquely identified photographs with complete intrinsic metadata", () => {
@@ -101,6 +102,10 @@ describe("photo catalog", () => {
       "tilted-bedroom-mirror",
       "ground-mirror-portrait",
     ]);
+  });
+
+  it("opens the Kerala collection on the port cover", () => {
+    expect(KERALA_PHOTO_CATALOG[0]?.id).toBe("kochi-port-ocean-sky");
   });
 
   it("fails fast when a bundled photograph is missing metadata or a generated source", () => {

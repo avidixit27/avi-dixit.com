@@ -1,4 +1,5 @@
 import { mount } from "@cypress/react";
+import { useState } from "react";
 import HeroSlideshow from "./HeroSlideshow";
 import type { Photo } from "./photoCatalog";
 
@@ -75,5 +76,39 @@ describe("HeroSlideshow", () => {
     cy.get("@setInterval").should("have.been.calledOnce");
     mount(<div>Replacement</div>);
     cy.get("@clearInterval").should("have.been.calledOnce");
+  });
+
+  it("restarts from the first photo when remounted for a selection", () => {
+    cy.clock();
+
+    function ResettableSlideshow() {
+      const [resetKey, setResetKey] = useState("initial");
+
+      return (
+        <>
+          <HeroSlideshow key={resetKey} photos={photos} onOpen={cy.stub()} />
+          <button
+            type="button"
+            className="relative z-10"
+            onClick={() => setResetKey("selected-again")}
+          >
+            Reset slideshow
+          </button>
+        </>
+      );
+    }
+
+    mount(<ResettableSlideshow />);
+    cy.get('img[alt="Second test photo"]').trigger("load");
+    cy.tick(2501);
+    cy.get('img[alt="Second test photo"]').should("have.class", "opacity-100");
+
+    cy.contains("button", "Reset slideshow").click();
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.get('img[alt="Second test photo"]').trigger("load");
+    cy.tick(2499);
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.tick(1);
+    cy.get('img[alt="Second test photo"]').should("have.class", "opacity-100");
   });
 });

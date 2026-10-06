@@ -13,6 +13,7 @@ interface PhotoSelection {
 
 interface PortfolioExperienceProps {
   photos: readonly Photo[];
+  heroResetKey?: string;
   showPhotoNumber?: boolean;
   gridMarkerRef?: Ref<HTMLDivElement>;
   children?: (onOpen: (index: number, previewSrc: string) => void) => ReactNode;
@@ -23,6 +24,7 @@ interface PortfolioExperienceProps {
 
 export default function PortfolioExperience({
   photos,
+  heroResetKey,
   showPhotoNumber = false,
   gridMarkerRef,
   children,
@@ -49,7 +51,11 @@ export default function PortfolioExperience({
 
   return (
     <div className="min-h-screen bg-canvas">
-      <HeroSlideshow photos={heroPhotos} onOpen={selectPhoto} />
+      <HeroSlideshow
+        key={heroResetKey}
+        photos={heroPhotos}
+        onOpen={selectPhoto}
+      />
       {children?.(selectPhoto)}
       <PhotoGrid
         photos={photos}

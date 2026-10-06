@@ -1,0 +1,216 @@
+import { AnimatePresence } from "motion/react";
+import * as m from "motion/react-m";
+import { useEffect, useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
+import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
+import ResponsiveImage from "../components/ResponsiveImage";
+import {
+  loadPortfolioCover,
+  type PortfolioCoverOrientation,
+} from "../features/portfolio/projects/portfolioCovers";
+import type { PortfolioProjectSummary } from "../features/portfolio/projects/portfolioProjects";
+import type { Photo } from "../features/portfolio/photoTypes";
+
+const MOBILE_COVER_MEDIA_QUERY = "(max-width: 639px)";
+
+interface PortfolioMenuProps {
+  readonly isOpen: boolean;
+  readonly projects: readonly PortfolioProjectSummary[];
+  readonly reduceMotion: boolean;
+  readonly transitionSeconds: number;
+  readonly onClose: () => void;
+  readonly onNavigate: (path: string) => void;
+}
+
+function isModifiedActivation(event: ReactMouseEvent<HTMLAnchorElement>) {
+  return (
+    event.button !== 0 ||
+    event.metaKey ||
+    event.altKey ||
+    event.ctrlKey ||
+    event.shiftKey
+  );
+}
+
+export default function PortfolioMenu({
+  isOpen,
+  projects,
+  reduceMotion,
+  transitionSeconds,
+  onClose,
+  onNavigate,
+}: PortfolioMenuProps) {
+  const [activeProjectId, setActiveProjectId] = useState<string>();
+  const [selectedProjectId, setSelectedProjectId] = useState<string>();
+  const [orientation, setOrientation] = useState<PortfolioCoverOrientation>();
+  const [covers, setCovers] = useState<Record<string, Photo | undefined>>({});
+  const [isNavigating, setIsNavigating] = useState(false);
+  const displayedProjectId = selectedProjectId ?? activeProjectId;
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const media = window.matchMedia(MOBILE_COVER_MEDIA_QUERY);
+    let current = true;
+    const loadCovers = async () => {
+      const nextOrientation = media.matches ? "portrait" : "landscape";
+      setOrientation(nextOrientation);
+      setCovers({});
+      const loadedCovers = await Promise.all(
+        projects.map(
+          async (project) =>
+            [
+              project.id,
+              await loadPortfolioCover(project, nextOrientation),
+            ] as const,
+        ),
+      );
+      if (current) setCovers(Object.fromEntries(loadedCovers));
+    };
+
+    void loadCovers();
+    media.addEventListener("change", loadCovers);
+
+    return () => {
+      current = false;
+      media.removeEventListener("change", loadCovers);
+    };
+  }, [isOpen, projects]);
+
+  return createPortal(
+    <AnimatePresence
+      onExitComplete={() => {
+        setActiveProjectId(undefined);
+        setSelectedProjectId(undefined);
+        setIsNavigating(false);
+      }}
+    >
+      {isOpen && (
+        <m.nav
+          id="portfolio-menu"
+          aria-label="Portfolios"
+          data-portfolio-menu="true"
+          className={`fixed inset-0 z-[80] isolate overflow-hidden ${
+            isNavigating ? "bg-transparent" : "bg-canvas"
+          }`}
+          data-navigating={isNavigating ? "true" : undefined}
+          initial={reduceMotion ? false : { clipPath: "inset(0 0 100% 0)" }}
+          animate={{ clipPath: "inset(0 0 0% 0)" }}
+          exit={
+            reduceMotion || isNavigating
+              ? { opacity: 0 }
+              : { clipPath: "inset(0 0 100% 0)" }
+          }
+          transition={{
+            duration: reduceMotion
+              ? 0
+              : isNavigating
+                ? 0.18
+                : transitionSeconds,
+            ease: "easeInOut",
+          }}
+          onPointerDown={(event) => {
+            if (!(event.target as Element).closest("a")) onClose();
+          }}
+        >
+          <AnimatePresence>
+            {displayedProjectId &&
+              orientation &&
+              covers[displayedProjectId] && (
+                <m.div
+                  key={`${displayedProjectId}-${orientation}`}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0"
+                  data-portfolio-cover="true"
+                  initial={
+                    reduceMotion ? false : { clipPath: "inset(0 50% 0 50%)" }
+                  }
+                  animate={{ clipPath: "inset(0 0% 0 0%)" }}
+                  exit={
+                    reduceMotion
+                      ? { opacity: 0 }
+                      : { clipPath: "inset(0 50% 0 50%)" }
+                  }
+                  transition={{
+                    duration: reduceMotion ? 0 : transitionSeconds,
+                    ease: [0.22, 0.61, 0.36, 1],
+                  }}
+                >
+                  <ResponsiveImage
+                    {...covers[displayedProjectId]}
+                    sizes="100vw"
+                    loading="eager"
+                    fetchPriority="high"
+                    alt=""
+                    pictureClassName="block h-full w-full"
+                    className="h-full w-full object-cover"
+                  />
+                  <m.div
+                    animate={{
+                      clipPath: isNavigating
+                        ? "inset(0 50% 0 50%)"
+                        : "inset(0 0% 0 0%)",
+                    }}
+                    className="absolute inset-0 bg-canvas/35"
+                    transition={{
+                      duration: reduceMotion ? 0 : transitionSeconds,
+                      ease: "easeInOut",
+                    }}
+                  />
+                </m.div>
+              )}
+          </AnimatePresence>
+
+          <m.div
+            animate={isNavigating ? "navigating" : "visible"}
+            aria-hidden={isNavigating ? true : undefined}
+            className="relative z-10 mx-auto flex h-full w-[80vw] flex-col justify-center"
+            data-portfolio-labels="true"
+            onAnimationComplete={(definition) => {
+              if (definition === "navigating") onClose();
+            }}
+            transition={{
+              duration: reduceMotion ? 0 : transitionSeconds,
+              ease: "easeInOut",
+            }}
+            variants={{
+              navigating: {
+                clipPath: "inset(0 50% 0 50%)",
+                opacity: 0,
+              },
+              visible: { clipPath: "inset(0 0% 0 0%)", opacity: 1 },
+            }}
+          >
+            {projects.map((project) => (
+              <Link
+                key={project.id}
+                to={project.route}
+                aria-label={project.title}
+                onPointerEnter={() => setActiveProjectId(project.id)}
+                onPointerLeave={() => setActiveProjectId(undefined)}
+                onPointerDown={() => setActiveProjectId(project.id)}
+                onFocus={() => setActiveProjectId(project.id)}
+                onBlur={() => setActiveProjectId(undefined)}
+                onClick={(event) => {
+                  if (event.defaultPrevented || isModifiedActivation(event)) {
+                    return;
+                  }
+
+                  event.preventDefault();
+                  setSelectedProjectId(project.id);
+                  setIsNavigating(true);
+                  onNavigate(project.route);
+                }}
+                className="flex min-h-0 flex-1 items-center justify-center text-center uppercase font-photo-number text-[clamp(4rem,18vw,18rem)] leading-none text-text [text-shadow:0_3px_12px_rgb(0_0_0_/_0.7)] hover:text-focus focus-visible:text-focus focus-visible:outline-none"
+              >
+                {project.title}
+              </Link>
+            ))}
+          </m.div>
+        </m.nav>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}
