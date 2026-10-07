@@ -3,12 +3,12 @@
 | Field          | Value                                                                         |
 | -------------- | ----------------------------------------------------------------------------- |
 | Type           | Feature                                                                       |
-| Status         | In progress                                                                   |
+| Status         | In review                                                                     |
 | Depends on     | [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md) |
 | Blocks         | [020 — Portfolio discovery index](020-portfolio-discovery-index.md)           |
 | Planned branch | `feat/portfolio-collection-routes`                                            |
 | PR base        | `main`                                                                        |
-| PR             | Not opened                                                                    |
+| PR             | [#57](https://github.com/avidixit27/avi-dixit.com/pull/57)                    |
 
 ## Outcome
 
@@ -176,4 +176,4 @@ Implementation to date:
 - Removed Nature's second duck photograph during visual review. Removed the lightbox's opening container fade so its existing clicked-source preview no longer double-exposes over the underlying grid, then fixed the remaining same-paint source race by requiring one painted preview frame before the decoded image begins its existing blend. The close animation remains unchanged.
 - Promoted a hovered or keyboard-focused grid photograph to the existing lightbox `sizes` and fetch-priority policy in place, allowing the browser to warm the exact responsive format and candidate before a first open without adding another cache or preload implementation.
 
-Awaiting user visual approval before the final E2E/release checks and PR.
+User visual approval is complete. PR #57 is awaiting the authoritative GitHub Actions gate and final review.
