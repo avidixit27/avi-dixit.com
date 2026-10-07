@@ -116,10 +116,10 @@ describe("photo catalog", () => {
   });
 
   it("opens Nature on its approved shared cover", () => {
-    expect(NATURE_PHOTO_CATALOG).toHaveLength(7);
+    expect(NATURE_PHOTO_CATALOG).toHaveLength(6);
     expect(NATURE_PHOTO_CATALOG[0]?.id).toBe("leaves-and-clouds-1");
     expect(NATURE_PHOTO_CATALOG.map((photo) => photo.sequence)).toEqual([
-      1, 2, 3, 4, 5, 6, 7,
+      1, 2, 3, 4, 5, 6,
     ]);
   });
 

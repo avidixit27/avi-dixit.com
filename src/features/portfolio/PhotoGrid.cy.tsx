@@ -1,16 +1,16 @@
 import { mount } from "@cypress/react";
 import PhotoGrid from "./PhotoGrid";
+import { LIGHTBOX_IMAGE_SIZES } from "./portfolioPresentationPolicy";
 import type { Photo } from "./photoTypes";
 
-const PIXEL =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E";
-
 function photo(id: string, width: number, height: number): Photo {
+  const source = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${width}' height='${height}'/%3E`;
+
   return {
     id,
     sequence: Number(id),
-    src: PIXEL,
-    srcSet: PIXEL,
+    src: source,
+    srcSet: source,
     sources: [],
     width,
     height,
@@ -20,6 +20,28 @@ function photo(id: string, width: number, height: number): Photo {
 }
 
 describe("PhotoGrid", () => {
+  it("warms the lightbox-sized source on hover", () => {
+    mount(
+      <PhotoGrid
+        photos={[photo("1", 6000, 4000), photo("2", 6000, 4000)]}
+        onOpen={cy.stub()}
+      />,
+    );
+
+    cy.get('img[alt="Photo 1"]')
+      .should("have.attr", "fetchpriority", "low")
+      .and("not.have.attr", "sizes", LIGHTBOX_IMAGE_SIZES);
+    cy.get('[aria-label="Open Photo 1"]').trigger("pointerover", {
+      pointerType: "mouse",
+    });
+    cy.get('img[alt="Photo 1"]')
+      .should("have.attr", "sizes", LIGHTBOX_IMAGE_SIZES)
+      .and("have.attr", "fetchpriority", "high");
+    cy.get('img[alt="Photo 2"]')
+      .should("have.attr", "fetchpriority", "low")
+      .and("not.have.attr", "sizes", LIGHTBOX_IMAGE_SIZES);
+  });
+
   it("packs the next landscape photo beside a preceding portrait photo", () => {
     cy.viewport(1280, 1000);
     mount(

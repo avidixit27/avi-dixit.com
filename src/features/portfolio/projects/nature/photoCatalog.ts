@@ -37,16 +37,9 @@ const PHOTO_DETAILS = {
     width: 5694,
     height: 3993,
   },
-  "ducks-2.jpg": {
-    id: "ducks-2",
-    sequence: 6,
-    alt: "Ducks gathered in a green pond behind tall grasses",
-    width: 6000,
-    height: 4000,
-  },
   "quarry-tree-reflection.jpg": {
     id: "quarry-tree-reflection",
-    sequence: 7,
+    sequence: 6,
     alt: "Trees and clouds reflected in a quiet quarry pond",
     width: 6000,
     height: 4000,

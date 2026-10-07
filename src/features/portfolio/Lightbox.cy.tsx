@@ -347,7 +347,6 @@ describe("Lightbox", () => {
   });
 
   it("shows the clicked preview immediately and closes only from the backdrop", () => {
-    cy.clock();
     const onClosed = cy.spy().as("onClosed");
     mount(
       <Lightbox
@@ -371,8 +370,10 @@ describe("Lightbox", () => {
     cy.get('img[alt="First test photo"]')
       .should("have.class", "opacity-0")
       .trigger("load")
-      .should("have.class", "opacity-100")
-      .click();
+      .should("have.class", "opacity-0");
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.clock();
+    cy.get('img[alt="First test photo"]').click();
     cy.get('[data-lightbox-preview="true"]').should("have.class", "opacity-0");
     cy.tick(LIGHTBOX_CLOSE_DURATION_MS);
     cy.get("@onClosed").should("not.have.been.called");
@@ -384,7 +385,6 @@ describe("Lightbox", () => {
   });
 
   it("keeps a stable stage while the larger image decodes", () => {
-    cy.clock();
     let finishDecode: (() => void) | undefined;
     const decodePromise = new Promise<void>((resolve) => {
       finishDecode = resolve;
@@ -442,6 +442,7 @@ describe("Lightbox", () => {
       );
       cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
       cy.then(() => finishDecode?.());
+      cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
       cy.get('img[alt="First test photo"]')
         .should("have.class", "opacity-100")
         .and("not.have.class", "transition-opacity")
@@ -454,7 +455,6 @@ describe("Lightbox", () => {
         "not.have.attr",
         "aria-disabled",
       );
-      cy.tick(250);
       cy.get('[data-lightbox-preview="true"]').should("not.exist");
       cy.get('[data-lightbox-stage="true"]').should(
         "have.attr",
@@ -469,7 +469,6 @@ describe("Lightbox", () => {
   });
 
   it("keeps the outgoing frame until decode, then swaps without overlap", () => {
-    cy.clock();
     const onSelect = cy.spy().as("statefulOnSelect");
     let finishIncomingDecode: (() => void) | undefined;
 
@@ -481,7 +480,6 @@ describe("Lightbox", () => {
       cy.wrap(image).trigger("load");
     });
     cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
-    cy.tick(250);
     cy.get('[data-lightbox-stage="true"]').should(
       "have.attr",
       "aria-busy",
@@ -520,7 +518,6 @@ describe("Lightbox", () => {
     cy.then(() => finishIncomingDecode?.());
     cy.get('[data-lightbox-outgoing="true"]').should("not.exist");
     cy.get('img[alt="Last test photo"]').should("have.class", "opacity-100");
-    cy.tick(250);
     cy.get("@statefulOnSelect").should("have.been.calledWith", 0, "/first.jpg");
     cy.get("@statefulOnSelect").should("have.been.calledTwice");
   });

@@ -148,7 +148,7 @@ Supplied secondary projects:
 
 - `paris-fr` — country `france`, city/title `paris`; three finished JPEGs from `/Users/avidixit/Documents/photography/india_2024_finished_photos`: hand holding flowers, hanging shoes, and merry-go-round horse. Filename order is the initial implementation sequence; the first image is the initial hero.
 - `kerala` — country `india`, region/title `kerala`; three finished JPEGs from the same source folder: Kochi port/ocean/sky, a person before a field in Alleppey, and a palm tree in Alleppey. The approved port photograph is the initial hero and first grid image.
-- `nature` — thematic collection/title `nature`, with no invented geographic destination; seven supplied landscape JPEGs. `leaves-and-clouds-1` is both the initial photograph and the approved landscape/compact cover.
+- `nature` — thematic collection/title `nature`, with no invented geographic destination; six retained landscape JPEGs after removing the second duck photograph during visual review. `leaves-and-clouds-1` is both the initial photograph and the approved landscape/compact cover.
 
 Later supplied additions append Sacré-Cœur Basilica to `paris-fr` and an airplane centered against blue sky to `kerala` without changing either project's approved cover or opening order.
 
@@ -173,5 +173,7 @@ Implementation to date:
 - Kept Home lightbox numbering opt-in, omitted numbering from secondary projects, added the résumé to secondary footers, and protected both landscape-to-portrait and portrait-to-landscape handoffs with the shared lightbox implementation and focused component coverage while retaining the approved 200 ms handoff timing.
 - Replaced the secondary pages' country/city heading with a shared static purple title panel between the hero and grid containing only the uppercase project name in Zen Tokyo Zoo at the portfolio selector's responsive type scale. Kept destination values as non-rendered lightweight metadata for later discovery work.
 - Kept the catalog's row-major order while allowing portrait cards to span two responsive grid tracks, so subsequent landscapes fill the otherwise empty neighboring cell. Reserved five rem of vertical lightbox stage space so photographs remain below the close control at short desktop heights.
+- Removed Nature's second duck photograph during visual review. Removed the lightbox's opening container fade so its existing clicked-source preview no longer double-exposes over the underlying grid, then fixed the remaining same-paint source race by requiring one painted preview frame before the decoded image begins its existing blend. The close animation remains unchanged.
+- Promoted a hovered or keyboard-focused grid photograph to the existing lightbox `sizes` and fetch-priority policy in place, allowing the browser to warm the exact responsive format and candidate before a first open without adding another cache or preload implementation.
 
 Awaiting user visual approval before the final E2E/release checks and PR.

@@ -2,12 +2,6 @@
   transition: opacity 180ms ease-out;
 }
 
-@starting-style {
-  .lightbox-dialog {
-    opacity: 0;
-  }
-}
-
 .lightbox-close-stroke {
   position: absolute;
   width: 26px;

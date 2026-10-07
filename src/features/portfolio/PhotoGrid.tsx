@@ -1,6 +1,8 @@
+import { useState } from "react";
 import type { Ref } from "react";
 import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
+import { LIGHTBOX_IMAGE_SIZES } from "./portfolioPresentationPolicy";
 
 const GRID_IMAGE_SIZES =
   "(min-width: 1024px) calc((100vw - 8rem) / 3), (min-width: 768px) calc((100vw - 6rem) / 2), calc(100vw - 4rem)";
@@ -16,6 +18,8 @@ export default function PhotoGrid({
   gridMarkerRef,
   onOpen,
 }: PhotoGridProps) {
+  const [preloadPhotoId, setPreloadPhotoId] = useState<string>();
+
   return (
     <>
       <div ref={gridMarkerRef} className="h-0 w-full" />
@@ -32,6 +36,8 @@ export default function PhotoGrid({
                          transition-[transform,border-color] duration-200 hover:scale-[1.01] hover:border-border-strong sm:p-3 ${
                            photo.height > photo.width ? "md:row-span-2" : ""
                          }`}
+              onPointerEnter={() => setPreloadPhotoId(photo.id)}
+              onFocus={() => setPreloadPhotoId(photo.id)}
               onClick={(event) =>
                 onOpen(
                   index,
@@ -45,12 +51,16 @@ export default function PhotoGrid({
                 src={photo.src}
                 srcSet={photo.srcSet}
                 sources={photo.sources}
-                sizes={GRID_IMAGE_SIZES}
+                sizes={
+                  preloadPhotoId === photo.id
+                    ? LIGHTBOX_IMAGE_SIZES
+                    : GRID_IMAGE_SIZES
+                }
                 width={photo.width}
                 height={photo.height}
                 alt={photo.alt}
                 loading="lazy"
-                fetchPriority="low"
+                fetchPriority={preloadPhotoId === photo.id ? "high" : "low"}
                 className="h-auto w-full rounded-control"
               />
             </button>

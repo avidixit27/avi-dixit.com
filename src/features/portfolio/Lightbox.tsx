@@ -82,6 +82,7 @@ export default function Lightbox({
   onClosed,
 }: LightboxProps) {
   const imageRef = useRef<HTMLImageElement>(null);
+  const revealFrameRef = useRef<number | null>(null);
   const closeTimerRef = useRef<number | null>(null);
   const closingRef = useRef(false);
   const navigationLockedRef = useRef(true);
@@ -211,6 +212,9 @@ export default function Lightbox({
 
   useEffect(
     () => () => {
+      if (revealFrameRef.current !== null) {
+        window.cancelAnimationFrame(revealFrameRef.current);
+      }
       if (closeTimerRef.current !== null) {
         window.clearTimeout(closeTimerRef.current);
       }
@@ -385,7 +389,23 @@ export default function Lightbox({
             if (!loadedImage) return;
             const revealLoadedImage = () => {
               if (imageRef.current !== loadedImage) return;
-              setLoadedPhotoId(photo.id);
+              if (
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches
+              ) {
+                setLoadedPhotoId(photo.id);
+                return;
+              }
+              if (revealFrameRef.current !== null) {
+                window.cancelAnimationFrame(revealFrameRef.current);
+              }
+              revealFrameRef.current = window.requestAnimationFrame(() => {
+                revealFrameRef.current = window.requestAnimationFrame(() => {
+                  revealFrameRef.current = null;
+                  if (imageRef.current === loadedImage) {
+                    setLoadedPhotoId(photo.id);
+                  }
+                });
+              });
             };
             if (typeof loadedImage.decode !== "function") {
               revealLoadedImage();
