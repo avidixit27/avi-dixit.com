@@ -5,6 +5,13 @@ import NotFound from "../../../app/NotFound";
 
 const ParisFrPortfolio = lazy(() => import("./paris-fr/ParisFrPortfolio"));
 const KeralaPortfolio = lazy(() => import("./kerala/KeralaPortfolio"));
+const NaturePortfolio = lazy(() => import("./nature/NaturePortfolio"));
+
+const PROJECT_COMPONENTS = {
+  "paris-fr": ParisFrPortfolio,
+  kerala: KeralaPortfolio,
+  nature: NaturePortfolio,
+} as const;
 
 export default function PortfolioProjectRoute({
   gridMarkerRef,
@@ -13,11 +20,9 @@ export default function PortfolioProjectRoute({
 }) {
   const { slug } = useParams();
   const Project =
-    slug === "paris-fr"
-      ? ParisFrPortfolio
-      : slug === "kerala"
-        ? KeralaPortfolio
-        : null;
+    slug && Object.hasOwn(PROJECT_COMPONENTS, slug)
+      ? PROJECT_COMPONENTS[slug as keyof typeof PROJECT_COMPONENTS]
+      : undefined;
 
   if (!Project) return <NotFound />;
 

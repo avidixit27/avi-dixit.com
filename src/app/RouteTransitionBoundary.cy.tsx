@@ -94,8 +94,11 @@ describe("RouteTransitionBoundary", () => {
 
   it("loads supplied secondary portfolio routes without changing Home", () => {
     mountRoute("/portfolio/paris-fr", false, true);
-    cy.contains("h1", "paris").should("be.visible");
-    cy.contains("p", "france").should("be.visible");
+    cy.contains("h1", "paris")
+      .should("be.visible")
+      .and("have.class", "font-photo-number")
+      .and("have.class", "uppercase");
+    cy.contains("france").should("not.exist");
     cy.get('[data-route-content="true"]').should(
       "have.attr",
       "aria-label",
@@ -104,7 +107,28 @@ describe("RouteTransitionBoundary", () => {
 
     mountRoute("/portfolio/kerala", false, true);
     cy.contains("h1", "kerala").should("be.visible");
-    cy.contains("p", "india").should("be.visible");
+    cy.contains("india").should("not.exist");
+
+    mountRoute("/portfolio/nature", false, true);
+    cy.contains("h1", "nature").should("be.visible");
+    cy.get('[data-project-title-panel="true"]')
+      .should("have.class", "bg-brand-vivid")
+      .and("have.class", "h-footer")
+      .and("have.class", "border-t-8")
+      .and("have.class", "border-canvas")
+      .and("have.css", "position", "static")
+      .then(($panel) => {
+        cy.get('[data-photo-grid="true"]').then(($grid) => {
+          expect(
+            $panel.get(0).compareDocumentPosition($grid.get(0)) &
+              Node.DOCUMENT_POSITION_FOLLOWING,
+          ).not.to.equal(0);
+        });
+      });
+    cy.get('[data-project-title="true"]')
+      .should("have.class", "text-center")
+      .and("have.class", "translate-y-[0.05em]")
+      .and("not.have.attr", "style");
 
     mountRoute("/portfolio/unknown", false, true);
     cy.contains("h1", "Page not found").should("be.visible");

@@ -8,6 +8,8 @@ const catalogLoaders = {
     (await import("./paris-fr/photoCatalog")).PARIS_FR_PHOTO_CATALOG,
   kerala: async () =>
     (await import("./kerala/photoCatalog")).KERALA_PHOTO_CATALOG,
+  nature: async () =>
+    (await import("./nature/photoCatalog")).NATURE_PHOTO_CATALOG,
 } satisfies Record<string, () => Promise<readonly Photo[]>>;
 
 export async function loadPortfolioCover(

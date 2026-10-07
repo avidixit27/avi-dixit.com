@@ -13,6 +13,7 @@ import type { PortfolioProjectSummary } from "../features/portfolio/projects/por
 import type { Photo } from "../features/portfolio/photoTypes";
 
 const MOBILE_COVER_MEDIA_QUERY = "(max-width: 639px)";
+const COVER_REVEAL_EASE = [0.22, 0.61, 0.36, 1] as const;
 
 interface PortfolioMenuProps {
   readonly isOpen: boolean;
@@ -134,7 +135,7 @@ export default function PortfolioMenu({
                   }
                   transition={{
                     duration: reduceMotion ? 0 : transitionSeconds,
-                    ease: [0.22, 0.61, 0.36, 1],
+                    ease: COVER_REVEAL_EASE,
                   }}
                 >
                   <ResponsiveImage
@@ -202,7 +203,7 @@ export default function PortfolioMenu({
                   setIsNavigating(true);
                   onNavigate(project.route);
                 }}
-                className="flex min-h-0 flex-1 items-center justify-center text-center uppercase font-photo-number text-[clamp(4rem,18vw,18rem)] leading-none text-text [text-shadow:0_3px_12px_rgb(0_0_0_/_0.7)] hover:text-focus focus-visible:text-focus focus-visible:outline-none"
+                className="flex min-h-0 flex-1 items-center justify-center text-center uppercase font-photo-number text-[clamp(3rem,min(18vw,26vh),18rem)] leading-none text-text [text-shadow:0_3px_12px_rgb(0_0_0_/_0.7)] hover:text-focus focus-visible:text-focus focus-visible:outline-none"
               >
                 {project.title}
               </Link>

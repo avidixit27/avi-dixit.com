@@ -43,6 +43,17 @@ export const PORTFOLIO_PROJECTS = Object.freeze([
       portrait: "palm-tree-sunset",
     },
   }),
+  Object.freeze({
+    id: "nature",
+    slug: "nature",
+    title: "nature",
+    route: "/portfolio/nature",
+    available: true,
+    coverPhotoIds: {
+      landscape: "leaves-and-clouds-1",
+      portrait: "leaves-and-clouds-1",
+    },
+  }),
 ] as const satisfies readonly PortfolioProjectSummary[]);
 
 export function getPortfolioProject(slug: string) {

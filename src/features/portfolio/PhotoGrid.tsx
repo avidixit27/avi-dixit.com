@@ -19,14 +19,19 @@ export default function PhotoGrid({
   return (
     <>
       <div ref={gridMarkerRef} className="h-0 w-full" />
-      <main className="page-container py-16 sm:py-20">
+      <main
+        data-photo-grid="true"
+        className="page-container relative z-10 bg-canvas py-16 sm:py-20"
+      >
         <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {photos.map((photo, index) => (
             <button
               type="button"
               key={photo.id}
-              className="relative block w-full cursor-pointer rounded-panel border border-border bg-surface p-2 shadow-panel
-                         transition-[transform,border-color] duration-200 hover:scale-[1.01] hover:border-border-strong sm:p-3"
+              className={`relative block w-full cursor-pointer rounded-panel border border-border bg-surface p-2 shadow-panel
+                         transition-[transform,border-color] duration-200 hover:scale-[1.01] hover:border-border-strong sm:p-3 ${
+                           photo.height > photo.width ? "md:row-span-2" : ""
+                         }`}
               onClick={(event) =>
                 onOpen(
                   index,

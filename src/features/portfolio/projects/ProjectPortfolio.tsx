@@ -24,14 +24,19 @@ export default function ProjectPortfolio({
       gridMarkerRef={gridMarkerRef}
     >
       {() => (
-        <header className="page-container py-16 sm:py-20">
-          <p className="font-inter text-sm tracking-[0.18em] text-text-muted">
-            {project.destination}
-          </p>
-          <h1 className="mt-3 font-display text-[clamp(2.625rem,10vw,4.5rem)] leading-none text-text">
-            {project.title}
-          </h1>
-        </header>
+        <section
+          data-project-title-panel="true"
+          className="flex h-footer items-center overflow-hidden border-t-8 border-canvas bg-brand-vivid text-canvas"
+        >
+          <div className="page-container w-full">
+            <h1
+              data-project-title="true"
+              className="translate-y-[0.05em] text-center font-photo-number text-[clamp(3rem,min(18vw,26vh),18rem)] leading-none uppercase"
+            >
+              {project.title}
+            </h1>
+          </div>
+        </section>
       )}
     </PortfolioExperience>
   );

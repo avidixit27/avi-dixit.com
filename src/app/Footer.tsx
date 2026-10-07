@@ -213,7 +213,7 @@ export default function Footer({ landingEnabled }: FooterProps) {
             {(isHome || isPortfolio) && (
               <nav
                 aria-label="Portfolio documents"
-                className="flex flex-col items-end text-[28px] md:col-start-2 md:flex-row md:items-stretch md:justify-center md:gap-8 md:text-center lg:gap-12 lg:text-[36px]"
+                className="flex flex-col-reverse items-end text-[28px] md:col-start-2 md:flex-row md:items-stretch md:justify-center md:gap-8 md:text-center lg:gap-12 lg:text-[36px]"
               >
                 {isHome && (
                   <Link

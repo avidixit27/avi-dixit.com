@@ -18,12 +18,27 @@ describe("portfolio project summaries", () => {
     )) {
       expect(project.slug).toMatch(/^[a-z]+(?:-[a-z]+){0,3}$/);
       expect(project.slug.length).toBeLessThanOrEqual(32);
-      expect(project.destination?.trim()).not.toBe("");
+      if (project.destination !== undefined) {
+        expect(project.destination.trim()).not.toBe("");
+      }
       expect(project.route).toBe(`/portfolio/${project.slug}`);
       expect(getPortfolioProject(project.slug)).toEqual(project);
-      expect(project.coverPhotoIds.landscape).not.toBe(
-        project.coverPhotoIds.portrait,
-      );
+      expect(project.coverPhotoIds.landscape.trim()).not.toBe("");
+      expect(project.coverPhotoIds.portrait.trim()).not.toBe("");
     }
+  });
+
+  it("supports a thematic Nature collection with one approved cover crop", () => {
+    const nature = getPortfolioProject("nature");
+
+    expect(nature).toMatchObject({
+      title: "nature",
+      route: "/portfolio/nature",
+      coverPhotoIds: {
+        landscape: "leaves-and-clouds-1",
+        portrait: "leaves-and-clouds-1",
+      },
+    });
+    expect(nature).not.toHaveProperty("destination");
   });
 });

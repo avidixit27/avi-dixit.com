@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { buildPhotoCatalog } from "./photoCatalog";
 import { FILM_PHOTO_CATALOG } from "./projects/film/photoCatalog";
 import { KERALA_PHOTO_CATALOG } from "./projects/kerala/photoCatalog";
+import { NATURE_PHOTO_CATALOG } from "./projects/nature/photoCatalog";
+import { PARIS_FR_PHOTO_CATALOG } from "./projects/paris-fr/photoCatalog";
 
 describe("photo catalog", () => {
   it("provides uniquely identified photographs with complete intrinsic metadata", () => {
@@ -106,6 +108,19 @@ describe("photo catalog", () => {
 
   it("opens the Kerala collection on the port cover", () => {
     expect(KERALA_PHOTO_CATALOG[0]?.id).toBe("kochi-port-ocean-sky");
+  });
+
+  it("includes the supplied Paris and Kerala additions", () => {
+    expect(PARIS_FR_PHOTO_CATALOG.at(-1)?.id).toBe("sacre-coeur-basilica");
+    expect(KERALA_PHOTO_CATALOG.at(-1)?.id).toBe("plane-center");
+  });
+
+  it("opens Nature on its approved shared cover", () => {
+    expect(NATURE_PHOTO_CATALOG).toHaveLength(7);
+    expect(NATURE_PHOTO_CATALOG[0]?.id).toBe("leaves-and-clouds-1");
+    expect(NATURE_PHOTO_CATALOG.map((photo) => photo.sequence)).toEqual([
+      1, 2, 3, 4, 5, 6, 7,
+    ]);
   });
 
   it("fails fast when a bundled photograph is missing metadata or a generated source", () => {

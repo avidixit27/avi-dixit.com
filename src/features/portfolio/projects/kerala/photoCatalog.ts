@@ -23,6 +23,13 @@ const PHOTO_DETAILS = {
     width: 6000,
     height: 4000,
   },
+  "plane-center.jpg": {
+    id: "plane-center",
+    sequence: 4,
+    alt: "An airplane centered in a blue sky",
+    width: 5619,
+    height: 3326,
+  },
 } as const satisfies Record<string, PhotoDetails>;
 
 const fallbackModules = import.meta.glob<string>(

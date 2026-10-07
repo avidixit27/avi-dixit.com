@@ -92,7 +92,7 @@ describe("Lightbox", () => {
       .should("have.text", "3")
       .and("have.attr", "aria-label", "Photo 3 of 3")
       .and("have.css", "font-size", "52px")
-      .and("have.css", "color", "rgb(253, 113, 0)");
+      .and("have.css", "color", "rgb(246, 241, 232)");
     cy.get('[data-lightbox-controls="true"]').should(
       "have.css",
       "position",
@@ -144,6 +144,28 @@ describe("Lightbox", () => {
     });
   });
 
+  it("keeps every image stage below the close control", () => {
+    cy.viewport(2048, 786);
+    mount(
+      <Lightbox
+        photos={photos}
+        selectedIndex={0}
+        previewSrc="/first-preview.jpg"
+        navigationIndices={[0, 1, 2]}
+        onSelect={cy.stub()}
+        onClosed={cy.stub()}
+      />,
+    );
+
+    cy.get('[aria-label="Close"]').then(($close) => {
+      const close = $close.get(0).getBoundingClientRect();
+      cy.get('[data-lightbox-stage="true"]').should(($stage) => {
+        const stage = $stage.get(0).getBoundingClientRect();
+        expect(stage.top).to.be.at.least(close.bottom);
+      });
+    });
+  });
+
   it("keeps a two-digit photo number clear of close at narrow widths", () => {
     cy.viewport(80, 600);
     mount(
@@ -189,7 +211,7 @@ describe("Lightbox", () => {
     cy.get('[data-lightbox-stage="true"]')
       .should("have.attr", "style")
       .and("include", "width: 95vw")
-      .and("include", "height: 95vh")
+      .and("include", "height: calc(-5rem + 95vh)")
       .and("not.include", "aspect-ratio");
     cy.get('img[alt="Portrait test photo"]')
       .should("have.class", "object-contain")
@@ -383,7 +405,7 @@ describe("Lightbox", () => {
       .should("have.attr", "aria-busy", "true")
       .should("have.attr", "style")
       .and("include", "width: 95vw")
-      .and("include", "height: 95vh");
+      .and("include", "height: calc(-5rem + 95vh)");
     cy.get('[data-lightbox-stage="true"]').then(($stage) => {
       const initialRect = $stage.get(0)?.getBoundingClientRect();
       if (!initialRect) throw new Error("Expected a lightbox stage");
@@ -446,7 +468,7 @@ describe("Lightbox", () => {
     });
   });
 
-  it("keeps the outgoing full-resolution frame until its replacement settles", () => {
+  it("keeps the outgoing frame until decode, then swaps without overlap", () => {
     cy.clock();
     const onSelect = cy.spy().as("statefulOnSelect");
     let finishIncomingDecode: (() => void) | undefined;
@@ -496,7 +518,8 @@ describe("Lightbox", () => {
       "opacity-100",
     );
     cy.then(() => finishIncomingDecode?.());
-    cy.get('[data-lightbox-outgoing="true"]').should("have.class", "opacity-0");
+    cy.get('[data-lightbox-outgoing="true"]').should("not.exist");
+    cy.get('img[alt="Last test photo"]').should("have.class", "opacity-100");
     cy.tick(250);
     cy.get("@statefulOnSelect").should("have.been.calledWith", 0, "/first.jpg");
     cy.get("@statefulOnSelect").should("have.been.calledTwice");
@@ -569,14 +592,19 @@ describe("Lightbox", () => {
     cy.get('[data-lightbox-outgoing="true"]')
       .should("have.attr", "width", "4000")
       .and("have.attr", "height", "6000")
-      .and(
-        "have.css",
-        "transition-duration",
-        `${LIGHTBOX_IMAGE_TRANSITION_MS / 1000}s`,
-      );
+      .and("have.class", "opacity-100");
     cy.get('img[alt="Last test photo"]')
       .should("have.attr", "width", "6000")
       .and("have.attr", "height", "4000");
+
+    cy.get('img[alt="Last test photo"]').then(($image) => {
+      const image = $image.get(0) as HTMLImageElement | undefined;
+      if (!image) throw new Error("Expected the returning landscape image");
+      cy.stub(image, "decode").resolves();
+      cy.wrap(image).trigger("load");
+    });
+    cy.get('[data-lightbox-outgoing="true"]').should("not.exist");
+    cy.get('img[alt="Last test photo"]').should("have.class", "opacity-100");
   });
 
   it("closes on Escape after the exit transition", () => {

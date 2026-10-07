@@ -81,12 +81,15 @@ Anticipated ownership includes `src/features/portfolio/` and focused project sub
 
 - `/` remains the current film portfolio with its approved hero, editorial composition, photo order, statement/resume closing section, and footer transition.
 - One supplied real project is reachable at an approved `/portfolio/:slug` path whose slug is unique and no longer than 32 characters.
-- Project destination and optional date appear as display metadata and are not structurally required in the URL.
+- Project destination and optional date remain lightweight metadata and are not structurally required in the URL. Current secondary project pages deliberately omit the destination label from their visual title treatment.
 - Lightweight project summaries can render links without importing photo catalogs, project route components, or original photographs.
 - Film and secondary project photo discovery is isolated to their own literal asset paths, with complete unique IDs, alt text, intrinsic dimensions, responsive source sets, and stable order.
 - Both projects reuse responsive hero, grid, lightbox, navigation, preload, and cleanup behavior without duplicating that orchestration.
 - Viewports at or above the measured 480 px collision boundary show `Home`, `Contact`, and `Portfolios`; narrower viewports collapse those destinations into a right-aligned geometric hamburger panel, and the portfolio overlay excludes Home. Opening `Portfolios` fills the viewport behind the persistent navigation with centered secondary-project labels occupying 80% of its width in uppercase Zen Tokyo Zoo with a legible text shadow. Hover or keyboard focus reveals an approved responsive cover from the center outward; compact viewports select the approved portrait crop and navigate on one tap. Escape, the navbar close control, and click-away dismissal reverse the overlay motion. Selecting a project navigates immediately, hides the primary navigation until the next pointer movement or scroll, and retains its cover while the dark scrim and labels collapse inward; the cover then dissolves into the destination without changing its full-viewport geometry. Selecting the already-active project restarts its hero on the matching cover with a fresh rotation interval. Reduced motion makes the exit immediate.
 - Lightbox numbering remains specific to Home; secondary project lightboxes omit it.
+- Secondary projects place a static footer-height purple panel between the hero and photo grid, separated from the hero by a canvas-black rule and containing only the optically centered uppercase project title in Zen Tokyo Zoo at the portfolio selector's responsive type scale.
+- Portrait cards span two responsive grid tracks so the next landscape photograph fills the available neighboring cell while catalog order remains row-major.
+- The stable lightbox stage reserves enough top clearance that no photograph overlaps the close control.
 - Secondary project footers show the résumé centered at roomy widths and right-aligned at compact widths without duplicating portfolio discovery links.
 - The film-specific Entropy/Chaos composition and statement/resume links do not appear on another project unless explicitly added there.
 - A secondary project can omit editorial sections or supply a different composition without changing the shared gallery implementation.
@@ -145,6 +148,9 @@ Supplied secondary projects:
 
 - `paris-fr` — country `france`, city/title `paris`; three finished JPEGs from `/Users/avidixit/Documents/photography/india_2024_finished_photos`: hand holding flowers, hanging shoes, and merry-go-round horse. Filename order is the initial implementation sequence; the first image is the initial hero.
 - `kerala` — country `india`, region/title `kerala`; three finished JPEGs from the same source folder: Kochi port/ocean/sky, a person before a field in Alleppey, and a palm tree in Alleppey. The approved port photograph is the initial hero and first grid image.
+- `nature` — thematic collection/title `nature`, with no invented geographic destination; seven supplied landscape JPEGs. `leaves-and-clouds-1` is both the initial photograph and the approved landscape/compact cover.
+
+Later supplied additions append Sacré-Cœur Basilica to `paris-fr` and an airplane centered against blue sky to `kerala` without changing either project's approved cover or opening order.
 
 Alt text is derived from the supplied descriptive filenames. Neither project has an approved date label or editorial copy, so neither is included. At completion, record extraction decisions, route and bundle measurements, visual approval, checks, remaining limitations, and PR link.
 
@@ -165,5 +171,7 @@ Implementation to date:
 - Made project landings start with the existing navigation hidden state for a more immersive hero; the established pointer/scroll listeners reveal it without another state machine. Increased the overlay-label shadow in place and protected both behaviors in the focused navigation component spec.
 - Keyed each secondary hero to React Router's existing location identity, so reselecting the active project natively remounts its slideshow and interval. Focused Chrome coverage and a production-preview Paris → menu → Paris run confirmed the cover remains for the full fresh 2.5-second interval before rotating.
 - Kept Home lightbox numbering opt-in, omitted numbering from secondary projects, added the résumé to secondary footers, and protected both landscape-to-portrait and portrait-to-landscape handoffs with the shared lightbox implementation and focused component coverage while retaining the approved 200 ms handoff timing.
+- Replaced the secondary pages' country/city heading with a shared static purple title panel between the hero and grid containing only the uppercase project name in Zen Tokyo Zoo at the portfolio selector's responsive type scale. Kept destination values as non-rendered lightweight metadata for later discovery work.
+- Kept the catalog's row-major order while allowing portrait cards to span two responsive grid tracks, so subsequent landscapes fill the otherwise empty neighboring cell. Reserved five rem of vertical lightbox stage space so photographs remain below the close control at short desktop heights.
 
 Awaiting user visual approval before the final E2E/release checks and PR.

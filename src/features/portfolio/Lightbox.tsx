@@ -15,6 +15,7 @@ import {
 import {
   LIGHTBOX_IMAGE_SIZES,
   LIGHTBOX_CLOSE_DURATION_MS,
+  LIGHTBOX_CONTROL_CLEARANCE_REM,
   LIGHTBOX_IMAGE_TRANSITION_MS,
   LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT,
   LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT,
@@ -261,7 +262,7 @@ export default function Lightbox({
             data-lightbox-photo-number="true"
             aria-label={`Photo ${photo.sequence} of ${photos.length}`}
             className="grid h-11 min-w-0 -translate-y-[12px] place-items-center overflow-hidden
-                       select-none font-photo-number text-[clamp(20px,20vw,52px)] leading-none text-brand-warm
+                       select-none font-photo-number text-[clamp(20px,20vw,52px)] leading-none text-text
                        drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
           >
             {photo.sequence}
@@ -359,7 +360,7 @@ export default function Lightbox({
         className="pointer-events-none relative z-10 overflow-hidden"
         style={{
           width: `${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw`,
-          height: `${LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT}vh`,
+          height: `calc(${LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT}vh - ${LIGHTBOX_CONTROL_CLEARANCE_REM}rem)`,
         }}
       >
         <ResponsiveImage
@@ -396,7 +397,7 @@ export default function Lightbox({
               .then(revealLoadedImage);
           }}
         />
-        {outgoingFrame && (
+        {outgoingFrame && !isFullImageReady && (
           <img
             data-lightbox-outgoing="true"
             src={outgoingFrame.src}
@@ -405,11 +406,8 @@ export default function Lightbox({
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`pointer-events-none absolute left-1/2 top-1/2 h-auto max-h-full w-auto max-w-full
-                        -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity ${
-                          isFullImageReady ? "opacity-0" : "opacity-100"
-                        }`}
-            style={{ transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms` }}
+            className="pointer-events-none absolute left-1/2 top-1/2 h-auto max-h-full w-auto max-w-full
+                       -translate-x-1/2 -translate-y-1/2 object-contain opacity-100"
           />
         )}
         {!outgoingFrame && !isNavigationReady && (

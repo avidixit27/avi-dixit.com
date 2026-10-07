@@ -124,7 +124,7 @@ describe("Footer", () => {
       cy.get('nav[aria-label="Portfolio documents"]')
         .should("have.class", "text-[28px]")
         .and("have.class", "items-end")
-        .and("have.class", "flex-col")
+        .and("have.class", "flex-col-reverse")
         .and("have.class", "md:flex-row")
         .and("have.class", "md:col-start-2")
         .and("have.class", "lg:text-[36px]")

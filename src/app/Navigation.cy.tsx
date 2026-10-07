@@ -165,7 +165,7 @@ describe("Navigation", () => {
 
   it("opens secondary portfolios in the full-screen desktop menu", () => {
     cy.clock();
-    cy.viewport(1280, 800);
+    cy.viewport(1512, 770);
     mount(
       <MemoryRouter>
         <MotionProvider>
@@ -189,9 +189,15 @@ describe("Navigation", () => {
           .and("have.class", "font-photo-number")
           .and("have.class", "justify-center")
           .and("have.class", "text-center")
+          .and("have.class", "hover:text-focus")
+          .and("have.class", "focus-visible:text-focus")
           .and("have.class", "[text-shadow:0_3px_12px_rgb(0_0_0_/_0.7)]");
         cy.contains("a", "kerala")
           .should("have.attr", "href", "/portfolio/kerala")
+          .and("have.class", "uppercase")
+          .and("have.class", "font-photo-number");
+        cy.contains("a", "nature")
+          .should("have.attr", "href", "/portfolio/nature")
           .and("have.class", "uppercase")
           .and("have.class", "font-photo-number");
         cy.contains("a", "entropy, chaos").should("not.exist");
@@ -206,13 +212,18 @@ describe("Navigation", () => {
       "have.class",
       "w-[80vw]",
     );
+    cy.get('nav[data-portfolio-menu="true"] a').each(($link) => {
+      expect(parseFloat(getComputedStyle($link.get(0)).fontSize)).to.be.at.most(
+        770 * 0.26,
+      );
+    });
     cy.get('nav[data-portfolio-menu="true"]').then(($menu) => {
       const menuRect = $menu.get(0)?.getBoundingClientRect();
       if (!menuRect) throw new Error("Expected the portfolio menu");
       expect(menuRect.left).to.equal(0);
-      expect(menuRect.right).to.equal(1280);
+      expect(menuRect.right).to.equal(1512);
       expect(menuRect.top).to.equal(0);
-      expect(menuRect.bottom).to.equal(800);
+      expect(menuRect.bottom).to.equal(770);
     });
     cy.tick(2000);
     cy.get('[data-desktop-navigation="true"]')
@@ -257,6 +268,7 @@ describe("Navigation", () => {
         .should("be.visible")
         .trigger("pointerover", { pointerType: "touch" });
       cy.contains("a", "kerala").should("be.visible");
+      cy.contains("a", "nature").should("be.visible");
       cy.get('picture img[alt=""]')
         .should("have.attr", "width", "3915")
         .and("have.attr", "height", "5872");

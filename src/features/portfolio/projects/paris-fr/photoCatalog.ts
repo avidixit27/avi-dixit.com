@@ -23,6 +23,13 @@ const PHOTO_DETAILS = {
     width: 5910,
     height: 3281,
   },
+  "sacre-coeur-basilica.jpg": {
+    id: "sacre-coeur-basilica",
+    sequence: 4,
+    alt: "Sacré-Cœur Basilica framed by trees in Paris",
+    width: 6000,
+    height: 4000,
+  },
 } as const satisfies Record<string, PhotoDetails>;
 
 const fallbackModules = import.meta.glob<string>(
