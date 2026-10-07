@@ -24,40 +24,49 @@ export function isAllFeaturesDevelopment(
 }
 
 export default defineConfig(
-  ({ command, mode, isPreview } = DEFAULT_CONFIG_ENV) => ({
-    define: {
-      "import.meta.env.ALL_FEATURES_DEVELOPMENT": JSON.stringify(
-        isAllFeaturesDevelopment(command, mode, isPreview),
-      ),
-    },
-    plugins: [
-      react(),
-      tailwindcss(),
+  ({ command, mode, isPreview } = DEFAULT_CONFIG_ENV) => {
+    const isComponentTest = process.env.PORTFOLIO_COMPONENT_TESTS === "true";
+    const responsiveWidths = isComponentTest
+      ? "32"
+      : PORTFOLIO_RESPONSIVE_WIDTHS;
+    const fallbackWidth = isComponentTest ? "32" : PORTFOLIO_FALLBACK_WIDTH;
+    const avifEffort = isComponentTest ? "0" : PORTFOLIO_AVIF_EFFORT;
 
-      imagetools({
-        include: /\.(?:avif|gif|heif|jpe?g|png|tiff|webp)(?:\?.*)?$/i,
+    return {
+      define: {
+        "import.meta.env.ALL_FEATURES_DEVELOPMENT": JSON.stringify(
+          isAllFeaturesDevelopment(command, mode, isPreview),
+        ),
+      },
+      plugins: [
+        react(),
+        tailwindcss(),
 
-        defaultDirectives: (url) => {
-          const directives = new URLSearchParams();
+        imagetools({
+          include: /\.(?:avif|gif|heif|jpe?g|png|tiff|webp)(?:\?.*)?$/i,
 
-          if (url.searchParams.has("portfolio-responsive")) {
-            directives.set("w", PORTFOLIO_RESPONSIVE_WIDTHS);
-            if (url.searchParams.get("format") === "avif") {
-              directives.set("quality", PORTFOLIO_AVIF_QUALITY);
-              directives.set("effort", PORTFOLIO_AVIF_EFFORT);
-            } else {
+          defaultDirectives: (url) => {
+            const directives = new URLSearchParams();
+
+            if (url.searchParams.has("portfolio-responsive")) {
+              directives.set("w", responsiveWidths);
+              if (url.searchParams.get("format") === "avif") {
+                directives.set("quality", PORTFOLIO_AVIF_QUALITY);
+                directives.set("effort", avifEffort);
+              } else {
+                directives.set("quality", PORTFOLIO_IMAGE_QUALITY);
+              }
+            } else if (url.searchParams.has("portfolio-fallback")) {
+              directives.set("w", fallbackWidth);
               directives.set("quality", PORTFOLIO_IMAGE_QUALITY);
             }
-          } else if (url.searchParams.has("portfolio-fallback")) {
-            directives.set("w", PORTFOLIO_FALLBACK_WIDTH);
-            directives.set("quality", PORTFOLIO_IMAGE_QUALITY);
-          }
 
-          return directives;
-        },
-      }),
+            return directives;
+          },
+        }),
 
-      cloudflare(),
-    ],
-  }),
+        cloudflare(),
+      ],
+    };
+  },
 );

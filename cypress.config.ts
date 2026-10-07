@@ -3,6 +3,8 @@ import { registerBrowserRunReporting } from "./cypress/reporting";
 import specPatterns from "./cypress/spec-patterns.json" with { type: "json" };
 import viteConfig from "./vite.config";
 
+process.env.PORTFOLIO_COMPONENT_TESTS = "true";
+
 export default defineConfig({
   video: process.env.CI === "true",
   component: {
