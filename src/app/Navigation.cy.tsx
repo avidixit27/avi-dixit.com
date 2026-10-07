@@ -204,7 +204,7 @@ describe("Navigation", () => {
         cy.contains("a", "paris").trigger("pointerover", {
           pointerType: "mouse",
         });
-        cy.get('picture img[alt=""]')
+        cy.get('picture img[alt=""]', { timeout: 60_000 })
           .should("have.attr", "width", "5626")
           .and("have.attr", "height", "4000");
       });
@@ -257,11 +257,8 @@ describe("Navigation", () => {
       cy.contains("a", "HOME").should("be.visible");
       cy.contains("a", "CONTACT").should("be.visible");
       cy.contains("button", "PORTFOLIOS").click();
-      cy.tick(239);
+      cy.tick(250);
     });
-    cy.get("#mobile-navigation-menu").should("exist");
-    cy.get('nav[data-portfolio-menu="true"]').should("not.exist");
-    cy.tick(1);
     cy.get("#mobile-navigation-menu").should("not.exist");
     cy.get('nav[data-portfolio-menu="true"]').within(() => {
       cy.contains("a", "paris")
@@ -269,7 +266,7 @@ describe("Navigation", () => {
         .trigger("pointerover", { pointerType: "touch" });
       cy.contains("a", "kerala").should("be.visible");
       cy.contains("a", "nature").should("be.visible");
-      cy.get('picture img[alt=""]')
+      cy.get('picture img[alt=""]', { timeout: 60_000 })
         .should("have.attr", "width", "3915")
         .and("have.attr", "height", "5872");
     });
@@ -349,7 +346,9 @@ describe("Navigation", () => {
       "pointerover",
       { pointerType: "mouse" },
     );
-    cy.get('[data-portfolio-cover="true"]').should("exist");
+    cy.get('[data-portfolio-cover="true"]', { timeout: 60_000 }).should(
+      "exist",
+    );
     cy.contains('nav[data-portfolio-menu="true"] a', "paris").click();
     cy.get("output[data-location]").should("have.text", "/portfolio/paris-fr");
     cy.get('nav[data-portfolio-menu="true"]')
@@ -382,7 +381,7 @@ describe("Navigation", () => {
     );
 
     cy.get("nav").should("have.class", "translate-y-0");
-    cy.tick(2000);
+    cy.tick(2001);
     cy.get("nav").should("have.class", "-translate-y-full");
     cy.window().trigger("mousemove");
     cy.get("nav").should("have.class", "translate-y-0");

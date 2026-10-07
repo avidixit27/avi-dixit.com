@@ -11,6 +11,32 @@ function getGeneratedSource(
   return source;
 }
 
+export function buildPhotoFromModules(
+  details: PhotoDetails,
+  path: string,
+  src: string,
+  jpegSources: Readonly<Record<string, string>>,
+  avifSources: Readonly<Record<string, string>>,
+  webpSources: Readonly<Record<string, string>>,
+): Photo {
+  return Object.freeze({
+    ...details,
+    src,
+    srcSet: getGeneratedSource(jpegSources, path),
+    sources: Object.freeze([
+      Object.freeze({
+        type: "image/avif",
+        srcSet: getGeneratedSource(avifSources, path),
+      }),
+      Object.freeze({
+        type: "image/webp",
+        srcSet: getGeneratedSource(webpSources, path),
+      }),
+    ]),
+    aspectRatio: details.width / details.height,
+  });
+}
+
 export function buildPhotoCatalog(
   detailsByFileName: Readonly<Record<string, PhotoDetails>>,
   fallbackSources: Readonly<Record<string, string>>,
@@ -23,22 +49,14 @@ export function buildPhotoCatalog(
     const details = fileName ? detailsByFileName[fileName] : undefined;
     if (!details) throw new Error(`Missing photo metadata for ${path}`);
 
-    return Object.freeze({
-      ...details,
+    return buildPhotoFromModules(
+      details,
+      path,
       src,
-      srcSet: getGeneratedSource(jpegSources, path),
-      sources: Object.freeze([
-        Object.freeze({
-          type: "image/avif",
-          srcSet: getGeneratedSource(avifSources, path),
-        }),
-        Object.freeze({
-          type: "image/webp",
-          srcSet: getGeneratedSource(webpSources, path),
-        }),
-      ]),
-      aspectRatio: details.width / details.height,
-    });
+      jpegSources,
+      avifSources,
+      webpSources,
+    );
   });
 
   const ids = new Set(photos.map((photo) => photo.id));

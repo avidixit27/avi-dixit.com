@@ -354,7 +354,12 @@ describe("photography portfolio", () => {
     cy.viewport(390, 844);
     cy.visit("/");
     cy.contains("a", "SHOP").should("not.exist");
-    cy.contains("a", "CONTACT").should("be.visible");
+    cy.get('button[aria-label="Navigation menu"]').click();
+    cy.contains('[data-mobile-navigation="true"] a', "CONTACT").should(
+      "be.visible",
+    );
+    cy.get('button[aria-label="Close navigation"]').click();
+    cy.get("#mobile-navigation-menu").should("not.exist");
     cy.get('[aria-label="Open hero image gallery"]').should("be.visible");
     cy.get('main [aria-label^="Open "]')
       .first()
