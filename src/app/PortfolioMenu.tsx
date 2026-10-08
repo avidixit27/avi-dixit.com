@@ -24,6 +24,7 @@ interface PortfolioMenuProps {
   readonly onClose: () => void;
   readonly onNavigate: (path: string) => void;
   readonly onNavigationComplete: () => void;
+  readonly preloadProject?: (slug: string) => Promise<boolean>;
 }
 
 function isModifiedActivation(event: ReactMouseEvent<HTMLAnchorElement>) {
@@ -44,6 +45,7 @@ export default function PortfolioMenu({
   onClose,
   onNavigate,
   onNavigationComplete,
+  preloadProject = preloadPortfolioProject,
 }: PortfolioMenuProps) {
   const [activeProjectId, setActiveProjectId] = useState<string>();
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
@@ -52,6 +54,7 @@ export default function PortfolioMenu({
   const [isNavigating, setIsNavigating] = useState(false);
   const readyCoverKeysRef = useRef(new Set<string>());
   const readyProjectIdsRef = useRef(new Set<string>());
+  const loadingProjectIdsRef = useRef(new Set<string>());
   const selectedProjectIdRef = useRef<string>();
   const orientationRef = useRef<PortfolioCoverOrientation>();
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -70,6 +73,30 @@ export default function PortfolioMenu({
       setIsNavigating(true);
     }
   }, []);
+
+  const prepareProject = useCallback(
+    (project: PortfolioProjectSummary) => {
+      if (
+        readyProjectIdsRef.current.has(project.id) ||
+        loadingProjectIdsRef.current.has(project.id)
+      ) {
+        revealSelectedProjectIfReady(project.id);
+        return;
+      }
+
+      loadingProjectIdsRef.current.add(project.id);
+      void preloadProject(project.slug).then(
+        (loaded) => {
+          loadingProjectIdsRef.current.delete(project.id);
+          if (!loaded) return;
+          readyProjectIdsRef.current.add(project.id);
+          revealSelectedProjectIfReady(project.id);
+        },
+        () => loadingProjectIdsRef.current.delete(project.id),
+      );
+    },
+    [preloadProject, revealSelectedProjectIfReady],
+  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -116,23 +143,13 @@ export default function PortfolioMenu({
     };
 
     void loadCovers();
-    projects.forEach((project) => {
-      void preloadPortfolioProject(project.slug).then(
-        (loaded) => {
-          if (!current || !loaded) return;
-          readyProjectIdsRef.current.add(project.id);
-          revealSelectedProjectIfReady(project.id);
-        },
-        () => undefined,
-      );
-    });
     media.addEventListener("change", loadCovers);
 
     return () => {
       current = false;
       media.removeEventListener("change", loadCovers);
     };
-  }, [isOpen, projects, revealSelectedProjectIfReady]);
+  }, [isOpen, projects]);
 
   return createPortal(
     <AnimatePresence
@@ -285,10 +302,19 @@ export default function PortfolioMenu({
                   key={project.id}
                   to={project.route}
                   aria-label={project.title}
-                  onPointerEnter={() => setActiveProjectId(project.id)}
+                  onPointerEnter={() => {
+                    setActiveProjectId(project.id);
+                    prepareProject(project);
+                  }}
                   onPointerLeave={() => setActiveProjectId(undefined)}
-                  onPointerDown={() => setActiveProjectId(project.id)}
-                  onFocus={() => setActiveProjectId(project.id)}
+                  onPointerDown={() => {
+                    setActiveProjectId(project.id);
+                    prepareProject(project);
+                  }}
+                  onFocus={() => {
+                    setActiveProjectId(project.id);
+                    prepareProject(project);
+                  }}
                   onBlur={() => setActiveProjectId(undefined)}
                   onClick={(event) => {
                     if (event.defaultPrevented || isModifiedActivation(event)) {
@@ -299,6 +325,7 @@ export default function PortfolioMenu({
                     restoreFocusRef.current = false;
                     selectedProjectIdRef.current = project.id;
                     setSelectedProjectId(project.id);
+                    prepareProject(project);
                     revealSelectedProjectIfReady(project.id);
                     onNavigate(project.route);
                   }}

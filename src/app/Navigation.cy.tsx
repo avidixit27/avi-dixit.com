@@ -187,6 +187,45 @@ describe("Navigation", () => {
     });
   });
 
+  it("preloads only the portfolio that receives intent", () => {
+    const paris = getPortfolioProject("paris-fr");
+    const kerala = getPortfolioProject("kerala");
+    if (!paris || !kerala) throw new Error("Expected portfolio projects");
+    const preloadProject = cy.stub().callsFake(async () => true);
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia").returns({
+        matches: false,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioMenu
+            isOpen
+            projects={[paris, kerala]}
+            reduceMotion
+            transitionSeconds={0}
+            onClose={cy.stub()}
+            onNavigate={cy.stub()}
+            onNavigationComplete={cy.stub()}
+            preloadProject={preloadProject}
+          />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.then(() => expect(preloadProject).not.to.have.been.called);
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").trigger(
+      "pointerover",
+      { pointerType: "mouse" },
+    );
+    cy.then(() =>
+      expect(preloadProject).to.have.been.calledOnceWith("paris-fr"),
+    );
+  });
+
   it("opens secondary portfolios in the full-screen desktop menu", () => {
     cy.clock();
     cy.viewport(1512, 770);
