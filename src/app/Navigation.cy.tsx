@@ -223,11 +223,12 @@ describe("Navigation", () => {
       const menu = $menu.get(0);
       if (!menu) throw new Error("Expected the portfolio menu");
       const menuRect = menu.getBoundingClientRect();
-      const viewport = menu.ownerDocument.documentElement;
-      expect(menuRect.left).to.equal(0);
-      expect(menuRect.right).to.equal(viewport.clientWidth);
-      expect(menuRect.top).to.equal(0);
-      expect(menuRect.bottom).to.equal(viewport.clientHeight);
+      const dialogRect = menu.closest("dialog")?.getBoundingClientRect();
+      if (!dialogRect) throw new Error("Expected the portfolio dialog");
+      expect(menuRect.left).to.equal(dialogRect.left);
+      expect(menuRect.right).to.equal(dialogRect.right);
+      expect(menuRect.top).to.equal(dialogRect.top);
+      expect(menuRect.bottom).to.equal(dialogRect.bottom);
     });
     cy.tick(2000);
     cy.get('[data-desktop-navigation="true"]')
