@@ -39,6 +39,7 @@ interface NavigationProps {
   availability: FeatureAvailability;
   onHomeResetEnd?: () => void;
   onHomeResetStart?: () => void;
+  onPortfolioNavigationComplete?: () => void;
   portfolioGridElement: HTMLDivElement | null;
 }
 
@@ -62,6 +63,7 @@ export default function Navigation({
   availability,
   onHomeResetEnd,
   onHomeResetStart,
+  onPortfolioNavigationComplete,
   portfolioGridElement,
 }: NavigationProps) {
   const location = useLocation();
@@ -577,6 +579,7 @@ export default function Navigation({
         transitionSeconds={MENU_ANIMATION_SECONDS}
         onClose={closeMenus}
         onNavigate={handlePortfolioNavigation}
+        onNavigationComplete={() => onPortfolioNavigationComplete?.()}
       />
     </nav>
   );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import Footer from "./Footer";
 import { FEATURE_AVAILABILITY } from "./featureAvailability";
@@ -10,6 +10,11 @@ export default function App() {
   const [portfolioGridElement, setPortfolioGridElement] =
     useState<HTMLDivElement | null>(null);
   const [isHomeResetActive, setIsHomeResetActive] = useState(false);
+  const [isRouteFocusRequested, setIsRouteFocusRequested] = useState(false);
+  const completeRouteFocus = useCallback(
+    () => setIsRouteFocusRequested(false),
+    [],
+  );
 
   return (
     <MotionProvider>
@@ -21,10 +26,15 @@ export default function App() {
               portfolioGridElement={portfolioGridElement}
               onHomeResetStart={() => setIsHomeResetActive(true)}
               onHomeResetEnd={() => setIsHomeResetActive(false)}
+              onPortfolioNavigationComplete={() =>
+                setIsRouteFocusRequested(true)
+              }
             />
             <RouteTransitionBoundary
               availability={FEATURE_AVAILABILITY}
               portfolioGridRef={setPortfolioGridElement}
+              routeFocusRequested={isRouteFocusRequested}
+              onRouteFocusComplete={completeRouteFocus}
             />
           </div>
           <Footer landingEnabled={!isHomeResetActive} />

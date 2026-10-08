@@ -23,6 +23,7 @@ interface PortfolioMenuProps {
   readonly transitionSeconds: number;
   readonly onClose: () => void;
   readonly onNavigate: (path: string) => void;
+  readonly onNavigationComplete: () => void;
 }
 
 function isModifiedActivation(event: ReactMouseEvent<HTMLAnchorElement>) {
@@ -42,6 +43,7 @@ export default function PortfolioMenu({
   transitionSeconds,
   onClose,
   onNavigate,
+  onNavigationComplete,
 }: PortfolioMenuProps) {
   const [activeProjectId, setActiveProjectId] = useState<string>();
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
@@ -139,6 +141,8 @@ export default function PortfolioMenu({
         document.documentElement.classList.remove("modal-open");
         if (restoreFocusRef.current) {
           previouslyFocusedRef.current?.focus({ preventScroll: true });
+        } else {
+          onNavigationComplete();
         }
         restoreFocusRef.current = false;
         previouslyFocusedRef.current = null;

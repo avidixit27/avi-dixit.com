@@ -28,7 +28,9 @@ const PortfolioProjectRoute = lazy(
 );
 interface RouteTransitionBoundaryProps {
   availability: FeatureAvailability;
+  onRouteFocusComplete?: () => void;
   portfolioGridRef: Ref<HTMLDivElement>;
+  routeFocusRequested?: boolean;
 }
 
 function getRouteLabel(pathname: string, availability: FeatureAvailability) {
@@ -49,10 +51,14 @@ function RouteFrame({
   children,
   navigationType,
   label,
+  routeFocusRequested,
+  onRouteFocusComplete,
 }: {
   children: ReactNode;
   navigationType: ReturnType<typeof useNavigationType>;
   label: string;
+  routeFocusRequested: boolean;
+  onRouteFocusComplete: (() => void) | undefined;
 }) {
   const routeRef = useRef<HTMLDivElement>(null);
   const navigationTypeOnMount = useRef(navigationType);
@@ -75,12 +81,27 @@ function RouteFrame({
     if (!isPresent || navigationTypeOnMount.current === "POP") return undefined;
 
     window.scrollTo(0, 0);
-    const frame = window.requestAnimationFrame(() => {
-      routeRef.current?.focus({ preventScroll: true });
-    });
+    if (document.documentElement.classList.contains("modal-open")) {
+      return undefined;
+    }
+
+    const frame = window.requestAnimationFrame(() =>
+      routeRef.current?.focus({ preventScroll: true }),
+    );
 
     return () => window.cancelAnimationFrame(frame);
   }, [isPresent]);
+
+  useLayoutEffect(() => {
+    if (!isPresent || !routeFocusRequested) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      routeRef.current?.focus({ preventScroll: true });
+      onRouteFocusComplete?.();
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [isPresent, onRouteFocusComplete, routeFocusRequested]);
 
   return (
     <m.div
@@ -109,7 +130,9 @@ function RouteFrame({
 
 export default function RouteTransitionBoundary({
   availability,
+  onRouteFocusComplete,
   portfolioGridRef,
+  routeFocusRequested = false,
 }: RouteTransitionBoundaryProps) {
   const location = useLocation();
   const navigationType = useNavigationType();
@@ -121,6 +144,8 @@ export default function RouteTransitionBoundary({
           key={location.pathname}
           navigationType={navigationType}
           label={getRouteLabel(location.pathname, availability)}
+          routeFocusRequested={routeFocusRequested}
+          onRouteFocusComplete={onRouteFocusComplete}
         >
           <Suspense fallback={<RouteLoadingFallback />}>
             <Routes location={location}>

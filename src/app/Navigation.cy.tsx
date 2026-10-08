@@ -6,6 +6,7 @@ import { resolveFeatureAvailability } from "./featureAvailability";
 import MotionProvider from "./MotionProvider";
 import Navigation from "./Navigation";
 import PortfolioMenu from "./PortfolioMenu";
+import RouteTransitionBoundary from "./RouteTransitionBoundary";
 
 const allFeatures = resolveFeatureAvailability({ shop: true, contact: true });
 const releasedFeatures = resolveFeatureAvailability({
@@ -42,6 +43,27 @@ function NavigationAvailabilityHarness() {
         Hide Shop
       </button>
       <Navigation availability={availability} portfolioGridElement={null} />
+    </>
+  );
+}
+
+function PortfolioFocusHarness() {
+  const [routeFocusRequested, setRouteFocusRequested] = useState(false);
+
+  return (
+    <>
+      <Navigation
+        availability={allFeatures}
+        portfolioGridElement={null}
+        onPortfolioNavigationComplete={() => setRouteFocusRequested(true)}
+      />
+      <RouteTransitionBoundary
+        availability={allFeatures}
+        onRouteFocusComplete={() => setRouteFocusRequested(false)}
+        portfolioGridRef={() => undefined}
+        routeFocusRequested={routeFocusRequested}
+      />
+      <LocationPath />
     </>
   );
 }
@@ -398,6 +420,7 @@ describe("Navigation", () => {
             transitionSeconds={10}
             onClose={onClose}
             onNavigate={onNavigate}
+            onNavigationComplete={cy.stub()}
           />
         </MotionProvider>
       </MemoryRouter>,
@@ -430,6 +453,41 @@ describe("Navigation", () => {
     cy.get("@onClose").should("not.have.been.called");
   });
 
+  it("focuses the incoming portfolio after the modal exit completes", () => {
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia").returns({
+        matches: true,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioFocusHarness />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").click();
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").trigger(
+      "pointerover",
+      { pointerType: "mouse", force: true },
+    );
+    cy.get('[data-portfolio-cover="true"]', { timeout: 60_000 }).should(
+      "exist",
+    );
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click({
+      force: true,
+    });
+
+    cy.get("[data-location]").should("have.text", "/portfolio/paris-fr");
+    cy.get('dialog[aria-label="Portfolios"]').should("not.exist");
+    cy.get('[data-route-content="true"]')
+      .should("have.attr", "aria-label", "Portfolio")
+      .and("have.focus");
+  });
+
   it("keeps the selector opaque when the selected cover is not ready", () => {
     const onNavigate = cy.stub().as("onNavigate");
     const onClose = cy.stub().as("onClose");
@@ -455,6 +513,7 @@ describe("Navigation", () => {
             transitionSeconds={0.45}
             onClose={onClose}
             onNavigate={onNavigate}
+            onNavigationComplete={cy.stub()}
           />
         </MotionProvider>
       </MemoryRouter>,
