@@ -3,6 +3,7 @@ import type { Ref } from "react";
 import { useParams } from "react-router-dom";
 import NotFound from "../../../app/NotFound";
 import { PORTFOLIO_PROJECT_MODULE_LOADERS } from "./portfolioProjectModules";
+import { getPortfolioProject } from "./portfolioProjects";
 
 const PROJECT_COMPONENTS = {
   "paris-fr": lazy(PORTFOLIO_PROJECT_MODULE_LOADERS["paris-fr"]),
@@ -16,9 +17,10 @@ export default function PortfolioProjectRoute({
   gridMarkerRef: Ref<HTMLDivElement>;
 }) {
   const { slug } = useParams();
+  const project = slug ? getPortfolioProject(slug) : undefined;
   const Project =
-    slug && Object.hasOwn(PROJECT_COMPONENTS, slug)
-      ? PROJECT_COMPONENTS[slug as keyof typeof PROJECT_COMPONENTS]
+    project && Object.hasOwn(PROJECT_COMPONENTS, project.slug)
+      ? PROJECT_COMPONENTS[project.slug as keyof typeof PROJECT_COMPONENTS]
       : undefined;
 
   if (!Project) return <NotFound />;
