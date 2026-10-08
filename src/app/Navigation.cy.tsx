@@ -341,6 +341,25 @@ describe("Navigation", () => {
     cy.contains("button", "PORTFOLIOS").should("have.focus");
   });
 
+  it("closes the modal from its top-layer close control", () => {
+    cy.clock();
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <Navigation availability={allFeatures} portfolioGridElement={null} />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").click();
+    cy.get('button[aria-label="Close portfolios"]')
+      .should("be.visible")
+      .click();
+    cy.tick(500);
+    cy.get('dialog[aria-label="Portfolios"]').should("not.exist");
+    cy.contains("button", "PORTFOLIOS").should("have.focus");
+  });
+
   it("does not apply portfolio behavior to an unknown project slug", () => {
     cy.clock();
     mount(

@@ -186,6 +186,23 @@ export default function PortfolioMenu({
               if (!(event.target as Element).closest("a")) onClose();
             }}
           >
+            <button
+              type="button"
+              aria-label="Close portfolios"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={onClose}
+              className="absolute top-2 right-4 z-20 grid h-11 w-11 cursor-pointer place-items-center
+                         text-text opacity-90 hover:opacity-100 focus-visible:opacity-100"
+            >
+              <span
+                aria-hidden="true"
+                className="absolute h-px w-6 rotate-45 bg-current"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute h-px w-6 -rotate-45 bg-current"
+              />
+            </button>
             <AnimatePresence>
               {displayedProjectId &&
                 orientation &&
