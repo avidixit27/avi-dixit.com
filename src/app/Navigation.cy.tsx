@@ -322,9 +322,8 @@ describe("Navigation", () => {
 
     cy.contains("button", "PORTFOLIOS").click();
     cy.get('dialog[aria-label="Portfolios"]').should("have.attr", "open");
-    cy.get('dialog[aria-label="Portfolios"]').within(() => {
-      cy.contains("a", "paris").should("have.focus");
-    });
+    cy.get('dialog[aria-label="Portfolios"]').should("have.focus");
+    cy.get('[data-portfolio-cover="true"]').should("not.exist");
     cy.get("html").should("have.class", "modal-open");
     cy.get("body").click(10, 300);
     cy.contains("button", "PORTFOLIOS").should(

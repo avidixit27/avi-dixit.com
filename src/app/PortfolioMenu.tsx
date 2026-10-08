@@ -53,7 +53,6 @@ export default function PortfolioMenu({
   const selectedProjectIdRef = useRef<string>();
   const orientationRef = useRef<PortfolioCoverOrientation>();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const firstProjectLinkRef = useRef<HTMLAnchorElement>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
   const restoreFocusRef = useRef(false);
   const displayedProjectId = selectedProjectId ?? activeProjectId;
@@ -83,7 +82,7 @@ export default function PortfolioMenu({
     restoreFocusRef.current = true;
     document.documentElement.classList.add("modal-open");
     if (dialog && !dialog.open) dialog.showModal();
-    firstProjectLinkRef.current?.focus({ preventScroll: true });
+    dialog?.focus({ preventScroll: true });
   }, [isOpen]);
 
   useEffect(
@@ -153,6 +152,7 @@ export default function PortfolioMenu({
         <m.dialog
           ref={dialogRef}
           aria-label="Portfolios"
+          tabIndex={-1}
           className="fixed inset-0 m-0 h-auto max-h-none w-auto max-w-none border-0 bg-transparent p-0 text-text backdrop:bg-transparent"
           initial={reduceMotion ? false : { clipPath: "inset(0 0 100% 0)" }}
           animate={{ clipPath: "inset(0 0 0% 0)" }}
@@ -259,9 +259,8 @@ export default function PortfolioMenu({
                 visible: { clipPath: "inset(0 0% 0 0%)", opacity: 1 },
               }}
             >
-              {projects.map((project, index) => (
+              {projects.map((project) => (
                 <Link
-                  ref={index === 0 ? firstProjectLinkRef : undefined}
                   key={project.id}
                   to={project.route}
                   aria-label={project.title}
