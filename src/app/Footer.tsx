@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { Link, matchPath, useLocation } from "react-router-dom";
 import resumeUrl from "../assets/documents/avi-dixit-resume.pdf";
 import signatureLogo from "../assets/icons/avi-signature-logo.svg";
+import { getPortfolioProject } from "../features/portfolio/projects/portfolioProjects";
 import { ROUTES } from "../resources/navigation";
 import { SITE_DETAILS } from "../resources/site";
 import {
@@ -23,8 +24,13 @@ const DOCUMENT_LINK_CLASS =
 export default function Footer({ landingEnabled }: FooterProps) {
   const location = useLocation();
   const isHome = matchPath(ROUTES.home, location.pathname) !== null;
-  const isPortfolio =
-    matchPath(`${ROUTES.portfolio}/:slug`, location.pathname) !== null;
+  const portfolioSlug = matchPath(
+    `${ROUTES.portfolio}/:slug`,
+    location.pathname,
+  )?.params.slug;
+  const isPortfolio = Boolean(
+    portfolioSlug && getPortfolioProject(portfolioSlug),
+  );
   const footerRef = useRef<HTMLDivElement>(null);
   const artistStatementLinkRef = useRef<HTMLAnchorElement>(null);
   const reduceMotion = useReducedMotion();

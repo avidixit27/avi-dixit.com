@@ -170,6 +170,15 @@ describe("Footer", () => {
           .and("have.class", "font-tangerine");
         cy.contains("a", "Artist Statement").should("not.exist");
       });
+
+    mount(
+      <MotionProvider>
+        <MemoryRouter initialEntries={["/portfolio/unknown"]}>
+          <Footer landingEnabled />
+        </MemoryRouter>
+      </MotionProvider>,
+    );
+    cy.get('nav[aria-label="Portfolio documents"]').should("not.exist");
   });
 
   it("right-stacks Home footer links without overlap on compact viewports", () => {

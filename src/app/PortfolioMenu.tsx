@@ -1,10 +1,11 @@
 import { AnimatePresence } from "motion/react";
 import * as m from "motion/react-m";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import ResponsiveImage from "../components/ResponsiveImage";
+import { preloadPortfolioProject } from "../features/portfolio/projects/portfolioProjectModules";
 import {
   loadPortfolioCover,
   type PortfolioCoverOrientation,
@@ -47,7 +48,48 @@ export default function PortfolioMenu({
   const [orientation, setOrientation] = useState<PortfolioCoverOrientation>();
   const [covers, setCovers] = useState<Record<string, Photo | undefined>>({});
   const [isNavigating, setIsNavigating] = useState(false);
+  const readyCoverKeysRef = useRef(new Set<string>());
+  const readyProjectIdsRef = useRef(new Set<string>());
+  const selectedProjectIdRef = useRef<string>();
+  const orientationRef = useRef<PortfolioCoverOrientation>();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const firstProjectLinkRef = useRef<HTMLAnchorElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  const restoreFocusRef = useRef(false);
   const displayedProjectId = selectedProjectId ?? activeProjectId;
+
+  const revealSelectedProjectIfReady = useCallback((projectId: string) => {
+    const currentOrientation = orientationRef.current;
+    if (
+      selectedProjectIdRef.current === projectId &&
+      currentOrientation &&
+      readyProjectIdsRef.current.has(projectId) &&
+      readyCoverKeysRef.current.has(`${projectId}:${currentOrientation}`)
+    ) {
+      setIsNavigating(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const dialog = dialogRef.current;
+    if (!restoreFocusRef.current) {
+      previouslyFocusedRef.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+    }
+    restoreFocusRef.current = true;
+    document.documentElement.classList.add("modal-open");
+    if (dialog && !dialog.open) dialog.showModal();
+    firstProjectLinkRef.current?.focus({ preventScroll: true });
+  }, [isOpen]);
+
+  useEffect(
+    () => () => document.documentElement.classList.remove("modal-open"),
+    [],
+  );
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -56,8 +98,10 @@ export default function PortfolioMenu({
     let current = true;
     const loadCovers = async () => {
       const nextOrientation = media.matches ? "portrait" : "landscape";
+      orientationRef.current = nextOrientation;
       setOrientation(nextOrientation);
       setCovers({});
+      readyCoverKeysRef.current.clear();
       const loadedCovers = await Promise.all(
         projects.map(
           async (project) =>
@@ -71,31 +115,45 @@ export default function PortfolioMenu({
     };
 
     void loadCovers();
+    projects.forEach((project) => {
+      void preloadPortfolioProject(project.slug).then(
+        (loaded) => {
+          if (!current || !loaded) return;
+          readyProjectIdsRef.current.add(project.id);
+          revealSelectedProjectIfReady(project.id);
+        },
+        () => undefined,
+      );
+    });
     media.addEventListener("change", loadCovers);
 
     return () => {
       current = false;
       media.removeEventListener("change", loadCovers);
     };
-  }, [isOpen, projects]);
+  }, [isOpen, projects, revealSelectedProjectIfReady]);
 
   return createPortal(
     <AnimatePresence
       onExitComplete={() => {
+        if (dialogRef.current?.open) dialogRef.current.close();
+        document.documentElement.classList.remove("modal-open");
+        if (restoreFocusRef.current) {
+          previouslyFocusedRef.current?.focus({ preventScroll: true });
+        }
+        restoreFocusRef.current = false;
+        previouslyFocusedRef.current = null;
         setActiveProjectId(undefined);
         setSelectedProjectId(undefined);
+        selectedProjectIdRef.current = undefined;
         setIsNavigating(false);
       }}
     >
       {isOpen && (
-        <m.nav
-          id="portfolio-menu"
+        <m.dialog
+          ref={dialogRef}
           aria-label="Portfolios"
-          data-portfolio-menu="true"
-          className={`fixed inset-0 z-[80] isolate overflow-hidden ${
-            isNavigating ? "bg-transparent" : "bg-canvas"
-          }`}
-          data-navigating={isNavigating ? "true" : undefined}
+          className="fixed inset-0 m-0 h-auto max-h-none w-auto max-w-none border-0 bg-transparent p-0 text-text backdrop:bg-transparent"
           initial={reduceMotion ? false : { clipPath: "inset(0 0 100% 0)" }}
           animate={{ clipPath: "inset(0 0 0% 0)" }}
           exit={
@@ -111,105 +169,127 @@ export default function PortfolioMenu({
                 : transitionSeconds,
             ease: "easeInOut",
           }}
-          onPointerDown={(event) => {
-            if (!(event.target as Element).closest("a")) onClose();
+          onCancel={(event) => {
+            event.preventDefault();
+            onClose();
           }}
         >
-          <AnimatePresence>
-            {displayedProjectId &&
-              orientation &&
-              covers[displayedProjectId] && (
-                <m.div
-                  key={`${displayedProjectId}-${orientation}`}
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0"
-                  data-portfolio-cover="true"
-                  initial={
-                    reduceMotion ? false : { clipPath: "inset(0 50% 0 50%)" }
-                  }
-                  animate={{ clipPath: "inset(0 0% 0 0%)" }}
-                  exit={
-                    reduceMotion
-                      ? { opacity: 0 }
-                      : { clipPath: "inset(0 50% 0 50%)" }
-                  }
-                  transition={{
-                    duration: reduceMotion ? 0 : transitionSeconds,
-                    ease: COVER_REVEAL_EASE,
-                  }}
-                >
-                  <ResponsiveImage
-                    {...covers[displayedProjectId]}
-                    sizes="100vw"
-                    loading="eager"
-                    fetchPriority="high"
-                    alt=""
-                    pictureClassName="block h-full w-full"
-                    className="h-full w-full object-cover"
-                  />
-                  <m.div
-                    animate={{
-                      clipPath: isNavigating
-                        ? "inset(0 50% 0 50%)"
-                        : "inset(0 0% 0 0%)",
-                    }}
-                    className="absolute inset-0 bg-canvas/35"
-                    transition={{
-                      duration: reduceMotion ? 0 : transitionSeconds,
-                      ease: "easeInOut",
-                    }}
-                  />
-                </m.div>
-              )}
-          </AnimatePresence>
-
-          <m.div
-            animate={isNavigating ? "navigating" : "visible"}
-            aria-hidden={isNavigating ? true : undefined}
-            className="relative z-10 mx-auto flex h-full w-[80vw] flex-col justify-center"
-            data-portfolio-labels="true"
-            onAnimationComplete={(definition) => {
-              if (definition === "navigating") onClose();
-            }}
-            transition={{
-              duration: reduceMotion ? 0 : transitionSeconds,
-              ease: "easeInOut",
-            }}
-            variants={{
-              navigating: {
-                clipPath: "inset(0 50% 0 50%)",
-                opacity: 0,
-              },
-              visible: { clipPath: "inset(0 0% 0 0%)", opacity: 1 },
+          <nav
+            id="portfolio-menu"
+            aria-label="Portfolios"
+            data-portfolio-menu="true"
+            className={`fixed inset-0 z-[80] isolate overflow-hidden ${
+              isNavigating ? "bg-transparent" : "bg-canvas"
+            }`}
+            data-navigating={isNavigating ? "true" : undefined}
+            onPointerDown={(event) => {
+              if (!(event.target as Element).closest("a")) onClose();
             }}
           >
-            {projects.map((project) => (
-              <Link
-                key={project.id}
-                to={project.route}
-                aria-label={project.title}
-                onPointerEnter={() => setActiveProjectId(project.id)}
-                onPointerLeave={() => setActiveProjectId(undefined)}
-                onPointerDown={() => setActiveProjectId(project.id)}
-                onFocus={() => setActiveProjectId(project.id)}
-                onBlur={() => setActiveProjectId(undefined)}
-                onClick={(event) => {
-                  if (event.defaultPrevented || isModifiedActivation(event)) {
-                    return;
-                  }
+            <AnimatePresence>
+              {displayedProjectId &&
+                orientation &&
+                covers[displayedProjectId] && (
+                  <m.div
+                    key={`${displayedProjectId}-${orientation}`}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0"
+                    data-portfolio-cover="true"
+                    initial={
+                      reduceMotion ? false : { clipPath: "inset(0 50% 0 50%)" }
+                    }
+                    animate={{ clipPath: "inset(0 0% 0 0%)" }}
+                    exit={
+                      reduceMotion
+                        ? { opacity: 0 }
+                        : { clipPath: "inset(0 50% 0 50%)" }
+                    }
+                    transition={{
+                      duration: reduceMotion ? 0 : transitionSeconds,
+                      ease: COVER_REVEAL_EASE,
+                    }}
+                  >
+                    <ResponsiveImage
+                      {...covers[displayedProjectId]}
+                      sizes="100vw"
+                      loading="eager"
+                      fetchPriority="high"
+                      alt=""
+                      pictureClassName="block h-full w-full"
+                      className="h-full w-full object-cover"
+                      onLoad={() => {
+                        const coverKey = `${displayedProjectId}:${orientation}`;
+                        readyCoverKeysRef.current.add(coverKey);
+                        revealSelectedProjectIfReady(displayedProjectId);
+                      }}
+                    />
+                    <m.div
+                      animate={{
+                        clipPath: isNavigating
+                          ? "inset(0 50% 0 50%)"
+                          : "inset(0 0% 0 0%)",
+                      }}
+                      className="absolute inset-0 bg-canvas/35"
+                      transition={{
+                        duration: reduceMotion ? 0 : transitionSeconds,
+                        ease: "easeInOut",
+                      }}
+                    />
+                  </m.div>
+                )}
+            </AnimatePresence>
 
-                  event.preventDefault();
-                  setSelectedProjectId(project.id);
-                  setIsNavigating(true);
-                  onNavigate(project.route);
-                }}
-                className="flex min-h-0 flex-1 items-center justify-center text-center uppercase font-photo-number text-[clamp(3rem,min(18vw,26vh),18rem)] leading-none text-text [text-shadow:0_3px_12px_rgb(0_0_0_/_0.7)] hover:text-focus focus-visible:text-focus focus-visible:outline-none"
-              >
-                {project.title}
-              </Link>
-            ))}
-          </m.div>
-        </m.nav>
+            <m.div
+              animate={isNavigating ? "navigating" : "visible"}
+              aria-hidden={isNavigating ? true : undefined}
+              className="relative z-10 mx-auto flex h-full w-[80vw] flex-col justify-center"
+              data-portfolio-labels="true"
+              onAnimationComplete={(definition) => {
+                if (definition === "navigating") onClose();
+              }}
+              transition={{
+                duration: reduceMotion ? 0 : transitionSeconds,
+                ease: "easeInOut",
+              }}
+              variants={{
+                navigating: {
+                  clipPath: "inset(0 50% 0 50%)",
+                  opacity: 0,
+                },
+                visible: { clipPath: "inset(0 0% 0 0%)", opacity: 1 },
+              }}
+            >
+              {projects.map((project, index) => (
+                <Link
+                  ref={index === 0 ? firstProjectLinkRef : undefined}
+                  key={project.id}
+                  to={project.route}
+                  aria-label={project.title}
+                  onPointerEnter={() => setActiveProjectId(project.id)}
+                  onPointerLeave={() => setActiveProjectId(undefined)}
+                  onPointerDown={() => setActiveProjectId(project.id)}
+                  onFocus={() => setActiveProjectId(project.id)}
+                  onBlur={() => setActiveProjectId(undefined)}
+                  onClick={(event) => {
+                    if (event.defaultPrevented || isModifiedActivation(event)) {
+                      return;
+                    }
+
+                    event.preventDefault();
+                    restoreFocusRef.current = false;
+                    selectedProjectIdRef.current = project.id;
+                    setSelectedProjectId(project.id);
+                    revealSelectedProjectIfReady(project.id);
+                    onNavigate(project.route);
+                  }}
+                  className="flex min-h-0 flex-1 items-center justify-center text-center uppercase font-photo-number text-[clamp(3rem,min(18vw,26vh),18rem)] leading-none text-text [text-shadow:0_3px_12px_rgb(0_0_0_/_0.7)] hover:text-focus focus-visible:text-focus focus-visible:outline-none"
+                >
+                  {project.title}
+                </Link>
+              ))}
+            </m.div>
+          </nav>
+        </m.dialog>
       )}
     </AnimatePresence>,
     document.body,

@@ -132,6 +132,11 @@ describe("RouteTransitionBoundary", () => {
 
     mountRoute("/portfolio/unknown", false, true);
     cy.contains("h1", "Page not found").should("be.visible");
+    cy.get('[data-route-content="true"]').should(
+      "have.attr",
+      "aria-label",
+      "Page not found",
+    );
   });
 
   it("redirects the legacy artist statement route to the expanded portfolio", () => {

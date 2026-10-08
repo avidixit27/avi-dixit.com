@@ -4,6 +4,7 @@ import { MemoryRouter, useLocation } from "react-router-dom";
 import { resolveFeatureAvailability } from "./featureAvailability";
 import MotionProvider from "./MotionProvider";
 import Navigation from "./Navigation";
+import PortfolioMenu from "./PortfolioMenu";
 
 const allFeatures = resolveFeatureAvailability({ shop: true, contact: true });
 const releasedFeatures = resolveFeatureAvailability({
@@ -309,6 +310,7 @@ describe("Navigation", () => {
   });
 
   it("folds the desktop portfolio menu away after clicking outside it", () => {
+    cy.clock();
     cy.viewport(1280, 800);
     mount(
       <MemoryRouter>
@@ -319,18 +321,48 @@ describe("Navigation", () => {
     );
 
     cy.contains("button", "PORTFOLIOS").click();
-    cy.get('nav[data-portfolio-menu="true"]').should("be.visible");
+    cy.get('dialog[aria-label="Portfolios"]').should("have.attr", "open");
+    cy.get('dialog[aria-label="Portfolios"]').within(() => {
+      cy.contains("a", "paris").should("have.focus");
+    });
+    cy.get("html").should("have.class", "modal-open");
     cy.get("body").click(10, 300);
     cy.contains("button", "PORTFOLIOS").should(
       "have.attr",
       "aria-expanded",
       "false",
     );
+    cy.tick(500);
     cy.get('nav[data-portfolio-menu="true"]').should("not.exist");
+    cy.get("html").should("not.have.class", "modal-open");
+    cy.contains("button", "PORTFOLIOS").should("have.focus");
+  });
+
+  it("does not apply portfolio behavior to an unknown project slug", () => {
+    cy.clock();
+    mount(
+      <MemoryRouter initialEntries={["/portfolio/unknown"]}>
+        <Navigation availability={allFeatures} portfolioGridElement={null} />
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").should(
+      "not.have.class",
+      "text-brand-warm",
+    );
+    cy.tick(2001);
+    cy.get("nav").should("have.class", "translate-y-0");
   });
 
   it("navigates immediately while the labels collapse over the selected cover", () => {
     cy.clock();
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia").returns({
+        matches: false,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
     mount(
       <MemoryRouter>
         <MotionProvider>
@@ -370,6 +402,53 @@ describe("Navigation", () => {
     cy.get('[data-desktop-navigation="true"]')
       .closest("nav")
       .should("have.class", "translate-y-0");
+  });
+
+  it("keeps the selector opaque when the selected cover is not ready", () => {
+    const onNavigate = cy.stub().as("onNavigate");
+    const onClose = cy.stub().as("onClose");
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioMenu
+            isOpen
+            projects={[
+              {
+                id: "cold-cover",
+                slug: "cold-cover",
+                title: "cold cover",
+                route: "/portfolio/cold-cover",
+                available: true,
+                coverPhotoIds: {
+                  landscape: "unavailable",
+                  portrait: "unavailable",
+                },
+              },
+            ]}
+            reduceMotion={false}
+            transitionSeconds={0.45}
+            onClose={onClose}
+            onNavigate={onNavigate}
+          />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains('nav[data-portfolio-menu="true"] a', "cold cover").click();
+    cy.get("@onNavigate").should(
+      "have.been.calledOnceWith",
+      "/portfolio/cold-cover",
+    );
+    cy.get('nav[data-portfolio-menu="true"]').should(
+      "not.have.attr",
+      "data-navigating",
+    );
+    cy.get('nav[data-portfolio-menu="true"]').should("have.class", "bg-canvas");
+    cy.get('[data-portfolio-labels="true"]').should(
+      "not.have.attr",
+      "aria-hidden",
+    );
+    cy.get("@onClose").should("not.have.been.called");
   });
 
   it("uses the Home portfolio visibility behavior on project routes", () => {

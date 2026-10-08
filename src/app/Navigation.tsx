@@ -12,7 +12,10 @@ import type { MouseEvent as ReactMouseEvent } from "react";
 import { Link, matchPath, useLocation, useNavigate } from "react-router-dom";
 import portrait from "../assets/brand/avi-dixit-portrait.webp";
 import wordmark from "../assets/brand/avi-dixit-wordmark.svg";
-import { PORTFOLIO_PROJECTS } from "../features/portfolio/projects/portfolioProjects";
+import {
+  getPortfolioProject,
+  PORTFOLIO_PROJECTS,
+} from "../features/portfolio/projects/portfolioProjects";
 import { NAVIGATION_ITEMS, ROUTES } from "../resources/navigation";
 import type { FeatureAvailability } from "./featureAvailability";
 import PortfolioMenu from "./PortfolioMenu";
@@ -64,8 +67,13 @@ export default function Navigation({
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = matchPath(ROUTES.home, location.pathname) !== null;
-  const isPortfolioRoute =
-    matchPath(`${ROUTES.portfolio}/:slug`, location.pathname) !== null;
+  const portfolioSlug = matchPath(
+    `${ROUTES.portfolio}/:slug`,
+    location.pathname,
+  )?.params.slug;
+  const isPortfolioRoute = Boolean(
+    portfolioSlug && getPortfolioProject(portfolioSlug),
+  );
   const isPortfolio = isHome || isPortfolioRoute;
   const navRef = useRef<HTMLElement>(null);
   const linksWrapRef = useRef<HTMLDivElement>(null);
