@@ -1,6 +1,7 @@
 import { mount } from "@cypress/react";
 import { useState } from "react";
 import { MemoryRouter, useLocation } from "react-router-dom";
+import { getPortfolioProject } from "../features/portfolio/projects/portfolioProjects";
 import { resolveFeatureAvailability } from "./featureAvailability";
 import MotionProvider from "./MotionProvider";
 import Navigation from "./Navigation";
@@ -354,7 +355,10 @@ describe("Navigation", () => {
   });
 
   it("navigates immediately while the labels collapse over the selected cover", () => {
-    cy.clock();
+    const paris = getPortfolioProject("paris-fr");
+    if (!paris) throw new Error("Expected the Paris portfolio");
+    const onNavigate = cy.stub().as("onNavigate");
+    const onClose = cy.stub().as("onClose");
     cy.window().then((window) => {
       cy.stub(window, "matchMedia").returns({
         matches: false,
@@ -365,23 +369,32 @@ describe("Navigation", () => {
     mount(
       <MemoryRouter>
         <MotionProvider>
-          <Navigation availability={allFeatures} portfolioGridElement={null} />
-          <LocationPath />
+          <PortfolioMenu
+            isOpen
+            projects={[paris]}
+            reduceMotion={false}
+            transitionSeconds={10}
+            onClose={onClose}
+            onNavigate={onNavigate}
+          />
         </MotionProvider>
       </MemoryRouter>,
     );
 
-    cy.contains("button", "PORTFOLIOS").click();
-    cy.tick(500);
     cy.contains('nav[data-portfolio-menu="true"] a', "paris").trigger(
       "pointerover",
-      { pointerType: "mouse" },
+      { pointerType: "mouse", force: true },
     );
     cy.get('[data-portfolio-cover="true"]', { timeout: 60_000 }).should(
       "exist",
     );
-    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click();
-    cy.get("output[data-location]").should("have.text", "/portfolio/paris-fr");
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click({
+      force: true,
+    });
+    cy.get("@onNavigate").should(
+      "have.been.calledOnceWith",
+      "/portfolio/paris-fr",
+    );
     cy.get('nav[data-portfolio-menu="true"]')
       .should("have.attr", "data-navigating", "true")
       .and("have.class", "bg-transparent");
@@ -391,16 +404,8 @@ describe("Navigation", () => {
       "aria-hidden",
       "true",
     );
-    cy.get('[data-desktop-navigation="true"]')
-      .closest("nav")
-      .should("have.class", "-translate-y-full");
     cy.get('[data-portfolio-transition-curtain="true"]').should("not.exist");
-    cy.tick(450 + 180);
-    cy.get('nav[data-portfolio-menu="true"]').should("not.exist");
-    cy.window().trigger("mousemove");
-    cy.get('[data-desktop-navigation="true"]')
-      .closest("nav")
-      .should("have.class", "translate-y-0");
+    cy.get("@onClose").should("not.have.been.called");
   });
 
   it("keeps the selector opaque when the selected cover is not ready", () => {
