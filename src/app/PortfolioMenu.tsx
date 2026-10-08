@@ -153,7 +153,7 @@ export default function PortfolioMenu({
           ref={dialogRef}
           aria-label="Portfolios"
           tabIndex={-1}
-          className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none border-0 bg-transparent p-0 text-text backdrop:bg-transparent"
+          className="fixed inset-0 m-0 h-auto max-h-none w-auto max-w-none border-0 bg-transparent p-0 text-text backdrop:bg-transparent"
           initial={reduceMotion ? false : { clipPath: "inset(0 0 100% 0)" }}
           animate={{ clipPath: "inset(0 0 0% 0)" }}
           exit={
@@ -178,7 +178,7 @@ export default function PortfolioMenu({
             id="portfolio-menu"
             aria-label="Portfolios"
             data-portfolio-menu="true"
-            className={`fixed inset-0 z-[80] isolate h-dvh w-screen overflow-hidden ${
+            className={`fixed inset-0 z-[80] isolate overflow-hidden ${
               isNavigating ? "bg-transparent" : "bg-canvas"
             }`}
             data-navigating={isNavigating ? "true" : undefined}

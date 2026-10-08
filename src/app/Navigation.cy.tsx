@@ -220,12 +220,14 @@ describe("Navigation", () => {
       );
     });
     cy.get('nav[data-portfolio-menu="true"]').then(($menu) => {
-      const menuRect = $menu.get(0)?.getBoundingClientRect();
-      if (!menuRect) throw new Error("Expected the portfolio menu");
+      const menu = $menu.get(0);
+      if (!menu) throw new Error("Expected the portfolio menu");
+      const menuRect = menu.getBoundingClientRect();
+      const viewport = menu.ownerDocument.documentElement;
       expect(menuRect.left).to.equal(0);
-      expect(menuRect.right).to.equal(1512);
+      expect(menuRect.right).to.equal(viewport.clientWidth);
       expect(menuRect.top).to.equal(0);
-      expect(menuRect.bottom).to.equal(770);
+      expect(menuRect.bottom).to.equal(viewport.clientHeight);
     });
     cy.tick(2000);
     cy.get('[data-desktop-navigation="true"]')
