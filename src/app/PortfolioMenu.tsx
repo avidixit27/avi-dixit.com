@@ -15,6 +15,7 @@ import type { Photo } from "../features/portfolio/photoTypes";
 
 const MOBILE_COVER_MEDIA_QUERY = "(max-width: 639px)";
 const COVER_REVEAL_EASE = [0.22, 0.61, 0.36, 1] as const;
+const INITIAL_COVER_PRELOAD_LIMIT = 4;
 
 interface PortfolioMenuProps {
   readonly isOpen: boolean;
@@ -136,8 +137,6 @@ export default function PortfolioMenu({
   );
 
   useEffect(() => {
-    if (!isOpen) return undefined;
-
     const media = window.matchMedia(MOBILE_COVER_MEDIA_QUERY);
     let current = true;
     const loadCovers = async () => {
@@ -171,7 +170,7 @@ export default function PortfolioMenu({
       current = false;
       media.removeEventListener("change", loadCovers);
     };
-  }, [isOpen, markCoverReady, projects]);
+  }, [markCoverReady, projects]);
 
   return createPortal(
     <AnimatePresence
@@ -195,8 +194,38 @@ export default function PortfolioMenu({
         setIsNavigating(false);
       }}
     >
+      {orientation && (
+        <div
+          key="cover-preloads"
+          aria-hidden="true"
+          className="pointer-events-none fixed -top-px -left-px h-px w-px overflow-hidden opacity-0"
+        >
+          {projects.slice(0, INITIAL_COVER_PRELOAD_LIMIT).map((project) => {
+            const cover = covers[project.id];
+            if (!cover) return null;
+
+            return (
+              <div
+                key={`${project.id}-${orientation}`}
+                data-portfolio-cover-preload="true"
+              >
+                <ResponsiveImage
+                  {...cover}
+                  sizes="100vw"
+                  loading="eager"
+                  fetchPriority="low"
+                  alt=""
+                  onLoad={() => markCoverReady(project.id, orientation)}
+                  onError={() => markCoverReady(project.id, orientation)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
       {isOpen && (
         <m.dialog
+          key="portfolio-dialog"
           ref={dialogRef}
           aria-label="Portfolios"
           tabIndex={-1}

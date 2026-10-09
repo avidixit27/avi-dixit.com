@@ -20,6 +20,20 @@ describe("photography portfolio", () => {
       expect(first.currentSrc).to.match(/-[\w-]+\.(?:avif|jpg|webp)$/);
     });
 
+    cy.get('[data-portfolio-cover-preload="true"] img').should(($images) => {
+      expect($images).to.have.length(3);
+
+      $images.each((_index, image) => {
+        const cover = image as HTMLImageElement;
+
+        expect(cover.getAttribute("loading")).to.equal("eager");
+        expect(cover.getAttribute("fetchpriority")).to.equal("low");
+        expect(cover.getAttribute("sizes")).to.equal("100vw");
+        expect(cover.complete).to.equal(true);
+        expect(cover.naturalWidth).to.be.greaterThan(0);
+      });
+    });
+
     cy.get("main button")
       .first()
       .find("img")

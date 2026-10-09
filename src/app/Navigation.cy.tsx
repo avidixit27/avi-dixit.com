@@ -913,19 +913,19 @@ describe("Navigation", () => {
         .returns(42);
       cy.stub(window, "cancelAnimationFrame").as("cancelAnimationFrame");
       cy.stub(window, "scrollTo");
-      cy.stub(window, "matchMedia")
-        .onFirstCall()
-        .returns({
-          matches: false,
+      const reducedMotionMatches = [false, true];
+      cy.stub(window, "matchMedia").callsFake((query: string) => {
+        const matches =
+          query === "(prefers-reduced-motion: reduce)"
+            ? (reducedMotionMatches.shift() ?? true)
+            : false;
+
+        return {
+          matches,
           addEventListener: cy.stub(),
           removeEventListener: cy.stub(),
-        } as unknown as MediaQueryList)
-        .onSecondCall()
-        .returns({
-          matches: true,
-          addEventListener: cy.stub(),
-          removeEventListener: cy.stub(),
-        } as unknown as MediaQueryList);
+        } as unknown as MediaQueryList;
+      });
     });
     mount(
       <MemoryRouter initialEntries={["/"]}>
