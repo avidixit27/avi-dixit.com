@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode, Ref } from "react";
 import HeroSlideshow from "./HeroSlideshow";
+import type { HeroPhotoIdsByOrientation } from "./HeroSlideshow";
 import Lightbox from "./Lightbox";
 import type { Photo } from "./photoTypes";
 import { HERO_PHOTO_COUNT } from "./portfolioPresentationPolicy";
@@ -14,6 +15,7 @@ interface PhotoSelection {
 interface PortfolioExperienceProps {
   photos: readonly Photo[];
   heroResetKey?: string;
+  initialHeroPhotoIdsByOrientation?: HeroPhotoIdsByOrientation | undefined;
   showPhotoNumber?: boolean;
   gridMarkerRef?: Ref<HTMLDivElement>;
   children?: (onOpen: (index: number, previewSrc: string) => void) => ReactNode;
@@ -25,6 +27,7 @@ interface PortfolioExperienceProps {
 export default function PortfolioExperience({
   photos,
   heroResetKey,
+  initialHeroPhotoIdsByOrientation,
   showPhotoNumber = false,
   gridMarkerRef,
   children,
@@ -54,6 +57,7 @@ export default function PortfolioExperience({
       <HeroSlideshow
         key={heroResetKey}
         photos={heroPhotos}
+        initialPhotoIdsByOrientation={initialHeroPhotoIdsByOrientation}
         onOpen={selectPhoto}
       />
       {children?.(selectPhoto)}

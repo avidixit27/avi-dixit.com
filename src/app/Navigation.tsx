@@ -85,6 +85,7 @@ export default function Navigation({
   const lastYRef = useRef(0);
   const inactivityTimerRef = useRef<number | null>(null);
   const homeResetFrameRef = useRef<number | null>(null);
+  const pendingPortfolioPathRef = useRef<string>();
   const openPortfolioAfterCompactMenuRef = useRef(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isPortfolioMenuOpen, setIsPortfolioMenuOpen] = useState(false);
@@ -353,13 +354,22 @@ export default function Navigation({
 
   const handlePortfolioNavigation = (path: string) => {
     setIsHidden(true);
+    pendingPortfolioPathRef.current = path;
     if (homeResetFrameRef.current !== null) {
       window.cancelAnimationFrame(homeResetFrameRef.current);
       homeResetFrameRef.current = null;
       onHomeResetEnd?.();
     }
 
+    if (location.pathname === path) window.scrollTo(0, 0);
     navigate(path);
+  };
+
+  const handlePortfolioNavigationComplete = () => {
+    const path = pendingPortfolioPathRef.current;
+    pendingPortfolioPathRef.current = undefined;
+    if (path) navigate(path, { replace: true });
+    onPortfolioNavigationComplete?.();
   };
 
   const isCompactMenuExpanded = isMobileNavigationOpen || isPortfolioMenuOpen;
@@ -581,7 +591,7 @@ export default function Navigation({
         transitionSeconds={MENU_ANIMATION_SECONDS}
         onClose={closeMenus}
         onNavigate={handlePortfolioNavigation}
-        onNavigationComplete={() => onPortfolioNavigationComplete?.()}
+        onNavigationComplete={handlePortfolioNavigationComplete}
       />
     </>
   );

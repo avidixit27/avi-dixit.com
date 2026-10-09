@@ -21,6 +21,7 @@ export default function ProjectPortfolio({
     <PortfolioExperience
       photos={photos}
       heroResetKey={location.key}
+      initialHeroPhotoIdsByOrientation={project.coverPhotoIds}
       gridMarkerRef={gridMarkerRef}
     >
       {() => (

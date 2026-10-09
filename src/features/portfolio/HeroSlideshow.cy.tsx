@@ -111,4 +111,27 @@ describe("HeroSlideshow", () => {
     cy.tick(1);
     cy.get('img[alt="Second test photo"]').should("have.class", "opacity-100");
   });
+
+  it("starts a portrait viewport on its configured cover", () => {
+    cy.clock();
+    cy.viewport(390, 844);
+
+    mount(
+      <HeroSlideshow
+        photos={photos}
+        initialPhotoIdsByOrientation={{
+          landscape: "first",
+          portrait: "third",
+        }}
+        onOpen={cy.stub()}
+      />,
+    );
+
+    cy.get('img[alt="Third test photo"]').should("have.class", "opacity-100");
+    cy.get('img[alt="First test photo"]').trigger("load");
+    cy.tick(2499);
+    cy.get('img[alt="Third test photo"]').should("have.class", "opacity-100");
+    cy.tick(1);
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+  });
 });
