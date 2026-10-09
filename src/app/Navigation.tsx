@@ -202,14 +202,11 @@ export default function Navigation({
     if (!isPortfolio) {
       return undefined;
     }
+    if (isMenuOpen) return undefined;
 
     const hideLater = () => {
       if (inactivityTimerRef.current !== null) {
         window.clearTimeout(inactivityTimerRef.current);
-      }
-      if (isMenuOpen) {
-        inactivityTimerRef.current = null;
-        return;
       }
       inactivityTimerRef.current = window.setTimeout(
         () => setIsHidden(true),

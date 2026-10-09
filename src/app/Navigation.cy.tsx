@@ -510,6 +510,49 @@ describe("Navigation", () => {
     cy.get("@onClose").should("not.have.been.called");
   });
 
+  it("keeps the destination navigation hidden while the selector exits", () => {
+    cy.viewport(1512, 770);
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <Navigation availability={allFeatures} portfolioGridElement={null} />
+          <LocationPath />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").click();
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").trigger(
+      "pointerover",
+      { pointerType: "mouse", force: true },
+    );
+    cy.get('[data-portfolio-cover="true"]', { timeout: 60_000 }).should(
+      "exist",
+    );
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click({
+      force: true,
+    });
+    cy.get("[data-location]").should("have.text", "/portfolio/paris-fr");
+    cy.get('nav[data-portfolio-menu="true"]').should(
+      "have.attr",
+      "data-navigating",
+      "true",
+    );
+    cy.window().then((window) => {
+      window.dispatchEvent(
+        new MouseEvent("mousemove", {
+          bubbles: true,
+          clientX: 500,
+          clientY: 400,
+        }),
+      );
+    });
+    cy.get('[data-primary-navigation="true"]').should(
+      "have.class",
+      "-translate-y-full",
+    );
+  });
+
   it("focuses the incoming portfolio after the modal exit completes", () => {
     cy.window().then((window) => {
       cy.stub(window, "matchMedia").returns({

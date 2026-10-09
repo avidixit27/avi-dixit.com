@@ -35,6 +35,9 @@ describe("PhotoGrid", () => {
       pointerType: "mouse",
     });
     cy.get('img[alt="Photo 1"]')
+      .should("have.attr", "fetchpriority", "low")
+      .and("not.have.attr", "sizes", LIGHTBOX_IMAGE_SIZES);
+    cy.get('[data-grid-lightbox-preload="true"] img')
       .should("have.attr", "sizes", LIGHTBOX_IMAGE_SIZES)
       .and("have.attr", "fetchpriority", "high");
     cy.get('img[alt="Photo 2"]')

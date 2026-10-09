@@ -19,6 +19,7 @@ export default function PhotoGrid({
   onOpen,
 }: PhotoGridProps) {
   const [preloadPhotoId, setPreloadPhotoId] = useState<string>();
+  const preloadPhoto = photos.find((photo) => photo.id === preloadPhotoId);
 
   return (
     <>
@@ -51,22 +52,33 @@ export default function PhotoGrid({
                 src={photo.src}
                 srcSet={photo.srcSet}
                 sources={photo.sources}
-                sizes={
-                  preloadPhotoId === photo.id
-                    ? LIGHTBOX_IMAGE_SIZES
-                    : GRID_IMAGE_SIZES
-                }
+                sizes={GRID_IMAGE_SIZES}
                 width={photo.width}
                 height={photo.height}
                 alt={photo.alt}
                 loading="lazy"
-                fetchPriority={preloadPhotoId === photo.id ? "high" : "low"}
+                fetchPriority="low"
                 className="h-auto w-full rounded-control"
               />
             </button>
           ))}
         </div>
       </main>
+      {preloadPhoto && (
+        <div
+          data-grid-lightbox-preload="true"
+          aria-hidden="true"
+          className="pointer-events-none fixed -top-px -left-px h-px w-px overflow-hidden opacity-0"
+        >
+          <ResponsiveImage
+            {...preloadPhoto}
+            sizes={LIGHTBOX_IMAGE_SIZES}
+            loading="eager"
+            fetchPriority="high"
+            alt=""
+          />
+        </div>
+      )}
     </>
   );
 }
