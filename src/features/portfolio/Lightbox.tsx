@@ -228,6 +228,9 @@ export default function Lightbox({
   if (!photo) return null;
   const isFullImageReady = loadedPhotoId === photo.id;
   const isNavigationReady = settledPhotoId === photo.id;
+  const imageWidth = `min(100%, calc(${
+    LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT * photo.aspectRatio
+  }vh - ${LIGHTBOX_CONTROL_CLEARANCE_REM * photo.aspectRatio}rem))`;
 
   return (
     <div
@@ -380,6 +383,7 @@ export default function Lightbox({
           loading="eager"
           fetchPriority="high"
           pictureClassName="contents"
+          style={{ width: imageWidth }}
           className={`pointer-events-auto absolute left-1/2 top-1/2 h-auto max-h-full w-auto max-w-full
                       -translate-x-1/2 -translate-y-1/2 object-contain ${
                         isFullImageReady ? "opacity-100" : "opacity-0"
@@ -426,6 +430,15 @@ export default function Lightbox({
             alt=""
             aria-hidden="true"
             draggable="false"
+            style={{
+              width: `min(100%, calc(${
+                (LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT * outgoingFrame.width) /
+                outgoingFrame.height
+              }vh - ${
+                (LIGHTBOX_CONTROL_CLEARANCE_REM * outgoingFrame.width) /
+                outgoingFrame.height
+              }rem))`,
+            }}
             className="pointer-events-none absolute left-1/2 top-1/2 h-auto max-h-full w-auto max-w-full
                        -translate-x-1/2 -translate-y-1/2 object-contain opacity-100"
           />
@@ -443,7 +456,10 @@ export default function Lightbox({
                         -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity ${
                           isFullImageReady ? "opacity-0" : "opacity-100"
                         }`}
-            style={{ transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms` }}
+            style={{
+              width: imageWidth,
+              transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms`,
+            }}
           />
         )}
       </div>

@@ -427,6 +427,9 @@ describe("Lightbox", () => {
           cy.get('img[alt="First test photo"]').then(($fullImage) => {
             const fullImage = $fullImage.get(0);
             const preview = $preview.get(0);
+            expect(fullImage.getBoundingClientRect().width).to.equal(
+              preview.getBoundingClientRect().width,
+            );
             expect(
               fullImage.compareDocumentPosition(preview) &
                 Node.DOCUMENT_POSITION_FOLLOWING,

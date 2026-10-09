@@ -2,6 +2,7 @@ import { AnimatePresence } from "motion/react";
 import * as m from "motion/react-m";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import ResponsiveImage from "../components/ResponsiveImage";
 import { preloadPortfolioProject } from "../features/portfolio/projects/portfolioProjectModules";
@@ -125,26 +126,8 @@ export default function PortfolioMenu({
     }
     restoreFocusRef.current = true;
     document.documentElement.classList.add("modal-open");
-    if (dialog && !dialog.open) {
-      dialog.inert = true;
-      dialog.show();
-      dialog.inert = false;
-    }
+    if (dialog && !dialog.open) dialog.showModal();
     dialog?.focus({ preventScroll: true });
-
-    const containFocus = (event: FocusEvent) => {
-      const target = event.target;
-      if (
-        !(target instanceof Element) ||
-        dialog?.contains(target) ||
-        target.closest('[data-primary-navigation="true"]')
-      ) {
-        return;
-      }
-      dialog?.focus({ preventScroll: true });
-    };
-    document.addEventListener("focusin", containFocus);
-    return () => document.removeEventListener("focusin", containFocus);
   }, [isOpen]);
 
   useEffect(
@@ -190,7 +173,7 @@ export default function PortfolioMenu({
     };
   }, [isOpen, markCoverReady, projects]);
 
-  return (
+  return createPortal(
     <AnimatePresence
       onExitComplete={() => {
         if (dialogRef.current?.open) dialogRef.current.close();
@@ -217,7 +200,7 @@ export default function PortfolioMenu({
           ref={dialogRef}
           aria-label="Portfolios"
           tabIndex={-1}
-          className="fixed inset-0 z-[80] m-0 h-auto max-h-none w-auto max-w-none border-0 bg-transparent p-0 text-text"
+          className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none border-0 bg-transparent p-0 text-text backdrop:bg-transparent"
           initial={reduceMotion ? false : { clipPath: "inset(0 0 100% 0)" }}
           animate={{ clipPath: "inset(0 0 0% 0)" }}
           exit={
@@ -233,6 +216,10 @@ export default function PortfolioMenu({
                 : transitionSeconds,
             ease: "easeInOut",
           }}
+          onCancel={(event) => {
+            event.preventDefault();
+            onClose();
+          }}
         >
           <nav
             id="portfolio-menu"
@@ -246,6 +233,23 @@ export default function PortfolioMenu({
               if (!(event.target as Element).closest("a")) onClose();
             }}
           >
+            <button
+              type="button"
+              aria-label="Close portfolios"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={onClose}
+              className="absolute top-2 right-4 z-20 grid h-11 w-11 cursor-pointer place-items-center
+                         text-text opacity-90 hover:opacity-100 focus-visible:opacity-100"
+            >
+              <span
+                aria-hidden="true"
+                className="absolute h-px w-6 rotate-45 bg-current"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute h-px w-6 -rotate-45 bg-current"
+              />
+            </button>
             <AnimatePresence>
               {displayedProjectId &&
                 orientation &&
@@ -361,6 +365,7 @@ export default function PortfolioMenu({
           </nav>
         </m.dialog>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }

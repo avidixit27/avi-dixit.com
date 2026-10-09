@@ -402,7 +402,7 @@ describe("Navigation", () => {
     cy.contains("button", "PORTFOLIOS").should("have.focus");
   });
 
-  it("closes the selector from its persistent navigation control", () => {
+  it("closes the modal from its top-layer close control", () => {
     cy.clock();
     mount(
       <MemoryRouter>
@@ -413,30 +413,12 @@ describe("Navigation", () => {
     );
 
     cy.contains("button", "PORTFOLIOS").click();
-    cy.contains("button", "PORTFOLIOS").click();
+    cy.get('button[aria-label="Close portfolios"]')
+      .should("be.visible")
+      .click();
     cy.tick(500);
     cy.get('dialog[aria-label="Portfolios"]').should("not.exist");
     cy.contains("button", "PORTFOLIOS").should("have.focus");
-  });
-
-  it("keeps the primary navigation usable while portfolios are open", () => {
-    mount(
-      <MemoryRouter>
-        <MotionProvider>
-          <PortfolioFocusHarness />
-        </MotionProvider>
-      </MemoryRouter>,
-    );
-
-    cy.contains("button", "PORTFOLIOS").click();
-    cy.get('dialog[aria-label="Portfolios"]').should("have.attr", "open");
-    cy.contains('[data-desktop-navigation="true"] a', "CONTACT").click();
-
-    cy.get("[data-location]").should("have.text", "/contact");
-    cy.get('dialog[aria-label="Portfolios"]').should("not.exist");
-    cy.get('[data-route-content="true"]')
-      .should("have.attr", "aria-label", "Contact")
-      .and("have.focus");
   });
 
   it("does not apply portfolio behavior to an unknown project slug", () => {
