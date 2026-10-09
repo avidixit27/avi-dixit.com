@@ -13,7 +13,8 @@ Keep enduring design decisions in `architecture.md`, current execution guidance 
 
 ## Maintenance history
 
-| Date       | Record                                            | Pull request                                               | Outcome                                                        |
-| ---------- | ------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------- |
-| 2026-09-12 | [Cloudflare and Sharp](2026-09-12-maintenance.md) | [#32](https://github.com/avidixit27/avi-dixit.com/pull/32) | Patched Sharp through the updated Cloudflare toolchain         |
-| 2026-09-30 | [Compatible updates](2026-09-30-maintenance.md)   | [#52](https://github.com/avidixit27/avi-dixit.com/pull/52) | Updated tooling and repaired a transitive development advisory |
+| Date       | Record                                            | Pull request                                               | Outcome                                                              |
+| ---------- | ------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------- |
+| 2026-09-12 | [Cloudflare and Sharp](2026-09-12-maintenance.md) | [#32](https://github.com/avidixit27/avi-dixit.com/pull/32) | Patched Sharp through the updated Cloudflare toolchain               |
+| 2026-09-30 | [Compatible updates](2026-09-30-maintenance.md)   | [#52](https://github.com/avidixit27/avi-dixit.com/pull/52) | Updated tooling and repaired a transitive development advisory       |
+| 2026-10-09 | [Compatible updates](2026-10-09-maintenance.md)   | [#58](https://github.com/avidixit27/avi-dixit.com/pull/58) | Updated compatible dependencies and cleared six development findings |
