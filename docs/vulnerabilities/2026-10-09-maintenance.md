@@ -1,11 +1,11 @@
 # 2026-10-09 — Dependency maintenance
 
-| Field        | Value                                     |
-| ------------ | ----------------------------------------- |
-| Status       | Completed                                 |
-| Base         | `main` at `02b75f1`                       |
-| Branch       | `chore/dependency-maintenance-2026-10-09` |
-| Pull request | Not opened                                |
+| Field        | Value                                                      |
+| ------------ | ---------------------------------------------------------- |
+| Status       | Completed                                                  |
+| Base         | `main` at `02b75f1`                                        |
+| Branch       | `chore/dependency-maintenance-2026-10-09`                  |
+| Pull request | [#58](https://github.com/avidixit27/avi-dixit.com/pull/58) |
 
 ## Inputs reviewed
 
