@@ -368,210 +368,215 @@ export default function Navigation({
   const isCompactMenuExpanded = isMobileNavigationOpen || isPortfolioMenuOpen;
 
   return (
-    <nav
-      ref={navRef}
-      className={`fixed top-0 left-0 right-0 z-[90] border-b border-border bg-canvas/95 backdrop-blur-xl
+    <>
+      <nav
+        ref={navRef}
+        data-primary-navigation="true"
+        className={`fixed top-0 left-0 right-0 z-[90] border-b border-border bg-canvas/95 backdrop-blur-xl
                   transition-transform duration-500 ease-out
                   ${isHidden ? "-translate-y-full" : "translate-y-0"}`}
-    >
-      <div className="flex h-16 items-center justify-between px-4 md:px-8">
-        <Link
-          to={ROUTES.home}
-          aria-label="Home"
-          className="flex items-center gap-1 md:gap-[5px]"
-          onMouseDown={(event) => {
-            if (!isModifiedActivation(event)) event.preventDefault();
-          }}
-          onClick={(event) => handleNavigationClick(event, ROUTES.home)}
-        >
-          <img
-            src={portrait}
-            alt=""
-            width="192"
-            height="192"
-            className="h-12 w-12 rounded-full md:h-14 md:w-14"
-          />
-          <img
-            src={wordmark}
-            alt=""
-            width="146"
-            height="22"
-            className="h-[17px] w-auto md:h-5"
-          />
-        </Link>
-
-        <div
-          ref={linksWrapRef}
-          data-desktop-navigation="true"
-          className={`relative hidden items-start gap-4 text-sm md:gap-8 md:text-base ${
-            availability.shop ? "sm:flex" : "min-[480px]:flex"
-          }`}
-        >
-          <span
-            data-navigation-indicator="true"
-            className={`absolute bottom-0 h-[1px] bg-brand-vivid transition-[transform,width] duration-250 ease-[cubic-bezier(.22,.61,.36,1)]
-                        ${indicator.visible ? "opacity-100" : "opacity-0"}`}
-            style={{
-              transform: `translateX(${indicator.left}px)`,
-              width: `${indicator.width}px`,
+      >
+        <div className="flex h-16 items-center justify-between px-4 md:px-8">
+          <Link
+            to={ROUTES.home}
+            aria-label="Home"
+            className="flex items-center gap-1 md:gap-[5px]"
+            onMouseDown={(event) => {
+              if (!isModifiedActivation(event)) event.preventDefault();
             }}
-            aria-hidden="true"
-          />
-          {visibleItems.map((item) => {
-            const isActive = matchPath(item.path, location.pathname) !== null;
-            return (
-              <Link
-                key={item.path}
+            onClick={(event) => handleNavigationClick(event, ROUTES.home)}
+          >
+            <img
+              src={portrait}
+              alt=""
+              width="192"
+              height="192"
+              className="h-12 w-12 rounded-full md:h-14 md:w-14"
+            />
+            <img
+              src={wordmark}
+              alt=""
+              width="146"
+              height="22"
+              className="h-[17px] w-auto md:h-5"
+            />
+          </Link>
+
+          <div
+            ref={linksWrapRef}
+            data-desktop-navigation="true"
+            className={`relative hidden items-start gap-4 text-sm md:gap-8 md:text-base ${
+              availability.shop ? "sm:flex" : "min-[480px]:flex"
+            }`}
+          >
+            <span
+              data-navigation-indicator="true"
+              className={`absolute bottom-0 h-[1px] bg-brand-vivid transition-[transform,width] duration-250 ease-[cubic-bezier(.22,.61,.36,1)]
+                        ${indicator.visible ? "opacity-100" : "opacity-0"}`}
+              style={{
+                transform: `translateX(${indicator.left}px)`,
+                width: `${indicator.width}px`,
+              }}
+              aria-hidden="true"
+            />
+            {visibleItems.map((item) => {
+              const isActive = matchPath(item.path, location.pathname) !== null;
+              return (
+                <Link
+                  key={item.path}
+                  ref={(element) => {
+                    if (element) linkRefs.current.set(item.path, element);
+                    else linkRefs.current.delete(item.path);
+                  }}
+                  to={item.path}
+                  onClick={(event) => handleNavigationClick(event, item.path)}
+                  className={`pb-1 font-display ${
+                    isActive
+                      ? "text-brand-warm"
+                      : "text-text-muted hover:text-focus"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+
+            <div className="relative">
+              <button
+                type="button"
                 ref={(element) => {
-                  if (element) linkRefs.current.set(item.path, element);
-                  else linkRefs.current.delete(item.path);
+                  if (element) linkRefs.current.set(ROUTES.portfolio, element);
+                  else linkRefs.current.delete(ROUTES.portfolio);
                 }}
-                to={item.path}
-                onClick={(event) => handleNavigationClick(event, item.path)}
-                className={`pb-1 font-display ${
-                  isActive
+                aria-expanded={isPortfolioMenuOpen}
+                aria-controls="portfolio-menu"
+                onClick={() => {
+                  keepMenuVisible();
+                  setIsPortfolioMenuOpen((isOpen) => !isOpen);
+                }}
+                className={`cursor-pointer pb-1 font-display ${
+                  isPortfolioRoute
                     ? "text-brand-warm"
                     : "text-text-muted hover:text-focus"
                 }`}
               >
-                {item.label}
-              </Link>
-            );
-          })}
+                PORTFOLIOS
+              </button>
+            </div>
+          </div>
 
-          <div className="relative">
+          <div
+            data-mobile-navigation="true"
+            className={availability.shop ? "sm:hidden" : "min-[480px]:hidden"}
+          >
             <button
               type="button"
-              ref={(element) => {
-                if (element) linkRefs.current.set(ROUTES.portfolio, element);
-                else linkRefs.current.delete(ROUTES.portfolio);
-              }}
-              aria-expanded={isPortfolioMenuOpen}
-              aria-controls="portfolio-menu"
+              aria-label={
+                isCompactMenuExpanded ? "Close navigation" : "Navigation menu"
+              }
+              aria-expanded={isMobileNavigationOpen || isPortfolioMenuOpen}
+              aria-controls={
+                isPortfolioMenuOpen
+                  ? "portfolio-menu"
+                  : "mobile-navigation-menu"
+              }
               onClick={() => {
                 keepMenuVisible();
-                setIsPortfolioMenuOpen((isOpen) => !isOpen);
+                if (isPortfolioMenuOpen) {
+                  setIsPortfolioMenuOpen(false);
+                  return;
+                }
+                setIsMobileNavigationOpen((isOpen) => !isOpen);
               }}
-              className={`cursor-pointer pb-1 font-display ${
-                isPortfolioRoute
-                  ? "text-brand-warm"
-                  : "text-text-muted hover:text-focus"
-              }`}
+              className="grid h-11 w-11 cursor-pointer place-content-center gap-1.5"
             >
-              PORTFOLIOS
+              <span
+                className={`h-px w-6 bg-text transition-transform ${
+                  isCompactMenuExpanded ? "translate-y-[7px] rotate-45" : ""
+                }`}
+              />
+              <span
+                className={`h-px w-6 bg-text transition-opacity ${
+                  isCompactMenuExpanded ? "opacity-0" : ""
+                }`}
+              />
+              <span
+                className={`h-px w-6 bg-text transition-transform ${
+                  isCompactMenuExpanded ? "-translate-y-[7px] -rotate-45" : ""
+                }`}
+              />
             </button>
-          </div>
-        </div>
-
-        <div
-          data-mobile-navigation="true"
-          className={availability.shop ? "sm:hidden" : "min-[480px]:hidden"}
-        >
-          <button
-            type="button"
-            aria-label={
-              isCompactMenuExpanded ? "Close navigation" : "Navigation menu"
-            }
-            aria-expanded={isMobileNavigationOpen || isPortfolioMenuOpen}
-            aria-controls={
-              isPortfolioMenuOpen ? "portfolio-menu" : "mobile-navigation-menu"
-            }
-            onClick={() => {
-              keepMenuVisible();
-              if (isPortfolioMenuOpen) {
-                setIsPortfolioMenuOpen(false);
-                return;
-              }
-              setIsMobileNavigationOpen((isOpen) => !isOpen);
-            }}
-            className="grid h-11 w-11 cursor-pointer place-content-center gap-1.5"
-          >
-            <span
-              className={`h-px w-6 bg-text transition-transform ${
-                isCompactMenuExpanded ? "translate-y-[7px] rotate-45" : ""
-              }`}
-            />
-            <span
-              className={`h-px w-6 bg-text transition-opacity ${
-                isCompactMenuExpanded ? "opacity-0" : ""
-              }`}
-            />
-            <span
-              className={`h-px w-6 bg-text transition-transform ${
-                isCompactMenuExpanded ? "-translate-y-[7px] -rotate-45" : ""
-              }`}
-            />
-          </button>
-          <AnimatePresence
-            onExitComplete={() => {
-              if (!openPortfolioAfterCompactMenuRef.current) return;
-              openPortfolioAfterCompactMenuRef.current = false;
-              setIsPortfolioMenuOpen(true);
-            }}
-          >
-            {isMobileNavigationOpen && (
-              <m.div
-                id="mobile-navigation-menu"
-                className="fixed top-[4.5rem] right-2 w-52 origin-top-right bg-border p-px text-right text-base shadow-panel"
-                initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                style={{
-                  clipPath:
-                    "polygon(1.25rem 0, 100% 0, 100% calc(100% - 1.25rem), calc(100% - 1.25rem) 100%, 0 100%, 0 1.25rem)",
-                }}
-                transition={{
-                  duration: reduceMotion ? 0 : COMPACT_MENU_ANIMATION_SECONDS,
-                  ease: "easeInOut",
-                }}
-              >
-                <div
-                  className="flex w-full flex-col items-end bg-canvas p-2"
+            <AnimatePresence
+              onExitComplete={() => {
+                if (!openPortfolioAfterCompactMenuRef.current) return;
+                openPortfolioAfterCompactMenuRef.current = false;
+                setIsPortfolioMenuOpen(true);
+              }}
+            >
+              {isMobileNavigationOpen && (
+                <m.div
+                  id="mobile-navigation-menu"
+                  className="fixed top-[4.5rem] right-2 w-52 origin-top-right bg-border p-px text-right text-base shadow-panel"
+                  initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
                   style={{
                     clipPath:
-                      "polygon(1.2rem 0, 100% 0, 100% calc(100% - 1.2rem), calc(100% - 1.2rem) 100%, 0 100%, 0 1.2rem)",
+                      "polygon(1.25rem 0, 100% 0, 100% calc(100% - 1.25rem), calc(100% - 1.25rem) 100%, 0 100%, 0 1.25rem)",
+                  }}
+                  transition={{
+                    duration: reduceMotion ? 0 : COMPACT_MENU_ANIMATION_SECONDS,
+                    ease: "easeInOut",
                   }}
                 >
-                  {visibleItems.map((item) => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={(event) =>
-                        handleNavigationClick(event, item.path)
-                      }
-                      className={`w-full border-b border-border px-3 py-3 font-display ${
-                        matchPath(item.path, location.pathname)
+                  <div
+                    className="flex w-full flex-col items-end bg-canvas p-2"
+                    style={{
+                      clipPath:
+                        "polygon(1.2rem 0, 100% 0, 100% calc(100% - 1.2rem), calc(100% - 1.2rem) 100%, 0 100%, 0 1.2rem)",
+                    }}
+                  >
+                    {visibleItems.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={(event) =>
+                          handleNavigationClick(event, item.path)
+                        }
+                        className={`w-full border-b border-border px-3 py-3 font-display ${
+                          matchPath(item.path, location.pathname)
+                            ? "text-brand-warm"
+                            : "text-text-muted hover:text-focus"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                    <button
+                      type="button"
+                      aria-label="Portfolios"
+                      aria-expanded={isPortfolioMenuOpen}
+                      aria-controls="portfolio-menu"
+                      onClick={() => {
+                        keepMenuVisible();
+                        openPortfolioAfterCompactMenuRef.current = true;
+                        setIsMobileNavigationOpen(false);
+                      }}
+                      className={`w-full cursor-pointer px-3 py-3 text-right font-display ${
+                        isPortfolioRoute
                           ? "text-brand-warm"
                           : "text-text-muted hover:text-focus"
                       }`}
                     >
-                      {item.label}
-                    </Link>
-                  ))}
-                  <button
-                    type="button"
-                    aria-label="Portfolios"
-                    aria-expanded={isPortfolioMenuOpen}
-                    aria-controls="portfolio-menu"
-                    onClick={() => {
-                      keepMenuVisible();
-                      openPortfolioAfterCompactMenuRef.current = true;
-                      setIsMobileNavigationOpen(false);
-                    }}
-                    className={`w-full cursor-pointer px-3 py-3 text-right font-display ${
-                      isPortfolioRoute
-                        ? "text-brand-warm"
-                        : "text-text-muted hover:text-focus"
-                    }`}
-                  >
-                    PORTFOLIOS
-                  </button>
-                </div>
-              </m.div>
-            )}
-          </AnimatePresence>
+                      PORTFOLIOS
+                    </button>
+                  </div>
+                </m.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
+      </nav>
       <PortfolioMenu
         isOpen={isPortfolioMenuOpen}
         projects={SECONDARY_PORTFOLIOS}
@@ -581,6 +586,6 @@ export default function Navigation({
         onNavigate={handlePortfolioNavigation}
         onNavigationComplete={() => onPortfolioNavigationComplete?.()}
       />
-    </nav>
+    </>
   );
 }

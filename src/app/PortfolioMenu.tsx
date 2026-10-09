@@ -2,8 +2,7 @@ import { AnimatePresence } from "motion/react";
 import * as m from "motion/react-m";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import ResponsiveImage from "../components/ResponsiveImage";
 import { preloadPortfolioProject } from "../features/portfolio/projects/portfolioProjectModules";
 import {
@@ -47,6 +46,7 @@ export default function PortfolioMenu({
   onNavigationComplete,
   preloadProject = preloadPortfolioProject,
 }: PortfolioMenuProps) {
+  const location = useLocation();
   const [activeProjectId, setActiveProjectId] = useState<string>();
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
   const [orientation, setOrientation] = useState<PortfolioCoverOrientation>();
@@ -58,6 +58,8 @@ export default function PortfolioMenu({
   const selectedProjectIdRef = useRef<string>();
   const orientationRef = useRef<PortfolioCoverOrientation>();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const currentLocationKeyRef = useRef(location.key);
+  const openedLocationKeyRef = useRef<string>();
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
   const restoreFocusRef = useRef(false);
   const displayedProjectId = selectedProjectId ?? activeProjectId;
@@ -107,9 +109,14 @@ export default function PortfolioMenu({
   );
 
   useEffect(() => {
+    currentLocationKeyRef.current = location.key;
+  }, [location.key]);
+
+  useEffect(() => {
     if (!isOpen) return;
 
     const dialog = dialogRef.current;
+    openedLocationKeyRef.current = currentLocationKeyRef.current;
     if (!restoreFocusRef.current) {
       previouslyFocusedRef.current =
         document.activeElement instanceof HTMLElement
@@ -118,8 +125,26 @@ export default function PortfolioMenu({
     }
     restoreFocusRef.current = true;
     document.documentElement.classList.add("modal-open");
-    if (dialog && !dialog.open) dialog.showModal();
+    if (dialog && !dialog.open) {
+      dialog.inert = true;
+      dialog.show();
+      dialog.inert = false;
+    }
     dialog?.focus({ preventScroll: true });
+
+    const containFocus = (event: FocusEvent) => {
+      const target = event.target;
+      if (
+        !(target instanceof Element) ||
+        dialog?.contains(target) ||
+        target.closest('[data-primary-navigation="true"]')
+      ) {
+        return;
+      }
+      dialog?.focus({ preventScroll: true });
+    };
+    document.addEventListener("focusin", containFocus);
+    return () => document.removeEventListener("focusin", containFocus);
   }, [isOpen]);
 
   useEffect(
@@ -165,18 +190,22 @@ export default function PortfolioMenu({
     };
   }, [isOpen, markCoverReady, projects]);
 
-  return createPortal(
+  return (
     <AnimatePresence
       onExitComplete={() => {
         if (dialogRef.current?.open) dialogRef.current.close();
         document.documentElement.classList.remove("modal-open");
-        if (restoreFocusRef.current) {
+        if (
+          restoreFocusRef.current &&
+          openedLocationKeyRef.current === currentLocationKeyRef.current
+        ) {
           previouslyFocusedRef.current?.focus({ preventScroll: true });
         } else {
           onNavigationComplete();
         }
         restoreFocusRef.current = false;
         previouslyFocusedRef.current = null;
+        openedLocationKeyRef.current = undefined;
         setActiveProjectId(undefined);
         setSelectedProjectId(undefined);
         selectedProjectIdRef.current = undefined;
@@ -188,7 +217,7 @@ export default function PortfolioMenu({
           ref={dialogRef}
           aria-label="Portfolios"
           tabIndex={-1}
-          className="fixed inset-0 m-0 h-auto max-h-none w-auto max-w-none border-0 bg-transparent p-0 text-text backdrop:bg-transparent"
+          className="fixed inset-0 z-[80] m-0 h-auto max-h-none w-auto max-w-none border-0 bg-transparent p-0 text-text"
           initial={reduceMotion ? false : { clipPath: "inset(0 0 100% 0)" }}
           animate={{ clipPath: "inset(0 0 0% 0)" }}
           exit={
@@ -204,10 +233,6 @@ export default function PortfolioMenu({
                 : transitionSeconds,
             ease: "easeInOut",
           }}
-          onCancel={(event) => {
-            event.preventDefault();
-            onClose();
-          }}
         >
           <nav
             id="portfolio-menu"
@@ -221,23 +246,6 @@ export default function PortfolioMenu({
               if (!(event.target as Element).closest("a")) onClose();
             }}
           >
-            <button
-              type="button"
-              aria-label="Close portfolios"
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={onClose}
-              className="absolute top-2 right-4 z-20 grid h-11 w-11 cursor-pointer place-items-center
-                         text-text opacity-90 hover:opacity-100 focus-visible:opacity-100"
-            >
-              <span
-                aria-hidden="true"
-                className="absolute h-px w-6 rotate-45 bg-current"
-              />
-              <span
-                aria-hidden="true"
-                className="absolute h-px w-6 -rotate-45 bg-current"
-              />
-            </button>
             <AnimatePresence>
               {displayedProjectId &&
                 orientation &&
@@ -353,7 +361,6 @@ export default function PortfolioMenu({
           </nav>
         </m.dialog>
       )}
-    </AnimatePresence>,
-    document.body,
+    </AnimatePresence>
   );
 }
