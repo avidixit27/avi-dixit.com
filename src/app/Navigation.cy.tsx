@@ -1,6 +1,6 @@
 import { mount } from "@cypress/react";
 import { useEffect, useState } from "react";
-import { MemoryRouter, useLocation } from "react-router-dom";
+import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import { getPortfolioProject } from "../features/portfolio/projects/portfolioProjects";
 import { resolveFeatureAvailability } from "./featureAvailability";
 import MotionProvider from "./MotionProvider";
@@ -24,6 +24,12 @@ function LocationPath() {
   const location = useLocation();
 
   return <output data-location>{location.pathname}</output>;
+}
+
+function HistoryBackButton() {
+  const navigate = useNavigate();
+
+  return <button onClick={() => navigate(-1)}>Back</button>;
 }
 
 function LocationKeyRecorder({
@@ -677,10 +683,14 @@ describe("Navigation", () => {
       } as unknown as MediaQueryList);
     });
     mount(
-      <MemoryRouter initialEntries={["/portfolio/paris-fr"]}>
+      <MemoryRouter
+        initialEntries={["/contact", "/portfolio/paris-fr"]}
+        initialIndex={1}
+      >
         <MotionProvider>
           <Navigation availability={allFeatures} portfolioGridElement={null} />
           <LocationPath />
+          <HistoryBackButton />
         </MotionProvider>
       </MemoryRouter>,
     );
@@ -692,6 +702,9 @@ describe("Navigation", () => {
 
     cy.get("@scrollTo").should("have.been.calledOnceWith", 0, 0);
     cy.get("output[data-location]").should("have.text", "/portfolio/paris-fr");
+    cy.get('dialog[aria-label="Portfolios"]').should("not.exist");
+    cy.contains("button", "Back").click();
+    cy.get("output[data-location]").should("have.text", "/contact");
   });
 
   it("runs a controlled return to the top without remounting Home", () => {

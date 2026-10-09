@@ -361,8 +361,9 @@ export default function Navigation({
       onHomeResetEnd?.();
     }
 
-    if (location.pathname === path) window.scrollTo(0, 0);
-    navigate(path);
+    const isActivePortfolio = location.pathname === path;
+    if (isActivePortfolio) window.scrollTo(0, 0);
+    navigate(path, { replace: isActivePortfolio });
   };
 
   const handlePortfolioNavigationComplete = () => {
