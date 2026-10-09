@@ -11,6 +11,7 @@ import {
   useNavigationType,
 } from "react-router-dom";
 import Portfolio from "../features/portfolio/Portfolio";
+import { getPortfolioProject } from "../features/portfolio/projects/portfolioProjects";
 import { ROUTES } from "../resources/navigation";
 import {
   ROUTE_EXIT_OFFSET_PX,
@@ -22,14 +23,22 @@ import RouteLoadingFallback from "./RouteLoadingFallback";
 
 const Shop = lazy(() => import("../features/shop/Shop"));
 const Contact = lazy(() => import("../features/inquiries/Contact"));
+const PortfolioProjectRoute = lazy(
+  () => import("../features/portfolio/projects/PortfolioProjectRoute"),
+);
 interface RouteTransitionBoundaryProps {
   availability: FeatureAvailability;
+  onRouteFocusComplete?: () => void;
   portfolioGridRef: Ref<HTMLDivElement>;
+  routeFocusRequested?: boolean;
 }
 
 function getRouteLabel(pathname: string, availability: FeatureAvailability) {
   if (matchPath(ROUTES.home, pathname)) return "Portfolio";
   if (matchPath(ROUTES.artistStatement, pathname)) return "Portfolio";
+  const portfolioSlug = matchPath(`${ROUTES.portfolio}/:slug`, pathname)?.params
+    .slug;
+  if (portfolioSlug && getPortfolioProject(portfolioSlug)) return "Portfolio";
   if (availability.shop && matchPath(ROUTES.shop, pathname))
     return "Print shop";
   if (availability.contact && matchPath(ROUTES.contact, pathname)) {
@@ -42,10 +51,14 @@ function RouteFrame({
   children,
   navigationType,
   label,
+  routeFocusRequested,
+  onRouteFocusComplete,
 }: {
   children: ReactNode;
   navigationType: ReturnType<typeof useNavigationType>;
   label: string;
+  routeFocusRequested: boolean;
+  onRouteFocusComplete: (() => void) | undefined;
 }) {
   const routeRef = useRef<HTMLDivElement>(null);
   const navigationTypeOnMount = useRef(navigationType);
@@ -68,12 +81,27 @@ function RouteFrame({
     if (!isPresent || navigationTypeOnMount.current === "POP") return undefined;
 
     window.scrollTo(0, 0);
-    const frame = window.requestAnimationFrame(() => {
-      routeRef.current?.focus({ preventScroll: true });
-    });
+    if (document.documentElement.classList.contains("modal-open")) {
+      return undefined;
+    }
+
+    const frame = window.requestAnimationFrame(() =>
+      routeRef.current?.focus({ preventScroll: true }),
+    );
 
     return () => window.cancelAnimationFrame(frame);
   }, [isPresent]);
+
+  useLayoutEffect(() => {
+    if (!isPresent || !routeFocusRequested) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      routeRef.current?.focus({ preventScroll: true });
+      onRouteFocusComplete?.();
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [isPresent, onRouteFocusComplete, routeFocusRequested]);
 
   return (
     <m.div
@@ -102,7 +130,9 @@ function RouteFrame({
 
 export default function RouteTransitionBoundary({
   availability,
+  onRouteFocusComplete,
   portfolioGridRef,
+  routeFocusRequested = false,
 }: RouteTransitionBoundaryProps) {
   const location = useLocation();
   const navigationType = useNavigationType();
@@ -114,6 +144,8 @@ export default function RouteTransitionBoundary({
           key={location.pathname}
           navigationType={navigationType}
           label={getRouteLabel(location.pathname, availability)}
+          routeFocusRequested={routeFocusRequested}
+          onRouteFocusComplete={onRouteFocusComplete}
         >
           <Suspense fallback={<RouteLoadingFallback />}>
             <Routes location={location}>
@@ -125,6 +157,12 @@ export default function RouteTransitionBoundary({
                 path={ROUTES.artistStatement}
                 element={
                   <Navigate to={`${ROUTES.home}#artist-statement`} replace />
+                }
+              />
+              <Route
+                path={`${ROUTES.portfolio}/:slug`}
+                element={
+                  <PortfolioProjectRoute gridMarkerRef={portfolioGridRef} />
                 }
               />
               {availability.shop && (

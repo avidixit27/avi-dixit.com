@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { buildPhotoCatalog, PHOTO_CATALOG } from "./photoCatalog";
+import { buildPhotoCatalog } from "./photoCatalog";
+import { FILM_PHOTO_CATALOG } from "./projects/film/photoCatalog";
+import { KERALA_PHOTO_CATALOG } from "./projects/kerala/photoCatalog";
+import { NATURE_PHOTO_CATALOG } from "./projects/nature/photoCatalog";
+import { PARIS_FR_PHOTO_CATALOG } from "./projects/paris-fr/photoCatalog";
 
 describe("photo catalog", () => {
   it("provides uniquely identified photographs with complete intrinsic metadata", () => {
-    const ids = PHOTO_CATALOG.map((photo) => photo.id);
+    const ids = FILM_PHOTO_CATALOG.map((photo) => photo.id);
 
-    expect(PHOTO_CATALOG).not.toHaveLength(0);
+    expect(FILM_PHOTO_CATALOG).not.toHaveLength(0);
     expect(new Set(ids).size).toBe(ids.length);
     expect(
-      PHOTO_CATALOG.every(
+      FILM_PHOTO_CATALOG.every(
         (photo) =>
           photo.alt.trim().length > 0 &&
           photo.width > 0 &&
@@ -20,7 +24,7 @@ describe("photo catalog", () => {
 
   it("provides fallback and responsive source contracts for every photograph", () => {
     expect(
-      PHOTO_CATALOG.every(
+      FILM_PHOTO_CATALOG.every(
         (photo) =>
           photo.src.length > 0 &&
           photo.srcSet.length > 0 &&
@@ -46,7 +50,51 @@ describe("photo catalog", () => {
         "/seventh.jpg",
     };
 
-    const catalog = buildPhotoCatalog(sources, sources, sources, sources);
+    const details = {
+      "college_film_portfolio_6.JPG": {
+        id: "figures-behind-chair",
+        sequence: 1,
+        alt: "Figures behind a chair",
+        width: 6000,
+        height: 4000,
+      },
+      "college_film_portfolio_1.JPG": {
+        id: "reaching-hands-reflection",
+        sequence: 2,
+        alt: "Hands reflected in a mirror",
+        width: 6000,
+        height: 4000,
+      },
+      "college_film_portfolio_8.JPG": {
+        id: "low-angle-mirror-portrait",
+        sequence: 4,
+        alt: "Low-angle mirror portrait",
+        width: 6000,
+        height: 4000,
+      },
+      "college_film_portfolio_7.JPG": {
+        id: "tilted-bedroom-mirror",
+        sequence: 5,
+        alt: "Tilted bedroom mirror",
+        width: 6000,
+        height: 4000,
+      },
+      "college_film_portfolio_4.JPG": {
+        id: "ground-mirror-portrait",
+        sequence: 8,
+        alt: "Ground mirror portrait",
+        width: 6000,
+        height: 4000,
+      },
+    };
+
+    const catalog = buildPhotoCatalog(
+      details,
+      sources,
+      sources,
+      sources,
+      sources,
+    );
 
     expect(catalog.map((photo) => photo.sequence)).toEqual([1, 2, 4, 5, 8]);
     expect(catalog.map((photo) => photo.id)).toEqual([
@@ -55,6 +103,23 @@ describe("photo catalog", () => {
       "low-angle-mirror-portrait",
       "tilted-bedroom-mirror",
       "ground-mirror-portrait",
+    ]);
+  });
+
+  it("opens the Kerala collection on the port cover", () => {
+    expect(KERALA_PHOTO_CATALOG[0]?.id).toBe("kochi-port-ocean-sky");
+  });
+
+  it("includes the supplied Paris and Kerala additions", () => {
+    expect(PARIS_FR_PHOTO_CATALOG.at(-1)?.id).toBe("sacre-coeur-basilica");
+    expect(KERALA_PHOTO_CATALOG.at(-1)?.id).toBe("plane-center");
+  });
+
+  it("opens Nature on its approved shared cover", () => {
+    expect(NATURE_PHOTO_CATALOG).toHaveLength(6);
+    expect(NATURE_PHOTO_CATALOG[0]?.id).toBe("leaves-and-clouds-1");
+    expect(NATURE_PHOTO_CATALOG.map((photo) => photo.sequence)).toEqual([
+      1, 2, 3, 4, 5, 6,
     ]);
   });
 
@@ -67,11 +132,25 @@ describe("photo catalog", () => {
         "/first.jpg",
     };
 
-    expect(() => buildPhotoCatalog(fallbackModules, {}, {}, {})).toThrow(
+    expect(() => buildPhotoCatalog({}, fallbackModules, {}, {}, {})).toThrow(
       "Missing photo metadata",
     );
-    expect(() => buildPhotoCatalog(knownFallbackModules, {}, {}, {})).toThrow(
-      "Missing generated media",
-    );
+    expect(() =>
+      buildPhotoCatalog(
+        {
+          "college_film_portfolio_1.JPG": {
+            id: "first",
+            sequence: 1,
+            alt: "First photo",
+            width: 6000,
+            height: 4000,
+          },
+        },
+        knownFallbackModules,
+        {},
+        {},
+        {},
+      ),
+    ).toThrow("Missing generated media");
   });
 });

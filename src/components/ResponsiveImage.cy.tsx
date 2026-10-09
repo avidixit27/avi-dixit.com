@@ -46,4 +46,28 @@ describe("ResponsiveImage", () => {
       .and("have.attr", "decoding", "async")
       .and("have.class", "responsive-photo");
   });
+
+  it("reports image loading failures", () => {
+    const onError = cy.stub().as("onError");
+
+    mount(
+      <ResponsiveImage
+        src="/missing.jpg"
+        srcSet="/missing.jpg 480w"
+        sources={[]}
+        sizes="100vw"
+        width={600}
+        height={400}
+        alt="A missing photograph"
+        loading="eager"
+        fetchPriority="high"
+        onError={onError}
+      />,
+    );
+
+    cy.get("picture img").then(($image) => {
+      $image.get(0)?.dispatchEvent(new Event("error"));
+    });
+    cy.get("@onError").should("have.been.calledOnce");
+  });
 });

@@ -1,10 +1,18 @@
 import { mount } from "@cypress/react";
-import { useState } from "react";
-import { MemoryRouter, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
+import { getPortfolioProject } from "../features/portfolio/projects/portfolioProjects";
 import { resolveFeatureAvailability } from "./featureAvailability";
+import MotionProvider from "./MotionProvider";
 import Navigation from "./Navigation";
+import PortfolioMenu from "./PortfolioMenu";
+import RouteTransitionBoundary from "./RouteTransitionBoundary";
 
 const allFeatures = resolveFeatureAvailability({ shop: true, contact: true });
+const releasedFeatures = resolveFeatureAvailability({
+  shop: false,
+  contact: true,
+});
 
 function LocationKey() {
   const location = useLocation();
@@ -16,6 +24,23 @@ function LocationPath() {
   const location = useLocation();
 
   return <output data-location>{location.pathname}</output>;
+}
+
+function HistoryBackButton() {
+  const navigate = useNavigate();
+
+  return <button onClick={() => navigate(-1)}>Back</button>;
+}
+
+function LocationKeyRecorder({
+  onChange,
+}: {
+  onChange: (key: string) => void;
+}) {
+  const location = useLocation();
+
+  useEffect(() => onChange(location.key), [location.key, onChange]);
+  return null;
 }
 
 function NavigationAvailabilityHarness() {
@@ -39,7 +64,32 @@ function NavigationAvailabilityHarness() {
   );
 }
 
+function PortfolioFocusHarness() {
+  const [routeFocusRequested, setRouteFocusRequested] = useState(false);
+
+  return (
+    <>
+      <Navigation
+        availability={allFeatures}
+        portfolioGridElement={null}
+        onPortfolioNavigationComplete={() => setRouteFocusRequested(true)}
+      />
+      <RouteTransitionBoundary
+        availability={allFeatures}
+        onRouteFocusComplete={() => setRouteFocusRequested(false)}
+        portfolioGridRef={() => undefined}
+        routeFocusRequested={routeFocusRequested}
+      />
+      <LocationPath />
+    </>
+  );
+}
+
 describe("Navigation", () => {
+  beforeEach(() => {
+    cy.viewport(1280, 800);
+  });
+
   it("shows only released destinations and clears a disabled active link", () => {
     mount(
       <MemoryRouter initialEntries={["/SHOP/"]}>
@@ -54,7 +104,10 @@ describe("Navigation", () => {
     cy.contains("button", "Hide Shop").click();
     cy.contains("a", "SHOP").should("not.exist");
     cy.contains("a", "CONTACT").should("be.visible");
-    cy.get("nav span").should("have.class", "opacity-0");
+    cy.get('[data-navigation-indicator="true"]').should(
+      "have.class",
+      "opacity-0",
+    );
   });
 
   it("renders route links and marks the current destination", () => {
@@ -69,7 +122,10 @@ describe("Navigation", () => {
       .should("have.attr", "href", "/shop")
       .and("have.class", "text-brand-warm")
       .and("not.have.class", "font-bold");
-    cy.get("nav span").should("have.class", "bg-brand-vivid");
+    cy.get('[data-navigation-indicator="true"]').should(
+      "have.class",
+      "bg-brand-vivid",
+    );
     cy.contains("a", "CONTACT").should("have.attr", "href", "/contact");
   });
 
@@ -123,29 +179,532 @@ describe("Navigation", () => {
       </MemoryRouter>,
     );
 
-    cy.contains("a", "HOME").parent().should("have.class", "flex");
-
-    cy.contains("a", "HOME").then(($home) => {
-      cy.contains("a", "SHOP").then(($shop) => {
+    cy.get('[data-desktop-navigation="true"]').within(() => {
+      cy.contains("a", "HOME").then(($home) => {
         cy.contains("a", "CONTACT").then(($contact) => {
-          const home = $home.get(0);
-          const shop = $shop.get(0);
-          const contact = $contact.get(0);
-          if (!home || !shop || !contact) {
-            throw new Error("Expected each navigation link");
-          }
+          cy.contains("a", "SHOP").then(($shop) => {
+            const home = $home.get(0);
+            const contact = $contact.get(0);
+            const shop = $shop.get(0);
+            if (!home || !shop || !contact) {
+              throw new Error("Expected each navigation link");
+            }
 
-          const homeRect = home.getBoundingClientRect();
-          const shopRect = shop.getBoundingClientRect();
-          const contactRect = contact.getBoundingClientRect();
-          const homeToShopGap = shopRect.left - homeRect.right;
-          const shopToContactGap = contactRect.left - shopRect.right;
+            const homeRect = home.getBoundingClientRect();
+            const contactRect = contact.getBoundingClientRect();
+            const shopRect = shop.getBoundingClientRect();
+            const homeToContactGap = contactRect.left - homeRect.right;
+            const contactToShopGap = shopRect.left - contactRect.right;
 
-          expect(homeToShopGap).to.equal(32);
-          expect(shopToContactGap).to.equal(32);
+            expect(homeToContactGap).to.equal(32);
+            expect(contactToShopGap).to.equal(32);
+          });
         });
       });
     });
+  });
+
+  it("preloads only the portfolio that receives intent", () => {
+    const paris = getPortfolioProject("paris-fr");
+    const kerala = getPortfolioProject("kerala");
+    if (!paris || !kerala) throw new Error("Expected portfolio projects");
+    const preloadProject = cy.stub().callsFake(async () => true);
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia").returns({
+        matches: false,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioMenu
+            isOpen
+            projects={[paris, kerala]}
+            reduceMotion
+            transitionSeconds={0}
+            onClose={cy.stub()}
+            onNavigate={cy.stub()}
+            onNavigationComplete={cy.stub()}
+            preloadProject={preloadProject}
+          />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.then(() => expect(preloadProject).not.to.have.been.called);
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").trigger(
+      "pointerover",
+      { pointerType: "mouse" },
+    );
+    cy.then(() =>
+      expect(preloadProject).to.have.been.calledOnceWith("paris-fr"),
+    );
+  });
+
+  it("opens secondary portfolios in the full-screen desktop menu", () => {
+    cy.clock();
+    cy.viewport(1512, 770);
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <Navigation availability={allFeatures} portfolioGridElement={null} />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.get('[data-desktop-navigation="true"] button')
+      .contains("PORTFOLIOS")
+      .click();
+    cy.tick(500);
+    cy.get('nav[data-portfolio-menu="true"]')
+      .should("be.visible")
+      .and("have.class", "fixed")
+      .and("have.class", "inset-0")
+      .within(() => {
+        cy.contains("a", "paris")
+          .should("have.attr", "href", "/portfolio/paris-fr")
+          .and("have.class", "uppercase")
+          .and("have.class", "font-photo-number")
+          .and("have.class", "justify-center")
+          .and("have.class", "text-center")
+          .and("have.class", "hover:text-focus")
+          .and("have.class", "focus-visible:text-focus")
+          .and("have.class", "[text-shadow:0_3px_12px_rgb(0_0_0_/_0.7)]");
+        cy.contains("a", "kerala")
+          .should("have.attr", "href", "/portfolio/kerala")
+          .and("have.class", "uppercase")
+          .and("have.class", "font-photo-number");
+        cy.contains("a", "nature")
+          .should("have.attr", "href", "/portfolio/nature")
+          .and("have.class", "uppercase")
+          .and("have.class", "font-photo-number");
+        cy.contains("a", "entropy, chaos").should("not.exist");
+        cy.contains("a", "paris").trigger("pointerover", {
+          pointerType: "mouse",
+        });
+        cy.get('picture img[alt=""]', { timeout: 60_000 })
+          .should("have.attr", "width", "5626")
+          .and("have.attr", "height", "4000");
+      });
+    cy.get('nav[data-portfolio-menu="true"] > div.z-10').should(
+      "have.class",
+      "w-[80vw]",
+    );
+    cy.get('nav[data-portfolio-menu="true"] a').each(($link) => {
+      expect(parseFloat(getComputedStyle($link.get(0)).fontSize)).to.be.at.most(
+        770 * 0.26,
+      );
+    });
+    cy.get('nav[data-portfolio-menu="true"]').then(($menu) => {
+      const menu = $menu.get(0);
+      if (!menu) throw new Error("Expected the portfolio menu");
+      const menuRect = menu.getBoundingClientRect();
+      const dialogRect = menu.closest("dialog")?.getBoundingClientRect();
+      if (!dialogRect) throw new Error("Expected the portfolio dialog");
+      expect(menuRect.left).to.equal(dialogRect.left);
+      expect(menuRect.right).to.equal(dialogRect.right);
+      expect(menuRect.top).to.equal(dialogRect.top);
+      expect(menuRect.bottom).to.equal(dialogRect.bottom);
+    });
+    cy.tick(2000);
+    cy.get('[data-desktop-navigation="true"]')
+      .closest("nav")
+      .should("have.class", "translate-y-0");
+  });
+
+  it("collapses navigation and portfolios into the mobile hamburger", () => {
+    cy.clock();
+    cy.viewport(390, 844);
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <Navigation availability={allFeatures} portfolioGridElement={null} />
+          <LocationPath />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.get('[data-desktop-navigation="true"]').should("not.be.visible");
+    cy.get('button[aria-label="Navigation menu"]')
+      .click()
+      .should("have.attr", "aria-expanded", "true");
+    cy.tick(240);
+    cy.get("#mobile-navigation-menu")
+      .should("have.class", "bg-border")
+      .then(($menu) => {
+        expect(getComputedStyle($menu.get(0)).clipPath).to.contain("polygon");
+      });
+    cy.get('[data-mobile-navigation="true"]').within(() => {
+      cy.contains("a", "HOME").should("be.visible");
+      cy.contains("a", "CONTACT").should("be.visible");
+      cy.contains("button", "PORTFOLIOS").click();
+      cy.tick(250);
+    });
+    cy.get("#mobile-navigation-menu").should("not.exist");
+    cy.get('nav[data-portfolio-menu="true"]').within(() => {
+      cy.contains("a", "paris")
+        .should("be.visible")
+        .trigger("pointerover", { pointerType: "touch" });
+      cy.contains("a", "kerala").should("be.visible");
+      cy.contains("a", "nature").should("be.visible");
+      cy.get('picture img[alt=""]', { timeout: 60_000 })
+        .should("have.attr", "width", "3915")
+        .and("have.attr", "height", "5872");
+    });
+    cy.get('button[aria-label="Close navigation"]').should(
+      "have.attr",
+      "aria-expanded",
+      "true",
+    );
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click();
+    cy.get("output[data-location]").should("have.text", "/portfolio/paris-fr");
+  });
+
+  it("keeps the full navigation until its labels risk colliding", () => {
+    cy.viewport(480, 844);
+    mount(
+      <MemoryRouter>
+        <Navigation
+          availability={releasedFeatures}
+          portfolioGridElement={null}
+        />
+      </MemoryRouter>,
+    );
+
+    cy.get('[data-desktop-navigation="true"]').should("be.visible");
+    cy.get('[data-mobile-navigation="true"]').should("not.be.visible");
+    cy.get('a[aria-label="Home"]').then(($home) => {
+      cy.get('[data-desktop-navigation="true"]').then(($navigation) => {
+        const homeRect = $home.get(0)?.getBoundingClientRect();
+        const navigationRect = $navigation.get(0)?.getBoundingClientRect();
+        if (!homeRect || !navigationRect) {
+          throw new Error("Expected the logo and full navigation");
+        }
+        expect(homeRect.right).to.be.lessThan(navigationRect.left);
+      });
+    });
+
+    cy.viewport(479, 844);
+    cy.get('[data-desktop-navigation="true"]').should("not.be.visible");
+    cy.get('[data-mobile-navigation="true"]').should("be.visible");
+  });
+
+  it("folds the desktop portfolio menu away after clicking outside it", () => {
+    cy.clock();
+    cy.viewport(1280, 800);
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <Navigation availability={allFeatures} portfolioGridElement={null} />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").click();
+    cy.get('dialog[aria-label="Portfolios"]').should("have.attr", "open");
+    cy.get('dialog[aria-label="Portfolios"]').should("have.focus");
+    cy.get('[data-portfolio-cover="true"]').should("not.exist");
+    cy.get("html").should("have.class", "modal-open");
+    cy.get("body").click(10, 300);
+    cy.contains("button", "PORTFOLIOS").should(
+      "have.attr",
+      "aria-expanded",
+      "false",
+    );
+    cy.tick(500);
+    cy.get('nav[data-portfolio-menu="true"]').should("not.exist");
+    cy.get("html").should("not.have.class", "modal-open");
+    cy.contains("button", "PORTFOLIOS").should("have.focus");
+  });
+
+  it("closes the modal from its top-layer close control", () => {
+    cy.clock();
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <Navigation availability={allFeatures} portfolioGridElement={null} />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").click();
+    cy.get('button[aria-label="Close portfolios"]')
+      .should("be.visible")
+      .click();
+    cy.tick(500);
+    cy.get('dialog[aria-label="Portfolios"]').should("not.exist");
+    cy.contains("button", "PORTFOLIOS").should("have.focus");
+  });
+
+  it("does not apply portfolio behavior to an unknown project slug", () => {
+    cy.clock();
+    mount(
+      <MemoryRouter initialEntries={["/portfolio/unknown"]}>
+        <Navigation availability={allFeatures} portfolioGridElement={null} />
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").should(
+      "not.have.class",
+      "text-brand-warm",
+    );
+    cy.tick(2001);
+    cy.get("nav").should("have.class", "translate-y-0");
+  });
+
+  it("navigates immediately while the labels collapse over the selected cover", () => {
+    const paris = getPortfolioProject("paris-fr");
+    if (!paris) throw new Error("Expected the Paris portfolio");
+    const onNavigate = cy.stub().as("onNavigate");
+    const onClose = cy.stub().as("onClose");
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia").returns({
+        matches: false,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioMenu
+            isOpen
+            projects={[paris]}
+            reduceMotion={false}
+            transitionSeconds={10}
+            onClose={onClose}
+            onNavigate={onNavigate}
+            onNavigationComplete={cy.stub()}
+          />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").trigger(
+      "pointerover",
+      { pointerType: "mouse", force: true },
+    );
+    cy.get('[data-portfolio-cover="true"]', { timeout: 60_000 }).should(
+      "exist",
+    );
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click({
+      force: true,
+    });
+    cy.get("@onNavigate").should(
+      "have.been.calledOnceWith",
+      "/portfolio/paris-fr",
+    );
+    cy.get('nav[data-portfolio-menu="true"]')
+      .should("have.attr", "data-navigating", "true")
+      .and("have.class", "bg-transparent");
+    cy.get('[data-portfolio-cover="true"]').should("exist");
+    cy.get('[data-portfolio-labels="true"]').should(
+      "have.attr",
+      "aria-hidden",
+      "true",
+    );
+    cy.get('[data-portfolio-transition-curtain="true"]').should("not.exist");
+    cy.get("@onClose").should("not.have.been.called");
+  });
+
+  it("keeps the destination navigation hidden while the selector exits", () => {
+    cy.viewport(1512, 770);
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <Navigation availability={allFeatures} portfolioGridElement={null} />
+          <LocationPath />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").click();
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").trigger(
+      "pointerover",
+      { pointerType: "mouse", force: true },
+    );
+    cy.get('[data-portfolio-cover="true"]', { timeout: 60_000 }).should(
+      "exist",
+    );
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click({
+      force: true,
+    });
+    cy.get("[data-location]").should("have.text", "/portfolio/paris-fr");
+    cy.get('nav[data-portfolio-menu="true"]').should(
+      "have.attr",
+      "data-navigating",
+      "true",
+    );
+    cy.window().then((window) => {
+      window.dispatchEvent(
+        new MouseEvent("mousemove", {
+          bubbles: true,
+          clientX: 500,
+          clientY: 400,
+        }),
+      );
+    });
+    cy.get('[data-primary-navigation="true"]').should(
+      "have.class",
+      "-translate-y-full",
+    );
+  });
+
+  it("restarts the shared hero timer when the selector exit completes", () => {
+    const recordLocationKey = cy.stub().as("recordLocationKey");
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <Navigation availability={allFeatures} portfolioGridElement={null} />
+          <LocationKeyRecorder onChange={recordLocationKey} />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").click();
+    cy.contains('nav[data-portfolio-menu="true"] a', "kerala").trigger(
+      "pointerover",
+      { pointerType: "mouse", force: true },
+    );
+    cy.get('[data-portfolio-cover="true"]', { timeout: 60_000 }).should(
+      "exist",
+    );
+    cy.contains('nav[data-portfolio-menu="true"] a', "kerala").click({
+      force: true,
+    });
+    cy.get('dialog[aria-label="Portfolios"]').should("not.exist");
+    cy.get("@recordLocationKey").should("have.callCount", 3);
+  });
+
+  it("focuses the incoming portfolio after the modal exit completes", () => {
+    cy.window().then((window) => {
+      cy.stub(window, "matchMedia").returns({
+        matches: true,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioFocusHarness />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").click();
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").trigger(
+      "pointerover",
+      { pointerType: "mouse", force: true },
+    );
+    cy.get('[data-portfolio-cover="true"]', { timeout: 60_000 }).should(
+      "exist",
+    );
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click({
+      force: true,
+    });
+
+    cy.get("[data-location]").should("have.text", "/portfolio/paris-fr");
+    cy.get('dialog[aria-label="Portfolios"]').should("not.exist");
+    cy.get('[data-route-content="true"]')
+      .should("have.attr", "aria-label", "Portfolio")
+      .and("have.focus");
+  });
+
+  it("completes navigation when the selected cover is unavailable", () => {
+    const onNavigate = cy.stub().as("onNavigate");
+    const onClose = cy.stub().as("onClose");
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioMenu
+            isOpen
+            projects={[
+              {
+                id: "cold-cover",
+                slug: "cold-cover",
+                title: "cold cover",
+                route: "/portfolio/cold-cover",
+                available: true,
+                coverPhotoIds: {
+                  landscape: "unavailable",
+                  portrait: "unavailable",
+                },
+              },
+            ]}
+            reduceMotion={false}
+            transitionSeconds={0.45}
+            onClose={onClose}
+            onNavigate={onNavigate}
+            onNavigationComplete={cy.stub()}
+            preloadProject={async () => true}
+          />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains('nav[data-portfolio-menu="true"] a', "cold cover").click();
+    cy.get("@onNavigate").should(
+      "have.been.calledOnceWith",
+      "/portfolio/cold-cover",
+    );
+    cy.get('nav[data-portfolio-menu="true"]').should(
+      "have.attr",
+      "data-navigating",
+      "true",
+    );
+    cy.get("@onClose").should("have.been.calledOnce");
+  });
+
+  it("uses the Home portfolio visibility behavior on project routes", () => {
+    cy.clock();
+    mount(
+      <MemoryRouter initialEntries={["/portfolio/paris-fr"]}>
+        <Navigation availability={allFeatures} portfolioGridElement={null} />
+      </MemoryRouter>,
+    );
+
+    cy.get("nav").should("have.class", "translate-y-0");
+    cy.tick(2001);
+    cy.get("nav").should("have.class", "-translate-y-full");
+    cy.window().trigger("mousemove");
+    cy.get("nav").should("have.class", "translate-y-0");
+  });
+
+  it("restarts the active portfolio at its cover", () => {
+    cy.window().then((window) => {
+      cy.stub(window, "scrollTo").as("scrollTo");
+      cy.stub(window, "matchMedia").returns({
+        matches: true,
+        addEventListener: cy.stub(),
+        removeEventListener: cy.stub(),
+      } as unknown as MediaQueryList);
+    });
+    mount(
+      <MemoryRouter
+        initialEntries={["/contact", "/portfolio/paris-fr"]}
+        initialIndex={1}
+      >
+        <MotionProvider>
+          <Navigation availability={allFeatures} portfolioGridElement={null} />
+          <LocationPath />
+          <HistoryBackButton />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+
+    cy.contains("button", "PORTFOLIOS").click();
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click({
+      force: true,
+    });
+
+    cy.get("@scrollTo").should("have.been.calledOnceWith", 0, 0);
+    cy.get("output[data-location]").should("have.text", "/portfolio/paris-fr");
+    cy.get('dialog[aria-label="Portfolios"]').should("not.exist");
+    cy.contains("button", "Back").click();
+    cy.get("output[data-location]").should("have.text", "/contact");
   });
 
   it("runs a controlled return to the top without remounting Home", () => {

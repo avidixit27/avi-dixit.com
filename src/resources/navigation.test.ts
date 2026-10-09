@@ -8,7 +8,7 @@ describe("site navigation resources", () => {
 
     expect(new Set(routePaths).size).toBe(routePaths.length);
     expect(new Set(navigationPaths).size).toBe(navigationPaths.length);
-    expect(navigationPaths).toEqual([ROUTES.home, ROUTES.shop, ROUTES.contact]);
+    expect(navigationPaths).toEqual([ROUTES.home, ROUTES.contact, ROUTES.shop]);
     expect(navigationPaths).not.toContain(ROUTES.artistStatement);
     expect(NAVIGATION_ITEMS.every((item) => item.label.trim().length > 0)).toBe(
       true,

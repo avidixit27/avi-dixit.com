@@ -1,5 +1,6 @@
 export const ROUTES = Object.freeze({
   home: "/",
+  portfolio: "/portfolio",
   artistStatement: "/artist-statement",
   shop: "/shop",
   contact: "/contact",
@@ -15,7 +16,7 @@ export interface NavigationItem {
 
 export const NAVIGATION_ITEMS: readonly NavigationItem[] = Object.freeze([
   Object.freeze({ path: ROUTES.home, label: "HOME" }),
-  Object.freeze({ path: ROUTES.shop, label: "SHOP", feature: "shop" }),
   Object.freeze({ path: ROUTES.contact, label: "CONTACT", feature: "contact" }),
+  Object.freeze({ path: ROUTES.shop, label: "SHOP", feature: "shop" }),
 ] as const satisfies readonly NavigationItem[]);
 import type { FeatureAvailability } from "../app/featureAvailability";

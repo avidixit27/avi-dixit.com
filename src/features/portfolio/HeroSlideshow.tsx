@@ -13,18 +13,35 @@ interface SlideshowState {
   readonly outgoingIndex: number | null;
 }
 
+export interface HeroPhotoIdsByOrientation {
+  readonly landscape: string;
+  readonly portrait: string;
+}
+
 interface HeroSlideshowProps {
   photos: readonly Photo[];
+  initialPhotoIdsByOrientation?: HeroPhotoIdsByOrientation | undefined;
   onOpen: (index: number, previewSrc: string) => void;
 }
 
-export default function HeroSlideshow({ photos, onOpen }: HeroSlideshowProps) {
+export default function HeroSlideshow({
+  photos,
+  initialPhotoIdsByOrientation,
+  onOpen,
+}: HeroSlideshowProps) {
   const [isLandscapeViewport, setIsLandscapeViewport] = useState(
     () => window.matchMedia("(orientation: landscape)").matches,
   );
   const heroPhotoIndices = useMemo(
-    () => getHeroPhotoIndices(photos, isLandscapeViewport),
-    [isLandscapeViewport, photos],
+    () =>
+      getHeroPhotoIndices(
+        photos,
+        isLandscapeViewport,
+        initialPhotoIdsByOrientation?.[
+          isLandscapeViewport ? "landscape" : "portrait"
+        ],
+      ),
+    [initialPhotoIdsByOrientation, isLandscapeViewport, photos],
   );
   const [slideshow, setSlideshow] = useState<SlideshowState>({
     activeIndex: 0,

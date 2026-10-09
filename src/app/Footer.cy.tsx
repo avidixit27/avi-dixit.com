@@ -77,7 +77,7 @@ describe("Footer", () => {
     });
   });
 
-  it("keeps portfolio documents in the Home footer only", () => {
+  it("keeps the Artist Statement in the Home footer", () => {
     cy.viewport(1280, 800);
     mount(
       <MotionProvider>
@@ -122,18 +122,11 @@ describe("Footer", () => {
           .and("not.have.class", "focus:underline");
       });
       cy.get('nav[aria-label="Portfolio documents"]')
-        .should("have.class", "bottom-7")
-        .and("have.class", "right-4")
-        .and("have.class", "text-[28px]")
+        .should("have.class", "text-[28px]")
         .and("have.class", "items-end")
-        .and("have.class", "flex-col")
-        .and("have.class", "text-right")
-        .and("have.class", "md:inset-x-0")
-        .and(
-          "have.class",
-          "md:bottom-[max(0.25rem,env(safe-area-inset-bottom))]",
-        )
+        .and("have.class", "flex-col-reverse")
         .and("have.class", "md:flex-row")
+        .and("have.class", "md:col-start-2")
         .and("have.class", "lg:text-[36px]")
         .and("have.class", "md:justify-center")
         .and("not.have.class", "inset-0")
@@ -145,12 +138,9 @@ describe("Footer", () => {
       cy.contains("Copyright @Avi Dixit 2026")
         .should("have.class", "font-footer")
         .and("have.class", "text-footer-copy")
-        .and("have.class", "right-4")
-        .and(
-          "have.class",
-          "md:right-[max(1rem,calc(env(safe-area-inset-right)+0.75rem))]",
-        )
+        .and("have.class", "md:col-start-3")
         .should("have.css", "font-size", "10px");
+      cy.get('nav[aria-label="Other portfolios"]').should("not.exist");
     });
 
     mount(
@@ -161,5 +151,57 @@ describe("Footer", () => {
       </MotionProvider>,
     );
     cy.get('nav[aria-label="Portfolio documents"]').should("not.exist");
+  });
+
+  it("centers only the résumé in secondary portfolio footers", () => {
+    mount(
+      <MotionProvider>
+        <MemoryRouter initialEntries={["/portfolio/paris-fr"]}>
+          <Footer landingEnabled />
+        </MemoryRouter>
+      </MotionProvider>,
+    );
+
+    cy.get('nav[aria-label="Portfolio documents"]')
+      .should("have.class", "md:col-start-2")
+      .within(() => {
+        cy.contains("a", "Resume")
+          .should("have.attr", "target", "_blank")
+          .and("have.class", "font-tangerine");
+        cy.contains("a", "Artist Statement").should("not.exist");
+      });
+
+    mount(
+      <MotionProvider>
+        <MemoryRouter initialEntries={["/portfolio/unknown"]}>
+          <Footer landingEnabled />
+        </MemoryRouter>
+      </MotionProvider>,
+    );
+    cy.get('nav[aria-label="Portfolio documents"]').should("not.exist");
+  });
+
+  it("right-stacks Home footer links without overlap on compact viewports", () => {
+    cy.viewport(390, 844);
+    mount(
+      <MotionProvider>
+        <MemoryRouter initialEntries={["/"]}>
+          <Footer landingEnabled />
+        </MemoryRouter>
+      </MotionProvider>,
+    );
+
+    cy.get('nav[aria-label="Portfolio documents"]').then(($documents) => {
+      const documents = $documents.get(0)?.getBoundingClientRect();
+      if (!documents) throw new Error("Expected document links");
+      cy.get('footer[aria-label="Site footer"] p').then(($copyright) => {
+        const copyright = $copyright.get(0)?.getBoundingClientRect();
+        if (!copyright) throw new Error("Expected copyright");
+
+        expect(documents.bottom).to.be.at.most(copyright.top);
+        expect(documents.right).to.equal(copyright.right);
+        expect(copyright.right).to.be.at.most(390);
+      });
+    });
   });
 });

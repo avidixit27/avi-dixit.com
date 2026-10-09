@@ -15,6 +15,7 @@ import {
 import {
   LIGHTBOX_IMAGE_SIZES,
   LIGHTBOX_CLOSE_DURATION_MS,
+  LIGHTBOX_CONTROL_CLEARANCE_REM,
   LIGHTBOX_IMAGE_TRANSITION_MS,
   LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT,
   LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT,
@@ -30,6 +31,7 @@ interface LightboxProps {
   selectedIndex: number;
   previewSrc: string;
   navigationIndices: readonly number[];
+  showPhotoNumber?: boolean;
   onSelect: (index: number, previewSrc: string) => void;
   onClosed: () => void;
 }
@@ -37,6 +39,12 @@ interface LightboxProps {
 interface PreloadedPhoto {
   readonly image: HTMLImageElement;
   readonly picture: HTMLPictureElement;
+}
+
+interface OutgoingFrame {
+  readonly height: number;
+  readonly src: string;
+  readonly width: number;
 }
 
 function createPreload(photo: Photo, imageDocument: Document): PreloadedPhoto {
@@ -69,10 +77,12 @@ export default function Lightbox({
   selectedIndex,
   previewSrc,
   navigationIndices,
+  showPhotoNumber = true,
   onSelect,
   onClosed,
 }: LightboxProps) {
   const imageRef = useRef<HTMLImageElement>(null);
+  const revealFrameRef = useRef<number | null>(null);
   const closeTimerRef = useRef<number | null>(null);
   const closingRef = useRef(false);
   const navigationLockedRef = useRef(true);
@@ -81,7 +91,9 @@ export default function Lightbox({
   const [isClosing, setIsClosing] = useState(false);
   const [loadedPhotoId, setLoadedPhotoId] = useState<string | null>(null);
   const [settledPhotoId, setSettledPhotoId] = useState<string | null>(null);
-  const [outgoingSrc, setOutgoingSrc] = useState<string | null>(null);
+  const [outgoingFrame, setOutgoingFrame] = useState<OutgoingFrame | null>(
+    null,
+  );
 
   const requestClose = useCallback(() => {
     if (closingRef.current) return;
@@ -103,9 +115,13 @@ export default function Lightbox({
       if (!nextPhoto || nextIndex === selectedIndex) return;
       navigationLockedRef.current = true;
       const currentImage = imageRef.current;
-      setOutgoingSrc(
-        currentImage?.currentSrc || currentImage?.src || previewSrc,
-      );
+      const currentPhoto = photos[selectedIndex];
+      if (!currentPhoto) return;
+      setOutgoingFrame({
+        src: currentImage?.currentSrc || currentImage?.src || previewSrc,
+        width: currentPhoto.width,
+        height: currentPhoto.height,
+      });
       setIsClosing(false);
       onSelect(nextIndex, nextPhoto.src);
     },
@@ -161,7 +177,7 @@ export default function Lightbox({
     if (!selectedPhoto || loadedPhotoId !== selectedPhoto.id) return undefined;
     const transitionTimer = window.setTimeout(() => {
       setSettledPhotoId(selectedPhoto.id);
-      setOutgoingSrc(null);
+      setOutgoingFrame(null);
       navigationLockedRef.current = false;
       const pendingOffset = pendingNavigationOffsetRef.current;
       pendingNavigationOffsetRef.current = 0;
@@ -196,6 +212,9 @@ export default function Lightbox({
 
   useEffect(
     () => () => {
+      if (revealFrameRef.current !== null) {
+        window.cancelAnimationFrame(revealFrameRef.current);
+      }
       if (closeTimerRef.current !== null) {
         window.clearTimeout(closeTimerRef.current);
       }
@@ -209,6 +228,9 @@ export default function Lightbox({
   if (!photo) return null;
   const isFullImageReady = loadedPhotoId === photo.id;
   const isNavigationReady = settledPhotoId === photo.id;
+  const imageWidth = `min(100%, calc(${
+    LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT * photo.aspectRatio
+  }vh - ${LIGHTBOX_CONTROL_CLEARANCE_REM * photo.aspectRatio}rem))`;
 
   return (
     <div
@@ -236,21 +258,23 @@ export default function Lightbox({
       />
       <div
         data-lightbox-controls="true"
-        className="pointer-events-none fixed top-[max(0.75rem,env(safe-area-inset-top))]
+        className={`pointer-events-none fixed top-[max(0.75rem,env(safe-area-inset-top))]
                    left-[max(0.75rem,env(safe-area-inset-left))]
                    right-[max(0.75rem,env(safe-area-inset-right))]
                    max-[160px]:left-1 max-[160px]:right-1 z-[200]
-                   flex items-start justify-between gap-1"
+                   flex items-start gap-1 ${showPhotoNumber ? "justify-between" : "justify-end"}`}
       >
-        <p
-          data-lightbox-photo-number="true"
-          aria-label={`Photo ${photo.sequence} of ${photos.length}`}
-          className="grid h-11 min-w-0 -translate-y-[12px] place-items-center overflow-hidden
-                     select-none font-photo-number text-[clamp(20px,20vw,52px)] leading-none text-brand-warm
-                     drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
-        >
-          {photo.sequence}
-        </p>
+        {showPhotoNumber && (
+          <p
+            data-lightbox-photo-number="true"
+            aria-label={`Photo ${photo.sequence} of ${photos.length}`}
+            className="grid h-11 min-w-0 -translate-y-[12px] place-items-center overflow-hidden
+                       select-none font-photo-number text-[clamp(20px,20vw,52px)] leading-none text-text
+                       drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
+          >
+            {photo.sequence}
+          </p>
+        )}
         <button
           type="button"
           data-closing={isClosing}
@@ -343,7 +367,7 @@ export default function Lightbox({
         className="pointer-events-none relative z-10 overflow-hidden"
         style={{
           width: `${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw`,
-          height: `${LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT}vh`,
+          height: `calc(${LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT}vh - ${LIGHTBOX_CONTROL_CLEARANCE_REM}rem)`,
         }}
       >
         <ResponsiveImage
@@ -359,6 +383,7 @@ export default function Lightbox({
           loading="eager"
           fetchPriority="high"
           pictureClassName="contents"
+          style={{ width: imageWidth }}
           className={`pointer-events-auto absolute left-1/2 top-1/2 h-auto max-h-full w-auto max-w-full
                       -translate-x-1/2 -translate-y-1/2 object-contain ${
                         isFullImageReady ? "opacity-100" : "opacity-0"
@@ -368,7 +393,23 @@ export default function Lightbox({
             if (!loadedImage) return;
             const revealLoadedImage = () => {
               if (imageRef.current !== loadedImage) return;
-              setLoadedPhotoId(photo.id);
+              if (
+                window.matchMedia("(prefers-reduced-motion: reduce)").matches
+              ) {
+                setLoadedPhotoId(photo.id);
+                return;
+              }
+              if (revealFrameRef.current !== null) {
+                window.cancelAnimationFrame(revealFrameRef.current);
+              }
+              revealFrameRef.current = window.requestAnimationFrame(() => {
+                revealFrameRef.current = window.requestAnimationFrame(() => {
+                  revealFrameRef.current = null;
+                  if (imageRef.current === loadedImage) {
+                    setLoadedPhotoId(photo.id);
+                  }
+                });
+              });
             };
             if (typeof loadedImage.decode !== "function") {
               revealLoadedImage();
@@ -380,23 +421,29 @@ export default function Lightbox({
               .then(revealLoadedImage);
           }}
         />
-        {outgoingSrc && (
+        {outgoingFrame && !isFullImageReady && (
           <img
             data-lightbox-outgoing="true"
-            src={outgoingSrc}
-            width={photo.width}
-            height={photo.height}
+            src={outgoingFrame.src}
+            width={outgoingFrame.width}
+            height={outgoingFrame.height}
             alt=""
             aria-hidden="true"
             draggable="false"
-            className={`pointer-events-none absolute left-1/2 top-1/2 h-auto max-h-full w-auto max-w-full
-                        -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity ${
-                          isFullImageReady ? "opacity-0" : "opacity-100"
-                        }`}
-            style={{ transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms` }}
+            style={{
+              width: `min(100%, calc(${
+                (LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT * outgoingFrame.width) /
+                outgoingFrame.height
+              }vh - ${
+                (LIGHTBOX_CONTROL_CLEARANCE_REM * outgoingFrame.width) /
+                outgoingFrame.height
+              }rem))`,
+            }}
+            className="pointer-events-none absolute left-1/2 top-1/2 h-auto max-h-full w-auto max-w-full
+                       -translate-x-1/2 -translate-y-1/2 object-contain opacity-100"
           />
         )}
-        {!outgoingSrc && !isNavigationReady && (
+        {!outgoingFrame && !isNavigationReady && (
           <img
             data-lightbox-preview="true"
             src={previewSrc}
@@ -409,7 +456,10 @@ export default function Lightbox({
                         -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity ${
                           isFullImageReady ? "opacity-0" : "opacity-100"
                         }`}
-            style={{ transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms` }}
+            style={{
+              width: imageWidth,
+              transitionDuration: `${LIGHTBOX_IMAGE_TRANSITION_MS}ms`,
+            }}
           />
         )}
       </div>
