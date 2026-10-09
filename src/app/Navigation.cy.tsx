@@ -527,7 +527,7 @@ describe("Navigation", () => {
       .and("have.focus");
   });
 
-  it("keeps the selector opaque when the selected cover is not ready", () => {
+  it("completes navigation when the selected cover is unavailable", () => {
     const onNavigate = cy.stub().as("onNavigate");
     const onClose = cy.stub().as("onClose");
     mount(
@@ -553,6 +553,7 @@ describe("Navigation", () => {
             onClose={onClose}
             onNavigate={onNavigate}
             onNavigationComplete={cy.stub()}
+            preloadProject={async () => true}
           />
         </MotionProvider>
       </MemoryRouter>,
@@ -564,15 +565,11 @@ describe("Navigation", () => {
       "/portfolio/cold-cover",
     );
     cy.get('nav[data-portfolio-menu="true"]').should(
-      "not.have.attr",
+      "have.attr",
       "data-navigating",
+      "true",
     );
-    cy.get('nav[data-portfolio-menu="true"]').should("have.class", "bg-canvas");
-    cy.get('[data-portfolio-labels="true"]').should(
-      "not.have.attr",
-      "aria-hidden",
-    );
-    cy.get("@onClose").should("not.have.been.called");
+    cy.get("@onClose").should("have.been.calledOnce");
   });
 
   it("uses the Home portfolio visibility behavior on project routes", () => {

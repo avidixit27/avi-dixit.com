@@ -20,6 +20,7 @@ interface ResponsiveImageProps {
   readonly style?: CSSProperties;
   readonly imageRef?: Ref<HTMLImageElement>;
   readonly onLoad?: () => void;
+  readonly onError?: () => void;
 }
 
 export default function ResponsiveImage({
@@ -37,6 +38,7 @@ export default function ResponsiveImage({
   style,
   imageRef,
   onLoad,
+  onError,
 }: ResponsiveImageProps) {
   return (
     <picture className={pictureClassName}>
@@ -62,6 +64,7 @@ export default function ResponsiveImage({
         className={className}
         style={style}
         onLoad={onLoad}
+        onError={onError}
         draggable="false"
       />
     </picture>

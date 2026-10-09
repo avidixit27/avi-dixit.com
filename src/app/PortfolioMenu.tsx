@@ -74,6 +74,14 @@ export default function PortfolioMenu({
     }
   }, []);
 
+  const markCoverReady = useCallback(
+    (projectId: string, coverOrientation: PortfolioCoverOrientation) => {
+      readyCoverKeysRef.current.add(`${projectId}:${coverOrientation}`);
+      revealSelectedProjectIfReady(projectId);
+    },
+    [revealSelectedProjectIfReady],
+  );
+
   const prepareProject = useCallback(
     (project: PortfolioProjectSummary) => {
       if (
@@ -135,11 +143,17 @@ export default function PortfolioMenu({
           async (project) =>
             [
               project.id,
-              await loadPortfolioCover(project, nextOrientation),
+              await loadPortfolioCover(project, nextOrientation).catch(
+                () => undefined,
+              ),
             ] as const,
         ),
       );
-      if (current) setCovers(Object.fromEntries(loadedCovers));
+      if (!current) return;
+      setCovers(Object.fromEntries(loadedCovers));
+      loadedCovers.forEach(([projectId, cover]) => {
+        if (!cover) markCoverReady(projectId, nextOrientation);
+      });
     };
 
     void loadCovers();
@@ -149,7 +163,7 @@ export default function PortfolioMenu({
       current = false;
       media.removeEventListener("change", loadCovers);
     };
-  }, [isOpen, projects]);
+  }, [isOpen, markCoverReady, projects]);
 
   return createPortal(
     <AnimatePresence
@@ -255,11 +269,12 @@ export default function PortfolioMenu({
                       alt=""
                       pictureClassName="block h-full w-full"
                       className="h-full w-full object-cover"
-                      onLoad={() => {
-                        const coverKey = `${displayedProjectId}:${orientation}`;
-                        readyCoverKeysRef.current.add(coverKey);
-                        revealSelectedProjectIfReady(displayedProjectId);
-                      }}
+                      onLoad={() =>
+                        markCoverReady(displayedProjectId, orientation)
+                      }
+                      onError={() =>
+                        markCoverReady(displayedProjectId, orientation)
+                      }
                     />
                     <m.div
                       animate={{
