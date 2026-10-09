@@ -64,7 +64,7 @@ No configuration removal or simplification was justified by the versions reviewe
   - Cypress component: 11 specs and 66 tests passed in headless Chrome with a completion report.
   - Production build and Cypress E2E: 13 tests passed with a completion report.
   - All-features Cypress E2E: one test passed with a completion report.
-- GitHub PR checks: pending.
+- GitHub PR checks: all passed for the dependency update at `55c2f43`.
 
 ## Follow-up
 
