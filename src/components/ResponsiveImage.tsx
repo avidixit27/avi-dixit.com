@@ -1,4 +1,4 @@
-import type { CSSProperties, Ref } from "react";
+import { useState, type CSSProperties, type Ref } from "react";
 
 export interface ImageSource {
   readonly type: string;
@@ -21,6 +21,7 @@ interface ResponsiveImageProps {
   readonly imageRef?: Ref<HTMLImageElement>;
   readonly onLoad?: () => void;
   readonly onError?: () => void;
+  readonly showSkeleton?: boolean;
 }
 
 export default function ResponsiveImage({
@@ -39,9 +40,13 @@ export default function ResponsiveImage({
   imageRef,
   onLoad,
   onError,
+  showSkeleton = false,
 }: ResponsiveImageProps) {
+  const [settledSrc, setSettledSrc] = useState<string>();
   return (
-    <picture className={pictureClassName}>
+    <picture
+      className={`${pictureClassName} ${showSkeleton && settledSrc !== src ? "image-skeleton" : ""}`}
+    >
       {sources.map((source) => (
         <source
           key={source.type}
@@ -63,8 +68,14 @@ export default function ResponsiveImage({
         decoding="async"
         className={className}
         style={style}
-        onLoad={onLoad}
-        onError={onError}
+        onLoad={() => {
+          setSettledSrc(src);
+          onLoad?.();
+        }}
+        onError={() => {
+          setSettledSrc(src);
+          onError?.();
+        }}
         draggable="false"
       />
     </picture>

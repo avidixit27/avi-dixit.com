@@ -15,6 +15,7 @@ import type { Photo } from "../features/portfolio/photoTypes";
 
 const MOBILE_COVER_MEDIA_QUERY = "(max-width: 639px)";
 const COVER_REVEAL_EASE = [0.22, 0.61, 0.36, 1] as const;
+const INITIAL_COVER_PRELOAD_LIMIT = 4;
 
 interface PortfolioMenuProps {
   readonly isOpen: boolean;
@@ -53,7 +54,9 @@ export default function PortfolioMenu({
   const [orientation, setOrientation] = useState<PortfolioCoverOrientation>();
   const [covers, setCovers] = useState<Record<string, Photo | undefined>>({});
   const [isNavigating, setIsNavigating] = useState(false);
+  const [coverPreloadCount, setCoverPreloadCount] = useState(0);
   const readyCoverKeysRef = useRef(new Set<string>());
+  const settledCoverKeysRef = useRef(new Set<string>());
   const readyProjectIdsRef = useRef(new Set<string>());
   const loadingProjectIdsRef = useRef(new Set<string>());
   const selectedProjectIdRef = useRef<string>();
@@ -77,13 +80,58 @@ export default function PortfolioMenu({
     }
   }, []);
 
-  const markCoverReady = useCallback(
-    (projectId: string, coverOrientation: PortfolioCoverOrientation) => {
-      readyCoverKeysRef.current.add(`${projectId}:${coverOrientation}`);
-      revealSelectedProjectIfReady(projectId);
+  const settleCover = useCallback(
+    (
+      projectId: string,
+      coverOrientation: PortfolioCoverOrientation,
+      ready = true,
+    ) => {
+      const key = `${projectId}:${coverOrientation}`;
+      settledCoverKeysRef.current.add(key);
+      if (ready) {
+        readyCoverKeysRef.current.add(key);
+        revealSelectedProjectIfReady(projectId);
+      }
+      if (coverOrientation !== orientationRef.current) return;
+      setCoverPreloadCount((count) => {
+        let next = count;
+        while (
+          next > 0 &&
+          next < Math.min(projects.length, INITIAL_COVER_PRELOAD_LIMIT) &&
+          settledCoverKeysRef.current.has(
+            `${projects[next - 1]?.id}:${coverOrientation}`,
+          )
+        ) {
+          next += 1;
+        }
+        return next;
+      });
     },
-    [revealSelectedProjectIfReady],
+    [projects, revealSelectedProjectIfReady],
   );
+
+  useEffect(() => {
+    const startWarming = () =>
+      setCoverPreloadCount((count) => Math.max(count, 1));
+    if (document.readyState === "complete") startWarming();
+    else window.addEventListener("load", startWarming, { once: true });
+    return () => window.removeEventListener("load", startWarming);
+  }, []);
+
+  useEffect(() => {
+    const project = projects[coverPreloadCount - 1];
+    if (
+      project &&
+      orientation &&
+      settledCoverKeysRef.current.has(`${project.id}:${orientation}`)
+    ) {
+      settleCover(
+        project.id,
+        orientation,
+        readyCoverKeysRef.current.has(`${project.id}:${orientation}`),
+      );
+    }
+  }, [coverPreloadCount, covers, settleCover, orientation, projects]);
 
   const prepareProject = useCallback(
     (project: PortfolioProjectSummary) => {
@@ -136,8 +184,6 @@ export default function PortfolioMenu({
   );
 
   useEffect(() => {
-    if (!isOpen) return undefined;
-
     const media = window.matchMedia(MOBILE_COVER_MEDIA_QUERY);
     let current = true;
     const loadCovers = async () => {
@@ -145,7 +191,9 @@ export default function PortfolioMenu({
       orientationRef.current = nextOrientation;
       setOrientation(nextOrientation);
       setCovers({});
+      setCoverPreloadCount((count) => Math.min(count, 1));
       readyCoverKeysRef.current.clear();
+      settledCoverKeysRef.current.clear();
       const loadedCovers = await Promise.all(
         projects.map(
           async (project) =>
@@ -160,7 +208,7 @@ export default function PortfolioMenu({
       if (!current) return;
       setCovers(Object.fromEntries(loadedCovers));
       loadedCovers.forEach(([projectId, cover]) => {
-        if (!cover) markCoverReady(projectId, nextOrientation);
+        if (!cover) settleCover(projectId, nextOrientation);
       });
     };
 
@@ -171,7 +219,7 @@ export default function PortfolioMenu({
       current = false;
       media.removeEventListener("change", loadCovers);
     };
-  }, [isOpen, markCoverReady, projects]);
+  }, [settleCover, projects]);
 
   return createPortal(
     <AnimatePresence
@@ -195,8 +243,38 @@ export default function PortfolioMenu({
         setIsNavigating(false);
       }}
     >
+      {orientation && (
+        <div
+          key="cover-preloads"
+          aria-hidden="true"
+          className="pointer-events-none fixed -top-px -left-px h-px w-px overflow-hidden opacity-0"
+        >
+          {projects.slice(0, coverPreloadCount).map((project) => {
+            const cover = covers[project.id];
+            if (!cover) return null;
+
+            return (
+              <div
+                key={`${project.id}-${orientation}`}
+                data-portfolio-cover-preload="true"
+              >
+                <ResponsiveImage
+                  {...cover}
+                  sizes="100vw"
+                  loading="eager"
+                  fetchPriority="low"
+                  alt=""
+                  onLoad={() => settleCover(project.id, orientation)}
+                  onError={() => settleCover(project.id, orientation, false)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
       {isOpen && (
         <m.dialog
+          key="portfolio-dialog"
           ref={dialogRef}
           aria-label="Portfolios"
           tabIndex={-1}
@@ -279,13 +357,14 @@ export default function PortfolioMenu({
                       loading="eager"
                       fetchPriority="high"
                       alt=""
-                      pictureClassName="block h-full w-full"
+                      showSkeleton
+                      pictureClassName="cover-image-reveal relative block h-full w-full overflow-hidden"
                       className="h-full w-full object-cover"
                       onLoad={() =>
-                        markCoverReady(displayedProjectId, orientation)
+                        settleCover(displayedProjectId, orientation)
                       }
                       onError={() =>
-                        markCoverReady(displayedProjectId, orientation)
+                        settleCover(displayedProjectId, orientation)
                       }
                     />
                     <m.div

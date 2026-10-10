@@ -48,6 +48,15 @@ function pressKey(key: string) {
   });
 }
 
+function decodePreloadedPhotos() {
+  cy.document().then((document) => {
+    const decode = cy
+      .stub(Object.getPrototypeOf(document.createElement("img")), "decode")
+      .as("warmDecode");
+    decode.resolves();
+  });
+}
+
 function StatefulLightbox({
   onSelect,
   navigationIndices = [0, 2],
@@ -76,6 +85,22 @@ function StatefulLightbox({
 }
 
 describe("Lightbox", () => {
+  const releaseRequests: (() => void)[] = [];
+  function holdNavigationImages() {
+    cy.intercept(
+      /\/(first|portrait|last)(-\d+)?\.(jpg|avif|webp)$/,
+      (request) =>
+        new Promise<void>((resolve) => {
+          releaseRequests.push(() => {
+            request.destroy();
+            resolve();
+          });
+        }),
+    );
+  }
+  afterEach(() => {
+    releaseRequests.splice(0).forEach((release) => release());
+  });
   it("shows the filename sequence number in the viewer's top-left corner", () => {
     mount(
       <Lightbox
@@ -287,6 +312,20 @@ describe("Lightbox", () => {
   });
 
   it("preloads and decodes a bounded responsive navigation window", () => {
+    let finishNextDecode: (() => void) | undefined;
+    const nextDecode = new Promise<void>((resolve) => {
+      finishNextDecode = resolve;
+    });
+    cy.document().then((document) => {
+      cy.stub(
+        Object.getPrototypeOf(document.createElement("img")),
+        "decode",
+      ).callsFake(function (this: HTMLImageElement) {
+        return this.getAttribute("src") === "/preload-1.jpg"
+          ? nextDecode
+          : Promise.resolve();
+      });
+    });
     const preloadPhotos = Array.from({ length: 6 }, (_, index) =>
       createPhoto(`preload-${index}`, `Preload photo ${index}`, index + 1),
     );
@@ -302,9 +341,20 @@ describe("Lightbox", () => {
       />,
     );
 
-    cy.get('[data-lightbox-preload="true"]').should("have.length", 5);
+    cy.get('[data-lightbox-preload="true"]').should("not.exist");
+    cy.get('img[alt="Preload photo 0"]').trigger("load");
+    cy.get('[data-lightbox-preload="true"] img')
+      .should("have.length", 1)
+      .and("have.attr", "src", "/preload-1.jpg")
+      .then(() => finishNextDecode?.());
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[data-lightbox-preload="true"]').should("have.length", 2);
     cy.get('[data-lightbox-preload="true"] source[type="image/avif"]')
-      .should("have.length", 5)
+      .should("have.length", 2)
       .each(($source) =>
         expect($source.attr("srcset")).to.match(/\.avif 480w, .*\.avif 960w/),
       );
@@ -313,6 +363,36 @@ describe("Lightbox", () => {
       expect($image.prop("fetchPriority")).to.equal("low");
       expect($image.attr("srcset")).to.match(/\.jpg 480w, .*\.jpg 960w/);
     });
+    cy.get('[data-lightbox-preload="true"] img').then(($images) => {
+      expect(
+        $images.toArray().map((image) => image.getAttribute("src")),
+      ).to.have.members(["/preload-1.jpg", "/preload-5.jpg"]);
+    });
+  });
+
+  it("does not start backward warming after unmounting during forward decode", () => {
+    let rejectNextDecode: ((reason: Error) => void) | undefined;
+    const nextDecode = new Promise<void>((_, reject) => {
+      rejectNextDecode = reject;
+    });
+    cy.document().then((document) => {
+      cy.stub(
+        Object.getPrototypeOf(document.createElement("img")),
+        "decode",
+      ).callsFake(function (this: HTMLImageElement) {
+        return this.getAttribute("src") === "/portrait.jpg"
+          ? nextDecode
+          : Promise.resolve();
+      });
+    });
+    mount(
+      <StatefulLightbox navigationIndices={[0, 1, 2]} onSelect={cy.stub()} />,
+    );
+    cy.get('img[alt="First test photo"]').trigger("load");
+    cy.get('[data-lightbox-preload="true"]').should("have.length", 1);
+    mount(<div>Unmounted viewer</div>);
+    cy.then(() => rejectNextDecode?.(new Error("Image failed")));
+    cy.get('[data-lightbox-preload="true"]').should("not.exist");
   });
 
   it("navigates eligible photos with buttons and arrow keys", () => {
@@ -471,7 +551,178 @@ describe("Lightbox", () => {
     });
   });
 
+  it("navigates immediately from the painted preview before full image decode", () => {
+    holdNavigationImages();
+    const onSelect = cy.spy().as("immediateSelect");
+    mount(<StatefulLightbox onSelect={onSelect} />);
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "true",
+    );
+    cy.get('[aria-label="Next image"]').click();
+    cy.get("@immediateSelect").should(
+      "have.been.calledOnceWith",
+      2,
+      "/last.jpg",
+    );
+    cy.get('[data-lightbox-outgoing="true"]').should("not.exist");
+    cy.get('[data-lightbox-loading="true"]')
+      .should("be.visible")
+      .and("have.class", "image-skeleton");
+  });
+
+  it("advances each cold navigation immediately and clears loading after decode", () => {
+    holdNavigationImages();
+    const onSelect = cy.spy().as("coldSelect");
+    mount(
+      <StatefulLightbox navigationIndices={[0, 1, 2]} onSelect={onSelect} />,
+    );
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "2");
+    cy.get('[data-lightbox-loading="true"]').should("be.visible");
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "3");
+    cy.get("@coldSelect").should("have.been.calledTwice");
+    cy.get<HTMLImageElement>('img[alt="Last test photo"]').then(($image) => {
+      cy.stub($image.get(0), "decode").resolves();
+      $image.get(0).dispatchEvent(new Event("load"));
+    });
+    cy.get('[data-lightbox-loading="true"]').should("not.exist");
+    cy.get('img[alt="Last test photo"]').should("have.class", "opacity-100");
+  });
+
+  it("waits for fresh decode when returning through an unloaded photo", () => {
+    holdNavigationImages();
+    mount(
+      <StatefulLightbox navigationIndices={[0, 1, 2]} onSelect={cy.stub()} />,
+    );
+    cy.get<HTMLImageElement>('img[alt="First test photo"]').then(($image) => {
+      cy.stub($image.get(0), "decode").resolves();
+      $image.get(0).dispatchEvent(new Event("load"));
+    });
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "2");
+    cy.get('[data-lightbox-loading="true"]').should("be.visible");
+    cy.get('[aria-label="Previous image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "1");
+    cy.get('[data-lightbox-stage="true"]').then(($stage) => {
+      expect($stage.find('[data-lightbox-loading="true"]')).to.have.length(1);
+    });
+    cy.get('[data-lightbox-loading="true"]').should(
+      "have.class",
+      "image-skeleton",
+    );
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "true",
+    );
+    cy.get<HTMLImageElement>('img[alt="First test photo"]').then(($image) => {
+      cy.stub($image.get(0), "decode").resolves();
+      $image.get(0).dispatchEvent(new Event("load"));
+    });
+    cy.get('[data-lightbox-loading="true"]').should("not.exist");
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+  });
+
+  it("stops shimmer on a failed cold image and still allows navigation", () => {
+    mount(
+      <StatefulLightbox navigationIndices={[0, 1, 2]} onSelect={cy.stub()} />,
+    );
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-loading="true"]')
+      .should("contain.text", "Could not load this photo")
+      .and("not.have.class", "image-skeleton");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "3");
+  });
+
+  it("recovers navigation when a decoded neighbor's displayed image fails", () => {
+    holdNavigationImages();
+    decodePreloadedPhotos();
+    const onSelect = cy.spy().as("failedWarmSelect");
+    mount(
+      <StatefulLightbox navigationIndices={[0, 1, 2]} onSelect={onSelect} />,
+    );
+    cy.get('img[alt="First test photo"]').trigger("load");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[data-lightbox-preload="true"]').should("have.length", 2);
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-outgoing="true"]').should("exist");
+    cy.get('img[alt="Portrait test photo"]').then(($image) => {
+      $image.get(0).dispatchEvent(new Event("error"));
+    });
+    cy.get('[data-lightbox-loading="true"]')
+      .should("contain.text", "Could not load this photo")
+      .and("not.have.class", "image-skeleton");
+    cy.get('[data-lightbox-outgoing="true"]').should("not.exist");
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "3");
+    cy.get("@failedWarmSelect").should("have.been.calledTwice");
+  });
+
+  it("discards queued navigation after manually leaving a failed image", () => {
+    holdNavigationImages();
+    decodePreloadedPhotos();
+    const onSelect = cy.spy().as("failedQueueSelect");
+    mount(
+      <StatefulLightbox navigationIndices={[0, 1, 2]} onSelect={onSelect} />,
+    );
+    cy.get('img[alt="First test photo"]').trigger("load");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[data-lightbox-preload="true"]').should("have.length", 2);
+    cy.clock(null, ["setTimeout", "clearTimeout"]);
+    cy.get('[aria-label="Next image"]').click().click();
+    cy.get("@failedQueueSelect").should("have.been.calledOnce");
+    cy.get('img[alt="Portrait test photo"]').then(($image) => {
+      $image.get(0).dispatchEvent(new Event("error"));
+    });
+    cy.get('[data-lightbox-loading="true"]').should(
+      "contain.text",
+      "Could not load this photo",
+    );
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "3");
+    cy.get('img[alt="Last test photo"]').trigger("load");
+    cy.get('img[alt="Last test photo"]').should("have.class", "opacity-100");
+    cy.tick(LIGHTBOX_IMAGE_TRANSITION_MS);
+    cy.then(() => expect(onSelect).to.have.been.calledTwice);
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "3");
+  });
+
   it("keeps the outgoing frame until decode, then swaps without overlap", () => {
+    holdNavigationImages();
+    decodePreloadedPhotos();
     const onSelect = cy.spy().as("statefulOnSelect");
     let finishIncomingDecode: (() => void) | undefined;
 
@@ -479,7 +730,6 @@ describe("Lightbox", () => {
     cy.get('img[alt="First test photo"]').then(($image) => {
       const image = $image.get(0) as HTMLImageElement | undefined;
       if (!image) throw new Error("Expected the initial full image");
-      cy.stub(image, "decode").resolves();
       cy.wrap(image).trigger("load");
     });
     cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
@@ -495,6 +745,7 @@ describe("Lightbox", () => {
       const outgoingSrc = image.currentSrc || image.src;
 
       cy.get('[aria-label="Next image"]').click().click();
+      cy.get('[data-lightbox-loading="true"]').should("not.exist");
       cy.get("@statefulOnSelect").should(
         "have.been.calledOnceWith",
         2,
@@ -508,10 +759,10 @@ describe("Lightbox", () => {
     const incomingDecode = new Promise<void>((resolve) => {
       finishIncomingDecode = resolve;
     });
+    cy.get("@warmDecode").invoke("returns", incomingDecode);
     cy.get('img[alt="Last test photo"]').then(($image) => {
       const image = $image.get(0) as HTMLImageElement | undefined;
       if (!image) throw new Error("Expected the incoming full image");
-      cy.stub(image, "decode").returns(incomingDecode);
       cy.wrap(image).trigger("load");
     });
     cy.get('[data-lightbox-outgoing="true"]').should(
@@ -526,6 +777,8 @@ describe("Lightbox", () => {
   });
 
   it("preserves outgoing dimensions while entering a portrait photo", () => {
+    holdNavigationImages();
+    decodePreloadedPhotos();
     const onSelect = cy.spy().as("portraitOnSelect");
 
     mount(
@@ -534,7 +787,6 @@ describe("Lightbox", () => {
     cy.get('img[alt="First test photo"]').then(($image) => {
       const image = $image.get(0) as HTMLImageElement | undefined;
       if (!image) throw new Error("Expected the initial full image");
-      cy.stub(image, "decode").resolves();
       cy.wrap(image).trigger("load");
     });
     cy.get('[data-lightbox-stage="true"]').should(
@@ -558,6 +810,8 @@ describe("Lightbox", () => {
   });
 
   it("preserves portrait dimensions while returning to landscape", () => {
+    holdNavigationImages();
+    decodePreloadedPhotos();
     const onSelect = cy.spy().as("landscapeOnSelect");
 
     mount(
@@ -566,7 +820,6 @@ describe("Lightbox", () => {
     cy.get('img[alt="First test photo"]').then(($image) => {
       const image = $image.get(0) as HTMLImageElement | undefined;
       if (!image) throw new Error("Expected the initial full image");
-      cy.stub(image, "decode").resolves();
       cy.wrap(image).trigger("load");
     });
     cy.get('[data-lightbox-stage="true"]').should(
@@ -578,7 +831,6 @@ describe("Lightbox", () => {
     cy.get('img[alt="Portrait test photo"]').then(($image) => {
       const image = $image.get(0) as HTMLImageElement | undefined;
       if (!image) throw new Error("Expected the portrait full image");
-      cy.stub(image, "decode").resolves();
       cy.wrap(image).trigger("load");
     });
     cy.get('[data-lightbox-stage="true"]').should(
@@ -600,7 +852,6 @@ describe("Lightbox", () => {
     cy.get('img[alt="Last test photo"]').then(($image) => {
       const image = $image.get(0) as HTMLImageElement | undefined;
       if (!image) throw new Error("Expected the returning landscape image");
-      cy.stub(image, "decode").resolves();
       cy.wrap(image).trigger("load");
     });
     cy.get('[data-lightbox-outgoing="true"]').should("not.exist");

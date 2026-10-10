@@ -55,7 +55,7 @@ export default function PortfolioExperience({
   return (
     <div className="min-h-screen bg-canvas">
       <HeroSlideshow
-        key={heroResetKey}
+        resetKey={heroResetKey}
         photos={heroPhotos}
         initialPhotoIdsByOrientation={initialHeroPhotoIdsByOrientation}
         onOpen={selectPhoto}

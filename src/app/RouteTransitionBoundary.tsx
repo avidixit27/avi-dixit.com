@@ -136,6 +136,7 @@ export default function RouteTransitionBoundary({
 }: RouteTransitionBoundaryProps) {
   const location = useLocation();
   const navigationType = useNavigationType();
+  const routeLabel = getRouteLabel(location.pathname, availability);
 
   return (
     <div className="relative">
@@ -143,11 +144,17 @@ export default function RouteTransitionBoundary({
         <RouteFrame
           key={location.pathname}
           navigationType={navigationType}
-          label={getRouteLabel(location.pathname, availability)}
+          label={routeLabel}
           routeFocusRequested={routeFocusRequested}
           onRouteFocusComplete={onRouteFocusComplete}
         >
-          <Suspense fallback={<RouteLoadingFallback />}>
+          <Suspense
+            fallback={
+              <RouteLoadingFallback
+                showImageSkeleton={routeLabel === "Portfolio"}
+              />
+            }
+          >
             <Routes location={location}>
               <Route
                 path={ROUTES.home}

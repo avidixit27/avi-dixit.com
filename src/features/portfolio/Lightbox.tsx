@@ -39,9 +39,11 @@ interface LightboxProps {
 interface PreloadedPhoto {
   readonly image: HTMLImageElement;
   readonly picture: HTMLPictureElement;
+  decoded: boolean;
 }
 
 interface OutgoingFrame {
+  readonly showSkeleton: boolean;
   readonly height: number;
   readonly src: string;
   readonly width: number;
@@ -69,7 +71,7 @@ function createPreload(photo: Photo, imageDocument: Document): PreloadedPhoto {
   picture.append(image);
   imageDocument.body.append(picture);
 
-  return { image, picture };
+  return { image, picture, decoded: false };
 }
 
 export default function Lightbox({
@@ -85,11 +87,12 @@ export default function Lightbox({
   const revealFrameRef = useRef<number | null>(null);
   const closeTimerRef = useRef<number | null>(null);
   const closingRef = useRef(false);
-  const navigationLockedRef = useRef(true);
+  const navigationLockedRef = useRef(false);
   const pendingNavigationOffsetRef = useRef(0);
   const preloadCacheRef = useRef(new Map<string, PreloadedPhoto>());
   const [isClosing, setIsClosing] = useState(false);
   const [loadedPhotoId, setLoadedPhotoId] = useState<string | null>(null);
+  const [failedPhotoId, setFailedPhotoId] = useState<string | null>(null);
   const [settledPhotoId, setSettledPhotoId] = useState<string | null>(null);
   const [outgoingFrame, setOutgoingFrame] = useState<OutgoingFrame | null>(
     null,
@@ -117,22 +120,34 @@ export default function Lightbox({
       const currentImage = imageRef.current;
       const currentPhoto = photos[selectedIndex];
       if (!currentPhoto) return;
+      pendingNavigationOffsetRef.current = 0;
       setOutgoingFrame({
-        src: currentImage?.currentSrc || currentImage?.src || previewSrc,
+        showSkeleton: !preloadCacheRef.current.get(nextPhoto.id)?.decoded,
+        src:
+          loadedPhotoId === currentPhoto.id
+            ? currentImage?.currentSrc || currentImage?.src || previewSrc
+            : previewSrc,
         width: currentPhoto.width,
         height: currentPhoto.height,
       });
       setIsClosing(false);
+      setLoadedPhotoId(null);
+      setSettledPhotoId(null);
+      setFailedPhotoId(null);
       onSelect(nextIndex, nextPhoto.src);
     },
-    [onSelect, photos, previewSrc, selectedIndex],
+    [loadedPhotoId, onSelect, photos, previewSrc, selectedIndex],
   );
 
   const selectAdjacent = useCallback(
     (direction: PhotoDirection) => {
       const currentPhoto = photos[selectedIndex];
       if (!currentPhoto) return;
-      if (navigationLockedRef.current || settledPhotoId !== currentPhoto.id) {
+      if (
+        navigationLockedRef.current &&
+        failedPhotoId !== currentPhoto.id &&
+        (!outgoingFrame?.showSkeleton || loadedPhotoId === currentPhoto.id)
+      ) {
         pendingNavigationOffsetRef.current += direction;
         return;
       }
@@ -143,7 +158,15 @@ export default function Lightbox({
       );
       if (nextIndex != null) openPhoto(nextIndex);
     },
-    [navigationIndices, openPhoto, photos, selectedIndex, settledPhotoId],
+    [
+      failedPhotoId,
+      loadedPhotoId,
+      navigationIndices,
+      openPhoto,
+      outgoingFrame,
+      photos,
+      selectedIndex,
+    ],
   );
 
   useEffect(() => {
@@ -153,24 +176,46 @@ export default function Lightbox({
       LIGHTBOX_PRELOAD_FORWARD_COUNT,
       LIGHTBOX_PRELOAD_BACKWARD_COUNT,
     );
-    const retainedPhotoIds = new Set<string>();
-    preloadIndices.forEach((index) => {
-      const preloadPhoto = photos[index];
-      if (!preloadPhoto) return;
-      retainedPhotoIds.add(preloadPhoto.id);
-      if (preloadCacheRef.current.has(preloadPhoto.id)) return;
-      const imageDocument = imageRef.current?.ownerDocument ?? document;
-      const preloadEntry = createPreload(preloadPhoto, imageDocument);
-      preloadCacheRef.current.set(preloadPhoto.id, preloadEntry);
-      void preloadEntry.image.decode().catch(() => undefined);
-    });
+    const retainedPhotoIds = new Set(
+      preloadIndices.map((index) => photos[index]?.id),
+    );
     preloadCacheRef.current.forEach((preload, photoId) => {
       if (!retainedPhotoIds.has(photoId)) {
         preload.picture.remove();
         preloadCacheRef.current.delete(photoId);
       }
     });
-  }, [navigationIndices, photos, selectedIndex]);
+    if (loadedPhotoId !== photos[selectedIndex]?.id) return;
+
+    let cancelled = false;
+    // Preserve bandwidth for the active photo, then warm forward before backward.
+    async function warmNeighbors() {
+      for (const index of preloadIndices) {
+        if (cancelled) return;
+        const preloadPhoto = photos[index];
+        if (!preloadPhoto) continue;
+        let entry = preloadCacheRef.current.get(preloadPhoto.id);
+        if (!entry) {
+          entry = createPreload(
+            preloadPhoto,
+            imageRef.current?.ownerDocument ?? document,
+          );
+          preloadCacheRef.current.set(preloadPhoto.id, entry);
+        }
+        const preloadEntry = entry;
+        await preloadEntry.image
+          .decode()
+          .then(() => {
+            preloadEntry.decoded = true;
+          })
+          .catch(() => undefined);
+      }
+    }
+    void warmNeighbors();
+    return () => {
+      cancelled = true;
+    };
+  }, [loadedPhotoId, navigationIndices, photos, selectedIndex]);
 
   useEffect(() => {
     const selectedPhoto = photos[selectedIndex];
@@ -227,6 +272,9 @@ export default function Lightbox({
   const photo = photos[selectedIndex];
   if (!photo) return null;
   const isFullImageReady = loadedPhotoId === photo.id;
+  const isImageFailed = failedPhotoId === photo.id;
+  const showLoadingFeedback =
+    outgoingFrame && (outgoingFrame.showSkeleton || isImageFailed);
   const isNavigationReady = settledPhotoId === photo.id;
   const imageWidth = `min(100%, calc(${
     LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT * photo.aspectRatio
@@ -363,7 +411,7 @@ export default function Lightbox({
 
       <div
         data-lightbox-stage="true"
-        aria-busy={!isNavigationReady}
+        aria-busy={!isNavigationReady && !isImageFailed}
         className="pointer-events-none relative z-10 overflow-hidden"
         style={{
           width: `${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw`,
@@ -391,6 +439,7 @@ export default function Lightbox({
           onLoad={() => {
             const loadedImage = imageRef.current;
             if (!loadedImage) return;
+            setFailedPhotoId(null);
             const revealLoadedImage = () => {
               if (imageRef.current !== loadedImage) return;
               if (
@@ -420,8 +469,30 @@ export default function Lightbox({
               .catch(() => undefined)
               .then(revealLoadedImage);
           }}
+          onError={() => setFailedPhotoId(photo.id)}
         />
-        {outgoingFrame && !isFullImageReady && (
+        {showLoadingFeedback && !isFullImageReady && (
+          <div
+            data-lightbox-loading="true"
+            role="status"
+            aria-live="polite"
+            className={`absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center overflow-hidden bg-surface-muted ${isImageFailed ? "" : "image-skeleton"}`}
+            style={{ width: imageWidth, aspectRatio: photo.aspectRatio }}
+          >
+            <span
+              className={
+                isImageFailed
+                  ? "relative px-4 text-center font-inter text-text-muted"
+                  : "sr-only"
+              }
+            >
+              {isImageFailed
+                ? "Could not load this photo. Try another photo."
+                : "Loading photo…"}
+            </span>
+          </div>
+        )}
+        {outgoingFrame && !showLoadingFeedback && !isFullImageReady && (
           <img
             data-lightbox-outgoing="true"
             src={outgoingFrame.src}

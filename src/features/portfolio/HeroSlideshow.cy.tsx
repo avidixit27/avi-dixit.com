@@ -1,6 +1,7 @@
 import { mount } from "@cypress/react";
 import { useState } from "react";
 import HeroSlideshow from "./HeroSlideshow";
+import PortfolioExperience from "./PortfolioExperience";
 import type { Photo } from "./photoCatalog";
 
 function createPhoto(id: string, alt: string): Photo {
@@ -29,6 +30,109 @@ const photos = [
 ] as const satisfies readonly Photo[];
 
 describe("HeroSlideshow", () => {
+  it("keeps the cover selected while a modal hides the slideshow", () => {
+    cy.clock(null, [
+      "setInterval",
+      "clearInterval",
+      "setTimeout",
+      "clearTimeout",
+    ]);
+    mount(
+      <HeroSlideshow photos={photos} resetKey="selected" onOpen={cy.stub()} />,
+    );
+    cy.document().then((document) => {
+      document.documentElement.classList.add("modal-open");
+      Cypress.once("test:after:run", () =>
+        document.documentElement.classList.remove("modal-open"),
+      );
+    });
+    // A neighbor can load before the held cover on a cold connection.
+    cy.get('img[alt="Second test photo"]').trigger("load");
+    cy.tick(5000);
+    cy.window().then(
+      (window) =>
+        new Cypress.Promise<void>((resolve) =>
+          window.requestAnimationFrame(() => resolve()),
+        ),
+    );
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.get('img[alt="First test photo"]').trigger("load", { force: true });
+    cy.tick(2500);
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.document().then((document) =>
+      document.documentElement.classList.remove("modal-open"),
+    );
+    cy.tick(2500);
+    cy.get('img[alt="Second test photo"]').should("have.class", "opacity-100");
+  });
+
+  it("resets selection and the timer without replacing the loaded cover", () => {
+    cy.clock();
+    const resetPhotos = [...photos, createPhoto("fourth", "Fourth test photo")];
+    function ResettablePortfolio() {
+      const [resetCount, setResetCount] = useState(0);
+      return (
+        <>
+          <PortfolioExperience
+            photos={resetPhotos}
+            heroResetKey={`${resetCount}`}
+          />
+          <button
+            type="button"
+            className="relative z-10"
+            onClick={() => setResetCount((count) => count + 1)}
+          >
+            Reset portfolio
+          </button>
+        </>
+      );
+    }
+
+    mount(<ResettablePortfolio />);
+    const hero = '[aria-label="Open hero image gallery"]';
+    let coverElement: HTMLElement;
+    cy.get(`${hero} img[alt="First test photo"]`).then(($image) => {
+      coverElement = $image.get(0);
+      coverElement.dispatchEvent(new Event("load"));
+    });
+    cy.get(`${hero} img[alt="Second test photo"]`).trigger("load");
+    cy.tick(2000);
+    cy.contains("button", "Reset portfolio").click();
+    cy.get(`${hero} img[alt="First test photo"]`)
+      .should(($image) => expect($image.get(0)).to.equal(coverElement))
+      .parent()
+      .should("not.have.class", "image-skeleton");
+    cy.tick(2499);
+    cy.get(`${hero} img[alt="First test photo"]`).should(
+      "have.class",
+      "opacity-100",
+    );
+    cy.tick(1);
+    cy.get(`${hero} img[alt="Second test photo"]`).should(
+      "have.class",
+      "opacity-100",
+    );
+    cy.tick(701);
+    cy.get(`${hero} img[alt="First test photo"]`).should(($image) =>
+      expect($image.get(0)).to.equal(coverElement),
+    );
+    cy.contains("button", "Reset portfolio").click();
+    cy.get(`${hero} img[alt="First test photo"]`)
+      .should("have.class", "opacity-100")
+      .and("have.css", "transition-duration", "0s")
+      .should(($image) => expect($image.get(0)).to.equal(coverElement));
+    cy.tick(2499);
+    cy.get(`${hero} img[alt="First test photo"]`).should(
+      "have.class",
+      "opacity-100",
+    );
+    cy.tick(1);
+    cy.get(`${hero} img[alt="Second test photo"]`).should(
+      "have.class",
+      "opacity-100",
+    );
+  });
+
   it("rotates predictably and opens the active photo", () => {
     cy.clock();
     cy.window().then((window) =>
@@ -42,7 +146,7 @@ describe("HeroSlideshow", () => {
     cy.get('img[alt="First test photo"]')
       .should("have.attr", "loading", "eager")
       .and("have.attr", "fetchpriority", "high")
-      .and("have.css", "transition-duration", "0.7s");
+      .and("have.css", "transition-duration", "0s");
     cy.get('img[alt="Second test photo"]')
       .should("have.attr", "loading", "eager")
       .and("have.attr", "fetchpriority", "low");
@@ -55,7 +159,9 @@ describe("HeroSlideshow", () => {
     cy.tick(2501);
     cy.get("img").should("have.length", 3);
     cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
-    cy.get('img[alt="Second test photo"]').should("have.class", "opacity-100");
+    cy.get('img[alt="Second test photo"]')
+      .should("have.class", "opacity-100")
+      .and("have.css", "transition-duration", "0.7s");
     cy.tick(701);
     cy.get('img[alt="First test photo"]').should("not.exist");
     cy.get('[aria-label="Open hero image gallery"]').click();

@@ -1,3 +1,12 @@
+import { PORTFOLIO_PROJECTS } from "../../src/features/portfolio/projects/portfolioProjects";
+
+const EXPECTED_COVER_PRELOADS = Math.min(
+  PORTFOLIO_PROJECTS.filter(
+    (project) => project.available && "coverPhotoIds" in project,
+  ).length,
+  4,
+);
+
 describe("photography portfolio", () => {
   it("serves responsive media with bounded first-view priority", () => {
     cy.clock();
@@ -19,6 +28,24 @@ describe("photography portfolio", () => {
 
       expect(first.currentSrc).to.match(/-[\w-]+\.(?:avif|jpg|webp)$/);
     });
+
+    cy.get('[data-portfolio-cover-preload="true"] img').should(($images) => {
+      expect($images).to.have.length(EXPECTED_COVER_PRELOADS);
+
+      $images.each((_index, image) => {
+        const cover = image as HTMLImageElement;
+
+        expect(cover.getAttribute("loading")).to.equal("eager");
+        expect(cover.getAttribute("fetchpriority")).to.equal("low");
+        expect(cover.getAttribute("sizes")).to.equal("100vw");
+        expect(cover.complete).to.equal(true);
+        expect(cover.naturalWidth).to.be.greaterThan(0);
+      });
+    });
+
+    cy.get('link[rel="preload"][href*="ZenTokyoZoo-Regular"]')
+      .should("have.attr", "as", "font")
+      .and("have.attr", "type", "font/woff2");
 
     cy.get("main button")
       .first()

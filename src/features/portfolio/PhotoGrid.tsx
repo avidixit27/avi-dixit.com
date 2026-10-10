@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Ref } from "react";
 import ResponsiveImage from "../../components/ResponsiveImage";
 import type { Photo } from "./photoCatalog";
+import { getSurroundingPhotoIndices } from "./photoNavigation";
 import { LIGHTBOX_IMAGE_SIZES } from "./portfolioPresentationPolicy";
 
 const GRID_IMAGE_SIZES =
@@ -19,7 +20,19 @@ export default function PhotoGrid({
   onOpen,
 }: PhotoGridProps) {
   const [preloadPhotoId, setPreloadPhotoId] = useState<string>();
-  const preloadPhoto = photos.find((photo) => photo.id === preloadPhotoId);
+  const preloadIndex = photos.findIndex((photo) => photo.id === preloadPhotoId);
+  const preloadIndices =
+    preloadIndex < 0
+      ? []
+      : [
+          preloadIndex,
+          ...getSurroundingPhotoIndices(
+            preloadIndex,
+            photos.map((_, index) => index),
+            1,
+            0,
+          ),
+        ];
 
   return (
     <>
@@ -58,25 +71,33 @@ export default function PhotoGrid({
                 alt={photo.alt}
                 loading="lazy"
                 fetchPriority="low"
+                showSkeleton
+                pictureClassName="relative block overflow-hidden rounded-control"
                 className="h-auto w-full rounded-control"
               />
             </button>
           ))}
         </div>
       </main>
-      {preloadPhoto && (
+      {preloadIndices.length > 0 && (
         <div
           data-grid-lightbox-preload="true"
           aria-hidden="true"
           className="pointer-events-none fixed -top-px -left-px h-px w-px overflow-hidden opacity-0"
         >
-          <ResponsiveImage
-            {...preloadPhoto}
-            sizes={LIGHTBOX_IMAGE_SIZES}
-            loading="eager"
-            fetchPriority="high"
-            alt=""
-          />
+          {preloadIndices.map((index) => {
+            const photo = photos[index];
+            return photo ? (
+              <ResponsiveImage
+                key={photo.id}
+                {...photo}
+                sizes={LIGHTBOX_IMAGE_SIZES}
+                loading="eager"
+                fetchPriority={index === preloadIndex ? "high" : "low"}
+                alt=""
+              />
+            ) : null;
+          })}
         </div>
       )}
     </>
