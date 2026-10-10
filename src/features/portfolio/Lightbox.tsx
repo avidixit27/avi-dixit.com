@@ -85,7 +85,7 @@ export default function Lightbox({
   const revealFrameRef = useRef<number | null>(null);
   const closeTimerRef = useRef<number | null>(null);
   const closingRef = useRef(false);
-  const navigationLockedRef = useRef(true);
+  const navigationLockedRef = useRef(false);
   const pendingNavigationOffsetRef = useRef(0);
   const preloadCacheRef = useRef(new Map<string, PreloadedPhoto>());
   const [isClosing, setIsClosing] = useState(false);
@@ -118,21 +118,24 @@ export default function Lightbox({
       const currentPhoto = photos[selectedIndex];
       if (!currentPhoto) return;
       setOutgoingFrame({
-        src: currentImage?.currentSrc || currentImage?.src || previewSrc,
+        src:
+          loadedPhotoId === currentPhoto.id
+            ? currentImage?.currentSrc || currentImage?.src || previewSrc
+            : previewSrc,
         width: currentPhoto.width,
         height: currentPhoto.height,
       });
       setIsClosing(false);
       onSelect(nextIndex, nextPhoto.src);
     },
-    [onSelect, photos, previewSrc, selectedIndex],
+    [loadedPhotoId, onSelect, photos, previewSrc, selectedIndex],
   );
 
   const selectAdjacent = useCallback(
     (direction: PhotoDirection) => {
       const currentPhoto = photos[selectedIndex];
       if (!currentPhoto) return;
-      if (navigationLockedRef.current || settledPhotoId !== currentPhoto.id) {
+      if (navigationLockedRef.current) {
         pendingNavigationOffsetRef.current += direction;
         return;
       }
@@ -143,15 +146,19 @@ export default function Lightbox({
       );
       if (nextIndex != null) openPhoto(nextIndex);
     },
-    [navigationIndices, openPhoto, photos, selectedIndex, settledPhotoId],
+    [navigationIndices, openPhoto, photos, selectedIndex],
   );
 
   useEffect(() => {
     const preloadIndices = getSurroundingPhotoIndices(
       selectedIndex,
       navigationIndices,
-      LIGHTBOX_PRELOAD_FORWARD_COUNT,
-      LIGHTBOX_PRELOAD_BACKWARD_COUNT,
+      settledPhotoId === photos[selectedIndex]?.id
+        ? LIGHTBOX_PRELOAD_FORWARD_COUNT
+        : 1,
+      settledPhotoId === photos[selectedIndex]?.id
+        ? LIGHTBOX_PRELOAD_BACKWARD_COUNT
+        : 1,
     );
     const retainedPhotoIds = new Set<string>();
     preloadIndices.forEach((index) => {
@@ -170,7 +177,7 @@ export default function Lightbox({
         preloadCacheRef.current.delete(photoId);
       }
     });
-  }, [navigationIndices, photos, selectedIndex]);
+  }, [navigationIndices, photos, selectedIndex, settledPhotoId]);
 
   useEffect(() => {
     const selectedPhoto = photos[selectedIndex];

@@ -302,6 +302,13 @@ describe("Lightbox", () => {
       />,
     );
 
+    cy.get('[data-lightbox-preload="true"]').should("have.length", 2);
+    cy.get('img[alt="Preload photo 0"]').trigger("load");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
     cy.get('[data-lightbox-preload="true"]').should("have.length", 5);
     cy.get('[data-lightbox-preload="true"] source[type="image/avif"]')
       .should("have.length", 5)
@@ -469,6 +476,27 @@ describe("Lightbox", () => {
         "aria-disabled",
       );
     });
+  });
+
+  it("navigates immediately from the painted preview before full image decode", () => {
+    const onSelect = cy.spy().as("immediateSelect");
+    mount(<StatefulLightbox onSelect={onSelect} />);
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "true",
+    );
+    cy.get('[aria-label="Next image"]').click();
+    cy.get("@immediateSelect").should(
+      "have.been.calledOnceWith",
+      2,
+      "/last.jpg",
+    );
+    cy.get('[data-lightbox-outgoing="true"]').should(
+      "have.attr",
+      "src",
+      "/first-preview.jpg",
+    );
   });
 
   it("keeps the outgoing frame until decode, then swaps without overlap", () => {

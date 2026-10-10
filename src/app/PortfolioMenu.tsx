@@ -54,6 +54,7 @@ export default function PortfolioMenu({
   const [orientation, setOrientation] = useState<PortfolioCoverOrientation>();
   const [covers, setCovers] = useState<Record<string, Photo | undefined>>({});
   const [isNavigating, setIsNavigating] = useState(false);
+  const [coverPreloadCount, setCoverPreloadCount] = useState(0);
   const readyCoverKeysRef = useRef(new Set<string>());
   const readyProjectIdsRef = useRef(new Set<string>());
   const loadingProjectIdsRef = useRef(new Set<string>());
@@ -82,9 +83,42 @@ export default function PortfolioMenu({
     (projectId: string, coverOrientation: PortfolioCoverOrientation) => {
       readyCoverKeysRef.current.add(`${projectId}:${coverOrientation}`);
       revealSelectedProjectIfReady(projectId);
+      if (coverOrientation !== orientationRef.current) return;
+      setCoverPreloadCount((count) => {
+        let next = count;
+        while (
+          next > 0 &&
+          next < Math.min(projects.length, INITIAL_COVER_PRELOAD_LIMIT) &&
+          readyCoverKeysRef.current.has(
+            `${projects[next - 1]?.id}:${coverOrientation}`,
+          )
+        ) {
+          next += 1;
+        }
+        return next;
+      });
     },
-    [revealSelectedProjectIfReady],
+    [projects, revealSelectedProjectIfReady],
   );
+
+  useEffect(() => {
+    const startWarming = () =>
+      setCoverPreloadCount((count) => Math.max(count, 1));
+    if (document.readyState === "complete") startWarming();
+    else window.addEventListener("load", startWarming, { once: true });
+    return () => window.removeEventListener("load", startWarming);
+  }, []);
+
+  useEffect(() => {
+    const project = projects[coverPreloadCount - 1];
+    if (
+      project &&
+      orientation &&
+      readyCoverKeysRef.current.has(`${project.id}:${orientation}`)
+    ) {
+      markCoverReady(project.id, orientation);
+    }
+  }, [coverPreloadCount, covers, markCoverReady, orientation, projects]);
 
   const prepareProject = useCallback(
     (project: PortfolioProjectSummary) => {
@@ -144,6 +178,7 @@ export default function PortfolioMenu({
       orientationRef.current = nextOrientation;
       setOrientation(nextOrientation);
       setCovers({});
+      setCoverPreloadCount((count) => Math.min(count, 1));
       readyCoverKeysRef.current.clear();
       const loadedCovers = await Promise.all(
         projects.map(
@@ -200,7 +235,7 @@ export default function PortfolioMenu({
           aria-hidden="true"
           className="pointer-events-none fixed -top-px -left-px h-px w-px overflow-hidden opacity-0"
         >
-          {projects.slice(0, INITIAL_COVER_PRELOAD_LIMIT).map((project) => {
+          {projects.slice(0, coverPreloadCount).map((project) => {
             const cover = covers[project.id];
             if (!cover) return null;
 

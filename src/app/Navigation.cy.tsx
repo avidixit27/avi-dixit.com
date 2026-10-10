@@ -243,6 +243,49 @@ describe("Navigation", () => {
     );
   });
 
+  it("warms covers sequentially without loading full project catalogs", () => {
+    const paris = getPortfolioProject("paris-fr");
+    const kerala = getPortfolioProject("kerala");
+    if (!paris || !kerala) throw new Error("Expected portfolio projects");
+    const preloadProject = cy.stub().resolves(true);
+    const releaseRequests: (() => void)[] = [];
+    cy.intercept(
+      /@imagetools\/|\.(avif|webp|jpg)(\?.*)?$/,
+      (request) =>
+        new Promise<void>((resolve) => {
+          releaseRequests.push(() => {
+            request.reply({ statusCode: 404 });
+            resolve();
+          });
+        }),
+    );
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioMenu
+            isOpen={false}
+            projects={[paris, kerala]}
+            reduceMotion
+            transitionSeconds={0}
+            onClose={cy.stub()}
+            onNavigate={cy.stub()}
+            onNavigationComplete={cy.stub()}
+            preloadProject={preloadProject}
+          />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+    cy.get('[data-portfolio-cover-preload="true"]')
+      .should("have.length", 1)
+      .find("img")
+      .trigger("load", { force: true });
+    cy.get('[data-portfolio-cover-preload="true"]').should("have.length", 2);
+    cy.then(() => {
+      expect(preloadProject.callCount).to.equal(0);
+      releaseRequests.forEach((release) => release());
+    });
+  });
+
   it("opens secondary portfolios in the full-screen desktop menu", () => {
     cy.clock();
     cy.viewport(1512, 770);
