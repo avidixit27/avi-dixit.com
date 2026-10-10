@@ -72,6 +72,7 @@ Assume the [Ponytail Codex plugin](https://github.com/DietrichGebert/ponytail) i
 
 - For behavior changes, write the smallest useful failing test first when practical, implement the behavior, and refactor while it passes.
 - For reproducible bugs, add a regression test. Protect intended behavior before refactoring and distinguish intentional changes from regressions.
+- For a recurring visual regression, compare the known-good commits before editing, reproduce the failing transition rather than only its final state, and record the cause and test in the active plan. Preserve earlier safeguards and verify cold and warm browser behavior before requesting visual approval. Review fixes need their own focused regression checks; do not assume the previous review or green CI covers a new interaction.
 - Use Vitest for pure logic, Cypress component tests for rendered React behavior, and Cypress E2E tests for critical production-build journeys.
 - Test observable results, meaningful boundaries, and durable invariants. Avoid implementation-detail assertions, broad snapshots, arbitrary sleeps, redundant test stacks, and live production dependencies.
 - Never weaken assertions, remove useful tests, add exclusions, skip relevant failures, or disable lint rules merely to pass. Policy changes need a concrete rationale.

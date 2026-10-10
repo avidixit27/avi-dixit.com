@@ -78,6 +78,8 @@ export default function HeroSlideshow({
   useEffect(() => {
     if (heroPhotoIndices.length === 0) return undefined;
     const interval = setInterval(() => {
+      // Keep the destination cover beneath the selector until its exit reset.
+      if (document.documentElement.classList.contains("modal-open")) return;
       setSlideshow((current) => {
         const nextIndex = (current.activeIndex + 1) % heroPhotoIndices.length;
         const nextPhotoIndex = heroPhotoIndices[nextIndex];

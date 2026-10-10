@@ -30,6 +30,42 @@ const photos = [
 ] as const satisfies readonly Photo[];
 
 describe("HeroSlideshow", () => {
+  it("keeps the cover selected while a modal hides the slideshow", () => {
+    cy.clock(null, [
+      "setInterval",
+      "clearInterval",
+      "setTimeout",
+      "clearTimeout",
+    ]);
+    mount(
+      <HeroSlideshow photos={photos} resetKey="selected" onOpen={cy.stub()} />,
+    );
+    cy.document().then((document) => {
+      document.documentElement.classList.add("modal-open");
+      Cypress.once("test:after:run", () =>
+        document.documentElement.classList.remove("modal-open"),
+      );
+    });
+    // A neighbor can load before the held cover on a cold connection.
+    cy.get('img[alt="Second test photo"]').trigger("load");
+    cy.tick(5000);
+    cy.window().then(
+      (window) =>
+        new Cypress.Promise<void>((resolve) =>
+          window.requestAnimationFrame(() => resolve()),
+        ),
+    );
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.get('img[alt="First test photo"]').trigger("load", { force: true });
+    cy.tick(2500);
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.document().then((document) =>
+      document.documentElement.classList.remove("modal-open"),
+    );
+    cy.tick(2500);
+    cy.get('img[alt="Second test photo"]').should("have.class", "opacity-100");
+  });
+
   it("resets selection and the timer without replacing the loaded cover", () => {
     cy.clock();
     const resetPhotos = [...photos, createPhoto("fourth", "Fourth test photo")];

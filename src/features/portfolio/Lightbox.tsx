@@ -120,6 +120,7 @@ export default function Lightbox({
       const currentImage = imageRef.current;
       const currentPhoto = photos[selectedIndex];
       if (!currentPhoto) return;
+      pendingNavigationOffsetRef.current = 0;
       setOutgoingFrame({
         showSkeleton: !preloadCacheRef.current.get(nextPhoto.id)?.decoded,
         src:

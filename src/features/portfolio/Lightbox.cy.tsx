@@ -682,6 +682,44 @@ describe("Lightbox", () => {
     cy.get("@failedWarmSelect").should("have.been.calledTwice");
   });
 
+  it("discards queued navigation after manually leaving a failed image", () => {
+    holdNavigationImages();
+    decodePreloadedPhotos();
+    const onSelect = cy.spy().as("failedQueueSelect");
+    mount(
+      <StatefulLightbox navigationIndices={[0, 1, 2]} onSelect={onSelect} />,
+    );
+    cy.get('img[alt="First test photo"]').trigger("load");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[data-lightbox-preload="true"]').should("have.length", 2);
+    cy.clock(null, ["setTimeout", "clearTimeout"]);
+    cy.get('[aria-label="Next image"]').click().click();
+    cy.get("@failedQueueSelect").should("have.been.calledOnce");
+    cy.get('img[alt="Portrait test photo"]').then(($image) => {
+      $image.get(0).dispatchEvent(new Event("error"));
+    });
+    cy.get('[data-lightbox-loading="true"]').should(
+      "contain.text",
+      "Could not load this photo",
+    );
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "3");
+    cy.get('img[alt="Last test photo"]').trigger("load");
+    cy.get('img[alt="Last test photo"]').should("have.class", "opacity-100");
+    cy.tick(LIGHTBOX_IMAGE_TRANSITION_MS);
+    cy.then(() => expect(onSelect).to.have.been.calledTwice);
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "3");
+  });
+
   it("keeps the outgoing frame until decode, then swaps without overlap", () => {
     holdNavigationImages();
     decodePreloadedPhotos();

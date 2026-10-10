@@ -7,8 +7,11 @@ export const PORTFOLIO_PROJECT_MODULE_LOADERS = {
 export async function preloadPortfolioProject(slug: string) {
   if (!Object.hasOwn(PORTFOLIO_PROJECT_MODULE_LOADERS, slug)) return false;
 
-  await PORTFOLIO_PROJECT_MODULE_LOADERS[
-    slug as keyof typeof PORTFOLIO_PROJECT_MODULE_LOADERS
-  ]();
+  await Promise.all([
+    import("./PortfolioProjectRoute"),
+    PORTFOLIO_PROJECT_MODULE_LOADERS[
+      slug as keyof typeof PORTFOLIO_PROJECT_MODULE_LOADERS
+    ](),
+  ]);
   return true;
 }
