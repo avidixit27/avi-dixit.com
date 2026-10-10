@@ -12,6 +12,9 @@ describe("document font loading", () => {
     expect(document).toContain(
       'href="/src/assets/fonts/Tangerine-Regular.woff2"',
     );
+    expect(document).toContain(
+      'href="/src/assets/fonts/ZenTokyoZoo-Regular.woff2"',
+    );
     expect(document).toContain('as="font"');
     expect(document).not.toContain("fonts.googleapis.com");
     expect(document).not.toContain("fonts.gstatic.com");
