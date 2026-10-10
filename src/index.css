@@ -95,6 +95,25 @@
 }
 
 @layer components {
+  .cover-image-reveal {
+    background: var(--color-surface-muted);
+  }
+
+  .cover-image-reveal > img {
+    opacity: 1;
+    transition: opacity 150ms ease-out;
+  }
+
+  .cover-image-reveal.image-skeleton > img {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cover-image-reveal > img {
+      transition: none;
+    }
+  }
+
   .image-skeleton {
     background: var(--color-surface-muted);
   }

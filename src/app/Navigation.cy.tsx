@@ -85,6 +85,137 @@ function PortfolioFocusHarness() {
   );
 }
 
+describe("Portfolio cover loading", () => {
+  beforeEach(() => {
+    cy.then(() =>
+      Cypress.automation("remote:debugger:protocol", {
+        command: "Network.setCacheDisabled",
+        params: { cacheDisabled: true },
+      }),
+    );
+  });
+
+  afterEach(() => {
+    cy.then(() =>
+      Cypress.automation("remote:debugger:protocol", {
+        command: "Network.setCacheDisabled",
+        params: { cacheDisabled: false },
+      }),
+    );
+    cy.then(() =>
+      Cypress.automation("remote:debugger:protocol", {
+        command: "Emulation.setEmulatedMedia",
+        params: { features: [] },
+      }),
+    );
+  });
+
+  it("warms covers sequentially without loading full project catalogs", () => {
+    const paris = getPortfolioProject("paris-fr");
+    const kerala = getPortfolioProject("kerala");
+    if (!paris || !kerala) throw new Error("Expected portfolio projects");
+    const preloadProject = cy.stub().resolves(true);
+    const releaseRequests: (() => void)[] = [];
+    cy.intercept(
+      /@imagetools\/|\.(avif|webp|jpg)(\?.*)?$/,
+      (request) =>
+        new Promise<void>((resolve) => {
+          releaseRequests.push(() => {
+            request.reply({ statusCode: 404 });
+            resolve();
+          });
+        }),
+    );
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioMenu
+            isOpen={false}
+            projects={[paris, kerala]}
+            reduceMotion
+            transitionSeconds={0}
+            onClose={cy.stub()}
+            onNavigate={cy.stub()}
+            onNavigationComplete={cy.stub()}
+            preloadProject={preloadProject}
+          />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+    cy.get('[data-portfolio-cover-preload="true"]')
+      .should("have.length", 1)
+      .find("img")
+      .trigger("load", { force: true });
+    cy.get('[data-portfolio-cover-preload="true"]').should("have.length", 2);
+    cy.then(() => {
+      expect(preloadProject.callCount).to.equal(0);
+      releaseRequests.forEach((release) => release());
+    });
+  });
+
+  it("shows shimmer for an unloaded cover preview and fades it in after load", () => {
+    const paris = getPortfolioProject("paris-fr");
+    if (!paris) throw new Error("Expected the Paris portfolio");
+    const releaseRequests: (() => void)[] = [];
+    cy.intercept(
+      /@imagetools\/|\.(avif|webp|jpg)(\?.*)?$/,
+      (request) =>
+        new Promise<void>((resolve) => {
+          releaseRequests.push(() => {
+            request.destroy();
+            resolve();
+          });
+        }),
+    );
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioMenu
+            isOpen
+            projects={[paris]}
+            reduceMotion
+            transitionSeconds={0}
+            onClose={cy.stub()}
+            onNavigate={cy.stub()}
+            onNavigationComplete={cy.stub()}
+          />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").focus();
+    cy.get('[data-portfolio-cover="true"] picture')
+      .should("have.class", "image-skeleton")
+      .find("img")
+      .should("have.css", "opacity", "0")
+      .should("have.css", "transition-duration", "0.15s")
+      .should("have.css", "transition-timing-function", "ease-out")
+      .then(($image) => $image.get(0).dispatchEvent(new Event("load")));
+    cy.get('[data-portfolio-cover="true"] picture').should(
+      "not.have.class",
+      "image-skeleton",
+    );
+    cy.get('[data-portfolio-cover="true"] img').should(
+      "have.css",
+      "opacity",
+      "1",
+    );
+    cy.then(() =>
+      Cypress.automation("remote:debugger:protocol", {
+        command: "Emulation.setEmulatedMedia",
+        params: {
+          features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+        },
+      }),
+    );
+    cy.get('[data-portfolio-cover="true"] img').should(
+      "have.css",
+      "transition-duration",
+      "0s",
+    );
+    cy.then(() => releaseRequests.forEach((release) => release()));
+  });
+});
+
 describe("Navigation", () => {
   beforeEach(() => {
     cy.viewport(1280, 800);
@@ -241,107 +372,6 @@ describe("Navigation", () => {
     cy.then(() =>
       expect(preloadProject).to.have.been.calledOnceWith("paris-fr"),
     );
-  });
-
-  it("warms covers sequentially without loading full project catalogs", () => {
-    const paris = getPortfolioProject("paris-fr");
-    const kerala = getPortfolioProject("kerala");
-    if (!paris || !kerala) throw new Error("Expected portfolio projects");
-    const preloadProject = cy.stub().resolves(true);
-    const releaseRequests: (() => void)[] = [];
-    cy.intercept(
-      /@imagetools\/|\.(avif|webp|jpg)(\?.*)?$/,
-      (request) =>
-        new Promise<void>((resolve) => {
-          releaseRequests.push(() => {
-            request.reply({ statusCode: 404 });
-            resolve();
-          });
-        }),
-    );
-    mount(
-      <MemoryRouter>
-        <MotionProvider>
-          <PortfolioMenu
-            isOpen={false}
-            projects={[paris, kerala]}
-            reduceMotion
-            transitionSeconds={0}
-            onClose={cy.stub()}
-            onNavigate={cy.stub()}
-            onNavigationComplete={cy.stub()}
-            preloadProject={preloadProject}
-          />
-        </MotionProvider>
-      </MemoryRouter>,
-    );
-    cy.get('[data-portfolio-cover-preload="true"]')
-      .should("have.length", 1)
-      .find("img")
-      .trigger("load", { force: true });
-    cy.get('[data-portfolio-cover-preload="true"]').should("have.length", 2);
-    cy.then(() => {
-      expect(preloadProject.callCount).to.equal(0);
-      releaseRequests.forEach((release) => release());
-    });
-  });
-
-  describe("cold cover preview", () => {
-    afterEach(() => {
-      cy.then(() =>
-        Cypress.automation("remote:debugger:protocol", {
-          command: "Network.setCacheDisabled",
-          params: { cacheDisabled: false },
-        }),
-      );
-    });
-
-    it("shows shimmer for an unloaded cover preview and clears it after load", () => {
-      const paris = getPortfolioProject("paris-fr");
-      if (!paris) throw new Error("Expected the Paris portfolio");
-      const releaseRequests: (() => void)[] = [];
-      cy.then(() =>
-        Cypress.automation("remote:debugger:protocol", {
-          command: "Network.setCacheDisabled",
-          params: { cacheDisabled: true },
-        }),
-      );
-      cy.intercept(
-        /@imagetools\/|\.(avif|webp|jpg)(\?.*)?$/,
-        (request) =>
-          new Promise<void>((resolve) => {
-            releaseRequests.push(() => {
-              request.destroy();
-              resolve();
-            });
-          }),
-      );
-      mount(
-        <MemoryRouter>
-          <MotionProvider>
-            <PortfolioMenu
-              isOpen
-              projects={[paris]}
-              reduceMotion
-              transitionSeconds={0}
-              onClose={cy.stub()}
-              onNavigate={cy.stub()}
-              onNavigationComplete={cy.stub()}
-            />
-          </MotionProvider>
-        </MemoryRouter>,
-      );
-      cy.contains('nav[data-portfolio-menu="true"] a', "paris").focus();
-      cy.get('[data-portfolio-cover="true"] picture')
-        .should("have.class", "image-skeleton")
-        .find("img")
-        .then(($image) => $image.get(0).dispatchEvent(new Event("load")));
-      cy.get('[data-portfolio-cover="true"] picture').should(
-        "not.have.class",
-        "image-skeleton",
-      );
-      cy.then(() => releaseRequests.forEach((release) => release()));
-    });
   });
 
   it("opens secondary portfolios in the full-screen desktop menu", () => {

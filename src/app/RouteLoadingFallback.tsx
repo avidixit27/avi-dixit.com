@@ -10,7 +10,7 @@ export default function RouteLoadingFallback({
       aria-live="polite"
       className={`relative grid min-h-svh place-items-center overflow-hidden font-inter text-text-muted ${showImageSkeleton ? "image-skeleton" : ""}`}
     >
-      <span className="relative">Loading page…</span>
+      <span className="sr-only">Loading page…</span>
     </div>
   );
 }

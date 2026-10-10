@@ -28,7 +28,7 @@ Make cold and warm portfolio interactions responsive on Slow 4G without loading 
 - `PortfolioMenu.tsx`: start background cover warming after page load, one cover at a time, capped at the first four projects. Later projects retain intent loading; orientation changes restart staged warming.
 - Subset the OFL-licensed Inter file to Latin, Latin Extended-A/B, general punctuation, euro and trademark. Keep Zina unmodified because its license forbids derivatives.
 - Protect behavior with component tests and update enduring architecture guidance.
-- Approved visual follow-up: keep loading messages centered and show a subtle shared charcoal shimmer only in empty portfolio route, hero and grid slots. Preserve existing previews and respect reduced motion.
+- Approved visual follow-up: keep loading status accessible without visible text and show a subtle shared charcoal shimmer only in empty portfolio route, hero and grid slots. Preserve existing previews and respect reduced motion.
 
 ## Non-goals
 
@@ -163,3 +163,19 @@ The user requested trying shimmer behind unloaded selector cover previews. `Port
 All 27 navigation component tests completed with zero failed, pending or skipped tests. Types, affected-file lint and production build passed. Native Chrome inspection confirmed shimmer on an unloaded Paris preview and removal after load. A held-image visual check captured `/private/tmp/portfolio-cover-shimmer.png`; temporary network/cache/interception overrides were cleared and the preview reloaded. This is visual feedback, not a download-speed improvement. Left uncommitted for user review.
 
 The user visually approved the cover shimmer and requested a local checkpoint commit including the pending warm-handoff fix, before trying a separate short cover-reveal transition. No push was requested for this checkpoint.
+
+### Short cover-reveal experiment
+
+Saved the approved checkpoint as `c06062f`. The next experiment adds a cover-only **150 ms ease-out opacity transition** from the existing skeleton state, with the charcoal surface retained behind the image and no transition for reduced motion. Loading, source candidates, image quality, readiness gates, interaction timing and dependencies are unchanged; there is no additional wait before clicks can proceed. **Simplify:** use CSS and the existing image load state rather than another animation owner or timer.
+
+[Material's image-loading guidance](https://m1.material.io/patterns/loading-images.html) describes progressive fade-ins, and [PIE's timing guidance](https://pie.design/foundations/motion/timing/) uses 100–150 ms for short feedback. The selected 150 ms is a scoped design choice, not a universal image-loading standard.
+
+The two request-dependent cover checks now run before navigation interactions can warm the same decoded images in Chrome. Their suite temporarily disables HTTP caching and restores it afterward. All existing assertions remain; the cold-preview check also verifies opacity, duration, easing and reduced motion. Two consecutive focused runs completed 27 tests with zero failures, pending or skipped tests; the final completion report is `cypress/results/2026-10-10T14-22-30-445Z-13818.json`. Type checking, affected-file lint/format and production build passed. Native Chrome verified the unloaded opacity of zero and loaded opacity of one, with a 150 ms ease-out transition. Screenshot: `/private/tmp/portfolio-cover-soft-reveal.png`. Temporary interception/cache overrides were restored.
+
+This experiment is uncommitted for visual approval. CI, the complete local matrix and physical-device frame-time profiling were not run. It changes visual settling, not download time; opacity avoids layout animation but still has rendering cost.
+
+### Hidden loading labels
+
+The user approved hiding visible loading labels in both bootstrap and route fallback while retaining accessible status text. The bootstrap uses scoped inline visually-hidden styling because Tailwind is unavailable before JavaScript loads; the React fallback reuses Tailwind's `sr-only`. Portfolio shimmer, plain non-image fallbacks, fetch policy, geometry and animation timing are unchanged. The pending cover-reveal experiment is preserved.
+
+Updated desktop/mobile component checks protect viewport-sized shimmer and accessible clipped text; reduced-motion coverage remains. The checks failed before implementation and all three passed after implementation (`cypress/results/2026-10-10T14-40-12-916Z-21511.json`, no failures/pending/skips). Type checking, affected-file lint/format and production build passed. Native Chrome verified the hidden bootstrap status with startup scripts temporarily held, then verified the portfolio shimmer with its route module held; restoring normal loading rendered Paris successfully. Screenshot evidence: `/private/tmp/portfolio-quiet-bootstrap.png` and `/private/tmp/portfolio-quiet-shimmer.png`. All temporary interception/cache overrides were restored. No commit or push; full-suite/CI and a physical screen-reader audit were not run.

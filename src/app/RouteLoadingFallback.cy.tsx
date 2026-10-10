@@ -6,18 +6,23 @@ describe("RouteLoadingFallback", () => {
     [1280, 720],
     [390, 844],
   ] as const) {
-    it(`centers the loading text in the ${width} × ${height} viewport`, () => {
+    it(`fills the ${width} × ${height} viewport with shimmer and screen-reader-only status text`, () => {
       cy.viewport(width, height);
       mount(<RouteLoadingFallback showImageSkeleton />);
       cy.get('[role="status"]')
         .should("have.class", "image-skeleton")
         .should("have.attr", "aria-live", "polite")
+        .should(($status) => {
+          const bounds = $status.get(0).getBoundingClientRect();
+          expect(bounds.width).to.equal(width);
+          expect(bounds.height).to.equal(height);
+        })
         .find("span")
-        .should(($text) => {
-          const bounds = $text.get(0).getBoundingClientRect();
-          expect(bounds.left + bounds.width / 2).to.be.closeTo(width / 2, 1);
-          expect(bounds.top + bounds.height / 2).to.be.closeTo(height / 2, 1);
-        });
+        .should("have.text", "Loading page…")
+        .and("have.css", "position", "absolute")
+        .and("have.css", "width", "1px")
+        .and("have.css", "height", "1px")
+        .and("have.css", "clip-path", "inset(50%)");
       cy.screenshot(`loading-shimmer-${width}`);
     });
   }

@@ -344,7 +344,7 @@ export default function PortfolioMenu({
                       fetchPriority="high"
                       alt=""
                       showSkeleton
-                      pictureClassName="relative block h-full w-full overflow-hidden"
+                      pictureClassName="cover-image-reveal relative block h-full w-full overflow-hidden"
                       className="h-full w-full object-cover"
                       onLoad={() =>
                         markCoverReady(displayedProjectId, orientation)
