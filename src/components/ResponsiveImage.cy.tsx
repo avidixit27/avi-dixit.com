@@ -2,6 +2,47 @@ import { mount } from "@cypress/react";
 import ResponsiveImage from "./ResponsiveImage";
 
 describe("ResponsiveImage", () => {
+  it("reserves photo geometry and stops the opt-in shimmer after load or error", () => {
+    const onLoad = cy.stub().as("imageLoaded");
+    const onError = cy.stub().as("imageFailed");
+    mount(
+      <div className="absolute top-[10000px] w-full">
+        <ResponsiveImage
+          src="/skeleton.jpg"
+          srcSet="/skeleton.jpg 480w"
+          sources={[]}
+          sizes="100vw"
+          width={600}
+          height={400}
+          alt="Loading test photo"
+          loading="lazy"
+          fetchPriority="low"
+          showSkeleton
+          pictureClassName="relative block overflow-hidden"
+          className="h-auto w-full"
+          onLoad={onLoad}
+          onError={onError}
+        />
+      </div>,
+    );
+    cy.get("picture").should("have.class", "image-skeleton");
+    cy.get("img").then(($image) => {
+      const before = $image.get(0).getBoundingClientRect();
+      $image.get(0).dispatchEvent(new Event("load"));
+      cy.get("picture").should("not.have.class", "image-skeleton");
+      cy.get("img").should(($loaded) => {
+        expect($loaded.get(0).getBoundingClientRect().height).to.equal(
+          before.height,
+        );
+      });
+    });
+    cy.get("@imageLoaded").should("have.been.calledOnce");
+    cy.get("img").then(($image) =>
+      $image.get(0).dispatchEvent(new Event("error")),
+    );
+    cy.get("picture").should("not.have.class", "image-skeleton");
+    cy.get("@imageFailed").should("have.been.calledOnce");
+  });
   it("renders an intrinsic responsive picture with an explicit loading policy", () => {
     mount(
       <ResponsiveImage
@@ -51,23 +92,29 @@ describe("ResponsiveImage", () => {
     const onError = cy.stub().as("onError");
 
     mount(
-      <ResponsiveImage
-        src="/missing.jpg"
-        srcSet="/missing.jpg 480w"
-        sources={[]}
-        sizes="100vw"
-        width={600}
-        height={400}
-        alt="A missing photograph"
-        loading="eager"
-        fetchPriority="high"
-        onError={onError}
-      />,
+      <div className="absolute top-[10000px] w-full">
+        <ResponsiveImage
+          src="/missing.jpg"
+          srcSet="/missing.jpg 480w"
+          sources={[]}
+          sizes="100vw"
+          width={600}
+          height={400}
+          alt="A missing photograph"
+          loading="lazy"
+          fetchPriority="high"
+          onError={onError}
+          showSkeleton
+          pictureClassName="relative block overflow-hidden"
+        />
+      </div>,
     );
 
+    cy.get("picture").should("have.class", "image-skeleton");
     cy.get("picture img").then(($image) => {
       $image.get(0)?.dispatchEvent(new Event("error"));
     });
     cy.get("@onError").should("have.been.calledOnce");
+    cy.get("picture").should("not.have.class", "image-skeleton");
   });
 });

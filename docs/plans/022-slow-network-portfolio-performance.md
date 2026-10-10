@@ -28,6 +28,7 @@ Make cold and warm portfolio interactions responsive on Slow 4G without loading 
 - `PortfolioMenu.tsx`: start background cover warming after page load, one cover at a time, capped at the first four projects. Later projects retain intent loading; orientation changes restart staged warming.
 - Subset the OFL-licensed Inter file to Latin, Latin Extended-A/B, general punctuation, euro and trademark. Keep Zina unmodified because its license forbids derivatives.
 - Protect behavior with component tests and update enduring architecture guidance.
+- Approved visual follow-up: keep loading messages centered and show a subtle shared charcoal shimmer only in empty portfolio route, hero and grid slots. Preserve existing previews and respect reduced motion.
 
 ## Non-goals
 
@@ -44,8 +45,8 @@ No Rust/Wasm, backend selection, new dependencies, image-quality changes, animat
 ## Acceptance criteria
 
 - First Next/Previous activation selects its target even if the opening fullscreen image has not decoded.
-- The outgoing layer preserves the visible preview in that case; subsequent rapid navigation remains queued safely.
-- Exactly two neighboring images preload before and after settling, rotating with selection to maintain previous/current/next. Small galleries deduplicate neighbors.
+- The opening view preserves its clicked preview. Adjacent decoded-neighbor handoffs preserve the outgoing photo and queue rapid intent; cold selections show their target-sized shimmer immediately and allow further direct navigation.
+- The lightbox retains at most two neighboring images, warming them serially after active-source readiness and rotating with selection to maintain previous/current/next. Small galleries deduplicate neighbors.
 - Background cover warming starts after page load and progresses serially without loading full catalogs.
 - Generated asset responses use `public, max-age=31536000, immutable`; document responses are not made immutable.
 - Inter is approximately 40 KB with its license retained; existing text and display fonts remain visually intact.
@@ -115,3 +116,38 @@ The user approved trying a permanent previous/current/next window. This is share
 - Four rapid cold Next clicks, starting at photograph 11, retained queued intent and settled at photograph 3, with two preload elements and `aria-busy=false`. It settled approximately 2.50 seconds after the final click: rapid uncached navigation can still outrun the buffer, but did not stall permanently.
 - A cold mobile smoke test settled the same next photograph in 598 ms, with exactly two neighbors. This is one sample, not a mobile distribution.
 - The user approved the cached experience and requested a checkpoint commit. Local Wrangler preview on port 8788 serves the experiment. No push or CI polling for this checkpoint; temporary browser viewport/network overrides were restored.
+
+### Intent warming and staged neighbors experiment
+
+The user approved trying two bounded scheduling changes after checkpoint `015790c`: grid hover/focus warms the selected fullscreen candidate at high priority and the next candidate at low priority; the shared lightbox starts new neighbor requests only after the current source decodes, warming forward before backward. Existing neighbor requests are retained within the rolling window. Failed neighbor decodes advance the queue, and stale selection/unmount work cannot start further requests. No media quality, source candidates, animation timing, dependency, connection detection or route-specific policy changed. The grid's two intent candidates are separate from the lightbox's two-neighbor cache; this is not a promise that the browser holds only three decoded images globally.
+
+- Regression tests failed against the checkpoint before implementation. After implementation: 67 unit tests, 22 focused component tests (PhotoGrid and Lightbox), 13 production E2E tests, type checking and affected-file lint passed. Both fresh browser completion reports contain nonzero completed specs/tests and zero failures, pending or skipped tests.
+- Repeated the same local Wrangler desktop Slow 4G procedure and photograph 11 → 12 journey with caching disabled: three-run median settled transition **1,390 ms**, range 1,373–1,420 ms, versus the checkpoint's 2,232 ms median. Next selection remained immediate (median 4 ms). This is an observed local improvement of approximately 842 ms, not a deployed field percentile or an interleaved A/B test.
+- After a separate cache-enabled priming run, three warm desktop runs settled in a median **234 ms**, range 230–242 ms. One cold mobile smoke run settled in **628 ms**; it is not a mobile distribution and does not demonstrate a mobile improvement over the checkpoint's 598 ms sample.
+- Browser network/cache/viewport overrides were restored. Screenshot evidence: `/private/tmp/portfolio-staged-preloads.png`. Full-quality cold downloads remain network-bound; backward navigation can wait longer because warming deliberately favors forward intent.
+- Left uncommitted for user visual review. No push or CI polling for this experiment.
+
+### Loading fallback alignment
+
+The user's recording showed the centered HTML bootstrap yielding to a left-aligned React route fallback. Centered the shared route fallback in a small-viewport-height grid, without changing bootstrap, route transitions, text or colors. Desktop/mobile Chrome component checks (2 tests, zero failed/pending/skipped), type checking, affected-file lint, formatting and production build passed. Skeleton shimmer was proposed here and approved in the subsequent follow-up below. Left uncommitted alongside the approved scheduling experiment.
+
+### Approved skeleton presentation
+
+Added one opt-in shared responsive-image loading state and a CSS-only 1.8-second transform shimmer over the existing charcoal surface token. Hero and grid owners opt in; the hero only shimmers its active empty slot. Portfolio route fallbacks use the same treatment beneath centered loading text. Other routes, existing lightbox previews, hidden preloads, source candidates, fetch priorities and image/route transitions stay unchanged. Load and error remove shimmer; reduced motion disables animation. Catalog width/height and existing viewport geometry reserve space without layout movement.
+
+- A new regression test failed against the previous component before implementation. After implementation: 67 unit tests, 32 focused Chrome component tests, 13 production E2E tests, type checking and lint passed. Fresh browser reports show nonzero completed specs/tests and zero failed/pending/skipped tests. Formatting and diff checks passed.
+- Inspected cold Slow 4G mobile and desktop Paris through local Wrangler on port 8788. Centered route status and active hero placeholders were visible; inactive hero sources did not shimmer. After loading, all hero pictures had cleared their shimmer class. Browser network/cache/viewport overrides were restored.
+- Screenshot evidence: `/private/tmp/portfolio-skeleton-loading.png` and `/private/tmp/portfolio-skeleton-desktop.png`. No physical-device performance trace or deployed measurement for the shimmer; it does not reduce download time.
+- No dependency, commit, push or CI polling. Awaiting user visual review.
+
+### Cold carousel navigation feedback
+
+The user approved extending shimmer to unloaded Next selections. The shared lightbox records successful neighbor decode in its existing bounded cache. Cold targets immediately replace the previous photograph with a catalog-sized shimmer, and further cold navigation advances directly instead of waiting behind the target download. Decoded-neighbor handoffs keep their outgoing-photo geometry and queued animation behavior. The opening clicked preview remains unchanged. A failed cold request stops shimmer, announces failure and leaves navigation available; no retry framework or new dependency was added.
+
+- New cold feedback tests failed before implementation. Final focused verification: 21 lightbox component tests, 67 unit tests, types, affected-file lint and production build/E2E (13 tests). Browser reports contain zero failed/pending/skipped tests. Warm handoff fixtures now explicitly control preload decode readiness rather than assuming nonexistent fixture images are warm.
+- Cold Slow 4G desktop visual check: photograph 11 → 12 updated the number immediately, showed a target-sized shimmer with no outgoing image, and settled with no remaining loader. Three subsequent mobile Next actions advanced 11 → 12 → 1 → 2 without becoming stuck. Browser overrides restored.
+- Screenshot: `/private/tmp/cold-carousel-shimmer.png`. No new speed claim: this changes feedback during network waits, not image quality or preload limits. Left uncommitted for user visual approval; no push or CI polling.
+
+### Approved checkpoint publication
+
+The user approved committing and pushing the intent-warming, centered-loading, shared-shimmer and cold-navigation follow-ups to the existing PR #59 branch. The recorded local verification above remains the evidence for this checkpoint; no additional full-suite rerun or CI polling is required to publish it.

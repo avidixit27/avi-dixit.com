@@ -20,7 +20,7 @@ function photo(id: string, width: number, height: number): Photo {
 }
 
 describe("PhotoGrid", () => {
-  it("warms the lightbox-sized source on hover", () => {
+  it("warms the selected and next lightbox sources without changing thumbnails", () => {
     mount(
       <PhotoGrid
         photos={[photo("1", 6000, 4000), photo("2", 6000, 4000)]}
@@ -38,11 +38,31 @@ describe("PhotoGrid", () => {
       .should("have.attr", "fetchpriority", "low")
       .and("not.have.attr", "sizes", LIGHTBOX_IMAGE_SIZES);
     cy.get('[data-grid-lightbox-preload="true"] img')
+      .should("have.length", 2)
+      .first()
       .should("have.attr", "sizes", LIGHTBOX_IMAGE_SIZES)
       .and("have.attr", "fetchpriority", "high");
+    cy.get('[data-grid-lightbox-preload="true"] img')
+      .last()
+      .should("have.attr", "fetchpriority", "low");
     cy.get('img[alt="Photo 2"]')
       .should("have.attr", "fetchpriority", "low")
       .and("not.have.attr", "sizes", LIGHTBOX_IMAGE_SIZES);
+  });
+
+  it("wraps next-photo warming on keyboard focus without duplicating a single photo", () => {
+    const first = photo("1", 6000, 4000);
+    const last = photo("2", 4000, 6000);
+    mount(<PhotoGrid photos={[first, last]} onOpen={cy.stub()} />);
+    cy.get('[aria-label="Open Photo 2"]').focus();
+    cy.get('[data-grid-lightbox-preload="true"] img').should(($images) => {
+      expect(
+        $images.toArray().map((image) => image.getAttribute("src")),
+      ).to.deep.equal([last.src, first.src]);
+    });
+    mount(<PhotoGrid photos={[first]} onOpen={cy.stub()} />);
+    cy.get('[aria-label="Open Photo 1"]').focus();
+    cy.get('[data-grid-lightbox-preload="true"] img').should("have.length", 1);
   });
 
   it("packs the next landscape photo beside a preceding portrait photo", () => {

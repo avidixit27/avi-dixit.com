@@ -95,6 +95,40 @@
 }
 
 @layer components {
+  .image-skeleton {
+    background: var(--color-surface-muted);
+  }
+
+  .image-skeleton::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 255 255 / 0.06),
+      transparent
+    );
+    animation: image-skeleton-shimmer 1.8s ease-in-out infinite;
+  }
+
+  @keyframes image-skeleton-shimmer {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .image-skeleton::before {
+      animation: none;
+      background: none;
+    }
+  }
+
   .page-container {
     width: min(100% - 2rem, 80rem);
     margin-inline: auto;

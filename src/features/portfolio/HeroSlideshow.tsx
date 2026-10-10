@@ -143,6 +143,8 @@ export default function HeroSlideshow({
             loading="eager"
             fetchPriority={isInitialHero ? "high" : "low"}
             imageRef={isActive ? activeImageRef : null}
+            showSkeleton={isActive}
+            pictureClassName="absolute inset-0 block overflow-hidden"
             onLoad={() => markPhotoLoaded(photo.id)}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity ${
               isActive ? "opacity-100" : "opacity-0"
