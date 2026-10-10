@@ -609,6 +609,34 @@ describe("Lightbox", () => {
     cy.get('[data-lightbox-photo-number="true"]').should("have.text", "3");
   });
 
+  it("recovers navigation when a decoded neighbor's displayed image fails", () => {
+    holdNavigationImages();
+    decodePreloadedPhotos();
+    const onSelect = cy.spy().as("failedWarmSelect");
+    mount(
+      <StatefulLightbox navigationIndices={[0, 1, 2]} onSelect={onSelect} />,
+    );
+    cy.get('img[alt="First test photo"]').trigger("load");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[data-lightbox-preload="true"]').should("have.length", 2);
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-outgoing="true"]').should("exist");
+    cy.get('img[alt="Portrait test photo"]').then(($image) => {
+      $image.get(0).dispatchEvent(new Event("error"));
+    });
+    cy.get('[data-lightbox-loading="true"]')
+      .should("contain.text", "Could not load this photo")
+      .and("not.have.class", "image-skeleton");
+    cy.get('[data-lightbox-outgoing="true"]').should("not.exist");
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "3");
+    cy.get("@failedWarmSelect").should("have.been.calledTwice");
+  });
+
   it("keeps the outgoing frame until decode, then swaps without overlap", () => {
     holdNavigationImages();
     decodePreloadedPhotos();

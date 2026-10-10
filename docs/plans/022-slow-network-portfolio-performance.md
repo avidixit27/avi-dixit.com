@@ -151,3 +151,15 @@ The user approved extending shimmer to unloaded Next selections. The shared ligh
 ### Approved checkpoint publication
 
 The user approved committing and pushing the intent-warming, centered-loading, shared-shimmer and cold-navigation follow-ups to the existing PR #59 branch. The recorded local verification above remains the evidence for this checkpoint; no additional full-suite rerun or CI polling is required to publish it.
+
+### Review follow-up: failed warm handoff
+
+The shared lightbox now allows navigation away from a failed displayed image even when its neighbor preload previously decoded. Warm handoff failures use the existing non-shimmer failure panel instead of leaving the old photograph on screen. Successful handoff and close timings remain unchanged. Added a component regression for a decoded neighbor whose displayed image fails; the focused suite completed 22 tests with zero failed, pending or skipped tests. All 67 unit tests, type checking and affected-file lint passed. Left uncommitted for visual approval.
+
+### Reversible cover-preview shimmer experiment
+
+The user requested trying shimmer behind unloaded selector cover previews. `PortfolioMenu` opts only its displayed cover into the existing shared responsive-image skeleton; hidden preloads, fetching policy and selector animation timings are unchanged. The normal dark menu remains plain until a project receives hover/focus/selection. Reverting this experiment means removing that opt-in and its picture positioning classes plus the isolated cold-cover component test; preserve the separate warm-handoff fix above.
+
+All 27 navigation component tests completed with zero failed, pending or skipped tests. Types, affected-file lint and production build passed. Native Chrome inspection confirmed shimmer on an unloaded Paris preview and removal after load. A held-image visual check captured `/private/tmp/portfolio-cover-shimmer.png`; temporary network/cache/interception overrides were cleared and the preview reloaded. This is visual feedback, not a download-speed improvement. Left uncommitted for user review.
+
+The user visually approved the cover shimmer and requested a local checkpoint commit including the pending warm-handoff fix, before trying a separate short cover-reveal transition. No push was requested for this checkpoint.

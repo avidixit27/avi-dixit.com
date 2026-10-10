@@ -142,6 +142,7 @@ export default function Lightbox({
       if (!currentPhoto) return;
       if (
         navigationLockedRef.current &&
+        failedPhotoId !== currentPhoto.id &&
         (!outgoingFrame?.showSkeleton || loadedPhotoId === currentPhoto.id)
       ) {
         pendingNavigationOffsetRef.current += direction;
@@ -155,6 +156,7 @@ export default function Lightbox({
       if (nextIndex != null) openPhoto(nextIndex);
     },
     [
+      failedPhotoId,
       loadedPhotoId,
       navigationIndices,
       openPhoto,
@@ -267,6 +269,9 @@ export default function Lightbox({
   const photo = photos[selectedIndex];
   if (!photo) return null;
   const isFullImageReady = loadedPhotoId === photo.id;
+  const isImageFailed = failedPhotoId === photo.id;
+  const showLoadingFeedback =
+    outgoingFrame && (outgoingFrame.showSkeleton || isImageFailed);
   const isNavigationReady = settledPhotoId === photo.id;
   const imageWidth = `min(100%, calc(${
     LIGHTBOX_MAX_HEIGHT_VIEWPORT_PERCENT * photo.aspectRatio
@@ -403,7 +408,7 @@ export default function Lightbox({
 
       <div
         data-lightbox-stage="true"
-        aria-busy={!isNavigationReady && failedPhotoId !== photo.id}
+        aria-busy={!isNavigationReady && !isImageFailed}
         className="pointer-events-none relative z-10 overflow-hidden"
         style={{
           width: `${LIGHTBOX_MAX_WIDTH_VIEWPORT_PERCENT}vw`,
@@ -463,28 +468,28 @@ export default function Lightbox({
           }}
           onError={() => setFailedPhotoId(photo.id)}
         />
-        {outgoingFrame?.showSkeleton && !isFullImageReady && (
+        {showLoadingFeedback && !isFullImageReady && (
           <div
             data-lightbox-loading="true"
             role="status"
             aria-live="polite"
-            className={`absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center overflow-hidden bg-surface-muted ${failedPhotoId === photo.id ? "" : "image-skeleton"}`}
+            className={`absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center overflow-hidden bg-surface-muted ${isImageFailed ? "" : "image-skeleton"}`}
             style={{ width: imageWidth, aspectRatio: photo.aspectRatio }}
           >
             <span
               className={
-                failedPhotoId === photo.id
+                isImageFailed
                   ? "relative px-4 text-center font-inter text-text-muted"
                   : "sr-only"
               }
             >
-              {failedPhotoId === photo.id
+              {isImageFailed
                 ? "Could not load this photo. Try another photo."
                 : "Loading photo…"}
             </span>
           </div>
         )}
-        {outgoingFrame && !outgoingFrame.showSkeleton && !isFullImageReady && (
+        {outgoingFrame && !showLoadingFeedback && !isFullImageReady && (
           <img
             data-lightbox-outgoing="true"
             src={outgoingFrame.src}

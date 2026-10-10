@@ -286,6 +286,64 @@ describe("Navigation", () => {
     });
   });
 
+  describe("cold cover preview", () => {
+    afterEach(() => {
+      cy.then(() =>
+        Cypress.automation("remote:debugger:protocol", {
+          command: "Network.setCacheDisabled",
+          params: { cacheDisabled: false },
+        }),
+      );
+    });
+
+    it("shows shimmer for an unloaded cover preview and clears it after load", () => {
+      const paris = getPortfolioProject("paris-fr");
+      if (!paris) throw new Error("Expected the Paris portfolio");
+      const releaseRequests: (() => void)[] = [];
+      cy.then(() =>
+        Cypress.automation("remote:debugger:protocol", {
+          command: "Network.setCacheDisabled",
+          params: { cacheDisabled: true },
+        }),
+      );
+      cy.intercept(
+        /@imagetools\/|\.(avif|webp|jpg)(\?.*)?$/,
+        (request) =>
+          new Promise<void>((resolve) => {
+            releaseRequests.push(() => {
+              request.destroy();
+              resolve();
+            });
+          }),
+      );
+      mount(
+        <MemoryRouter>
+          <MotionProvider>
+            <PortfolioMenu
+              isOpen
+              projects={[paris]}
+              reduceMotion
+              transitionSeconds={0}
+              onClose={cy.stub()}
+              onNavigate={cy.stub()}
+              onNavigationComplete={cy.stub()}
+            />
+          </MotionProvider>
+        </MemoryRouter>,
+      );
+      cy.contains('nav[data-portfolio-menu="true"] a', "paris").focus();
+      cy.get('[data-portfolio-cover="true"] picture')
+        .should("have.class", "image-skeleton")
+        .find("img")
+        .then(($image) => $image.get(0).dispatchEvent(new Event("load")));
+      cy.get('[data-portfolio-cover="true"] picture').should(
+        "not.have.class",
+        "image-skeleton",
+      );
+      cy.then(() => releaseRequests.forEach((release) => release()));
+    });
+  });
+
   it("opens secondary portfolios in the full-screen desktop menu", () => {
     cy.clock();
     cy.viewport(1512, 770);
