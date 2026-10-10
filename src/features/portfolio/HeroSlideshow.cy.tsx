@@ -1,6 +1,7 @@
 import { mount } from "@cypress/react";
 import { useState } from "react";
 import HeroSlideshow from "./HeroSlideshow";
+import PortfolioExperience from "./PortfolioExperience";
 import type { Photo } from "./photoCatalog";
 
 function createPhoto(id: string, alt: string): Photo {
@@ -29,6 +30,64 @@ const photos = [
 ] as const satisfies readonly Photo[];
 
 describe("HeroSlideshow", () => {
+  it("resets selection and the timer without replacing the loaded cover", () => {
+    cy.clock();
+    function ResettablePortfolio() {
+      const [resetCount, setResetCount] = useState(0);
+      return (
+        <>
+          <PortfolioExperience photos={photos} heroResetKey={`${resetCount}`} />
+          <button
+            type="button"
+            className="relative z-10"
+            onClick={() => setResetCount((count) => count + 1)}
+          >
+            Reset portfolio
+          </button>
+        </>
+      );
+    }
+
+    mount(<ResettablePortfolio />);
+    const hero = '[aria-label="Open hero image gallery"]';
+    let coverElement: HTMLElement;
+    cy.get(`${hero} img[alt="First test photo"]`).then(($image) => {
+      coverElement = $image.get(0);
+      coverElement.dispatchEvent(new Event("load"));
+    });
+    cy.get(`${hero} img[alt="Second test photo"]`).trigger("load");
+    cy.tick(2000);
+    cy.contains("button", "Reset portfolio").click();
+    cy.get(`${hero} img[alt="First test photo"]`)
+      .should(($image) => expect($image.get(0)).to.equal(coverElement))
+      .parent()
+      .should("not.have.class", "image-skeleton");
+    cy.tick(2499);
+    cy.get(`${hero} img[alt="First test photo"]`).should(
+      "have.class",
+      "opacity-100",
+    );
+    cy.tick(1);
+    cy.get(`${hero} img[alt="Second test photo"]`).should(
+      "have.class",
+      "opacity-100",
+    );
+    cy.contains("button", "Reset portfolio").click();
+    cy.get(`${hero} img[alt="First test photo"]`)
+      .should("have.class", "opacity-100")
+      .should(($image) => expect($image.get(0)).to.equal(coverElement));
+    cy.tick(2499);
+    cy.get(`${hero} img[alt="First test photo"]`).should(
+      "have.class",
+      "opacity-100",
+    );
+    cy.tick(1);
+    cy.get(`${hero} img[alt="Second test photo"]`).should(
+      "have.class",
+      "opacity-100",
+    );
+  });
+
   it("rotates predictably and opens the active photo", () => {
     cy.clock();
     cy.window().then((window) =>

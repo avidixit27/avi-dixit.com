@@ -11,6 +11,7 @@ import {
 interface SlideshowState {
   readonly activeIndex: number;
   readonly outgoingIndex: number | null;
+  readonly resetKey: string | undefined;
 }
 
 export interface HeroPhotoIdsByOrientation {
@@ -20,12 +21,14 @@ export interface HeroPhotoIdsByOrientation {
 
 interface HeroSlideshowProps {
   photos: readonly Photo[];
+  resetKey?: string | undefined;
   initialPhotoIdsByOrientation?: HeroPhotoIdsByOrientation | undefined;
   onOpen: (index: number, previewSrc: string) => void;
 }
 
 export default function HeroSlideshow({
   photos,
+  resetKey,
   initialPhotoIdsByOrientation,
   onOpen,
 }: HeroSlideshowProps) {
@@ -46,7 +49,11 @@ export default function HeroSlideshow({
   const [slideshow, setSlideshow] = useState<SlideshowState>({
     activeIndex: 0,
     outgoingIndex: null,
+    resetKey,
   });
+  if (slideshow.resetKey !== resetKey) {
+    setSlideshow({ activeIndex: 0, outgoingIndex: null, resetKey });
+  }
   const activeImageRef = useRef<HTMLImageElement>(null);
   const loadedPhotoIdsRef = useRef(new Set<string>());
 
@@ -58,7 +65,11 @@ export default function HeroSlideshow({
     const mediaQuery = window.matchMedia("(orientation: landscape)");
     const updateOrientation = () => {
       setIsLandscapeViewport(mediaQuery.matches);
-      setSlideshow({ activeIndex: 0, outgoingIndex: null });
+      setSlideshow((current) => ({
+        ...current,
+        activeIndex: 0,
+        outgoingIndex: null,
+      }));
     };
     mediaQuery.addEventListener("change", updateOrientation);
     return () => mediaQuery.removeEventListener("change", updateOrientation);
@@ -74,6 +85,7 @@ export default function HeroSlideshow({
           nextPhotoIndex == null ? undefined : photos[nextPhotoIndex];
         return nextPhoto && loadedPhotoIdsRef.current.has(nextPhoto.id)
           ? {
+              ...current,
               activeIndex: nextIndex,
               outgoingIndex: current.activeIndex,
             }
@@ -81,7 +93,7 @@ export default function HeroSlideshow({
       });
     }, HERO_ROTATION_DELAY_MS);
     return () => clearInterval(interval);
-  }, [heroPhotoIndices, photos]);
+  }, [heroPhotoIndices, photos, resetKey]);
 
   useEffect(() => {
     if (slideshow.outgoingIndex == null) return undefined;
