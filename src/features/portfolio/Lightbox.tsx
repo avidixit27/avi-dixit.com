@@ -153,12 +153,8 @@ export default function Lightbox({
     const preloadIndices = getSurroundingPhotoIndices(
       selectedIndex,
       navigationIndices,
-      settledPhotoId === photos[selectedIndex]?.id
-        ? LIGHTBOX_PRELOAD_FORWARD_COUNT
-        : 1,
-      settledPhotoId === photos[selectedIndex]?.id
-        ? LIGHTBOX_PRELOAD_BACKWARD_COUNT
-        : 1,
+      LIGHTBOX_PRELOAD_FORWARD_COUNT,
+      LIGHTBOX_PRELOAD_BACKWARD_COUNT,
     );
     const retainedPhotoIds = new Set<string>();
     preloadIndices.forEach((index) => {
@@ -177,7 +173,7 @@ export default function Lightbox({
         preloadCacheRef.current.delete(photoId);
       }
     });
-  }, [navigationIndices, photos, selectedIndex, settledPhotoId]);
+  }, [navigationIndices, photos, selectedIndex]);
 
   useEffect(() => {
     const selectedPhoto = photos[selectedIndex];

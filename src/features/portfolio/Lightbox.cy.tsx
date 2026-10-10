@@ -309,9 +309,9 @@ describe("Lightbox", () => {
       "aria-busy",
       "false",
     );
-    cy.get('[data-lightbox-preload="true"]').should("have.length", 5);
+    cy.get('[data-lightbox-preload="true"]').should("have.length", 2);
     cy.get('[data-lightbox-preload="true"] source[type="image/avif"]')
-      .should("have.length", 5)
+      .should("have.length", 2)
       .each(($source) =>
         expect($source.attr("srcset")).to.match(/\.avif 480w, .*\.avif 960w/),
       );
@@ -319,6 +319,11 @@ describe("Lightbox", () => {
       expect($image.attr("sizes")).to.equal("95vw");
       expect($image.prop("fetchPriority")).to.equal("low");
       expect($image.attr("srcset")).to.match(/\.jpg 480w, .*\.jpg 960w/);
+    });
+    cy.get('[data-lightbox-preload="true"] img').then(($images) => {
+      expect(
+        $images.toArray().map((image) => image.getAttribute("src")),
+      ).to.have.members(["/preload-1.jpg", "/preload-5.jpg"]);
     });
   });
 
