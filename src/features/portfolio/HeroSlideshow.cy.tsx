@@ -32,11 +32,15 @@ const photos = [
 describe("HeroSlideshow", () => {
   it("resets selection and the timer without replacing the loaded cover", () => {
     cy.clock();
+    const resetPhotos = [...photos, createPhoto("fourth", "Fourth test photo")];
     function ResettablePortfolio() {
       const [resetCount, setResetCount] = useState(0);
       return (
         <>
-          <PortfolioExperience photos={photos} heroResetKey={`${resetCount}`} />
+          <PortfolioExperience
+            photos={resetPhotos}
+            heroResetKey={`${resetCount}`}
+          />
           <button
             type="button"
             className="relative z-10"
@@ -72,9 +76,14 @@ describe("HeroSlideshow", () => {
       "have.class",
       "opacity-100",
     );
+    cy.tick(701);
+    cy.get(`${hero} img[alt="First test photo"]`).should(($image) =>
+      expect($image.get(0)).to.equal(coverElement),
+    );
     cy.contains("button", "Reset portfolio").click();
     cy.get(`${hero} img[alt="First test photo"]`)
       .should("have.class", "opacity-100")
+      .and("have.css", "transition-duration", "0s")
       .should(($image) => expect($image.get(0)).to.equal(coverElement));
     cy.tick(2499);
     cy.get(`${hero} img[alt="First test photo"]`).should(
@@ -101,7 +110,7 @@ describe("HeroSlideshow", () => {
     cy.get('img[alt="First test photo"]')
       .should("have.attr", "loading", "eager")
       .and("have.attr", "fetchpriority", "high")
-      .and("have.css", "transition-duration", "0.7s");
+      .and("have.css", "transition-duration", "0s");
     cy.get('img[alt="Second test photo"]')
       .should("have.attr", "loading", "eager")
       .and("have.attr", "fetchpriority", "low");
@@ -114,7 +123,9 @@ describe("HeroSlideshow", () => {
     cy.tick(2501);
     cy.get("img").should("have.length", 3);
     cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
-    cy.get('img[alt="Second test photo"]').should("have.class", "opacity-100");
+    cy.get('img[alt="Second test photo"]')
+      .should("have.class", "opacity-100")
+      .and("have.css", "transition-duration", "0.7s");
     cy.tick(701);
     cy.get('img[alt="First test photo"]').should("not.exist");
     cy.get('[aria-label="Open hero image gallery"]').click();

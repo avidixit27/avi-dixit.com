@@ -214,6 +214,62 @@ describe("Portfolio cover loading", () => {
     );
     cy.then(() => releaseRequests.forEach((release) => release()));
   });
+
+  it("advances failed background warming without dismissing an unloaded retry", () => {
+    cy.viewport(1280, 800);
+    const paris = getPortfolioProject("paris-fr");
+    const kerala = getPortfolioProject("kerala");
+    if (!paris || !kerala) throw new Error("Expected portfolio projects");
+    const onClose = cy.stub().as("closeFailedCover");
+    const projects = [paris, kerala];
+    cy.document().then((document) => {
+      // Control readiness even when Chrome reuses a decoded test image.
+      const holdNativeImageLoads = (event: Event) => {
+        if (event.isTrusted && (event.target as Element).tagName === "IMG") {
+          event.stopImmediatePropagation();
+        }
+      };
+      document.addEventListener("load", holdNativeImageLoads, true);
+      Cypress.once("test:after:run", () =>
+        document.removeEventListener("load", holdNativeImageLoads, true),
+      );
+    });
+    mount(
+      <MemoryRouter>
+        <MotionProvider>
+          <PortfolioMenu
+            isOpen
+            projects={projects}
+            reduceMotion
+            transitionSeconds={0}
+            onClose={onClose}
+            onNavigate={cy.stub()}
+            onNavigationComplete={cy.stub()}
+            preloadProject={() => Promise.resolve(true)}
+          />
+        </MotionProvider>
+      </MemoryRouter>,
+    );
+    cy.get('[data-portfolio-cover-preload="true"] img')
+      .first()
+      .then(($image) => $image.get(0).dispatchEvent(new Event("error")));
+    cy.get('[data-portfolio-cover-preload="true"]').should("have.length", 2);
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").focus();
+    cy.contains('nav[data-portfolio-menu="true"] a', "paris").click();
+    cy.get('[data-portfolio-labels="true"]').should(
+      "not.have.attr",
+      "aria-hidden",
+    );
+    cy.get("@closeFailedCover").should("not.have.been.called");
+    cy.get('[data-portfolio-cover="true"] picture').should(
+      "have.class",
+      "image-skeleton",
+    );
+    cy.get('[data-portfolio-cover="true"] img').trigger("load", {
+      force: true,
+    });
+    cy.get("@closeFailedCover").should("have.been.calledOnce");
+  });
 });
 
 describe("Navigation", () => {

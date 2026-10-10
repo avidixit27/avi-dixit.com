@@ -118,9 +118,13 @@ export default function HeroSlideshow({
   const nextIndex = (activeIndex + 1) % heroPhotoIndices.length;
   const visibleIndices = Array.from(
     new Set(
-      [slideshow.outgoingIndex, activeIndex, nextIndex].filter(
-        (index): index is number => index != null,
-      ),
+      // Keep the decoded cover mounted for the selector's final reset.
+      [
+        resetKey == null ? null : 0,
+        slideshow.outgoingIndex,
+        activeIndex,
+        nextIndex,
+      ].filter((index): index is number => index != null),
     ),
   );
 
@@ -161,7 +165,9 @@ export default function HeroSlideshow({
             className={`absolute inset-0 w-full h-full object-cover transition-opacity ${
               isActive ? "opacity-100" : "opacity-0"
             }`}
-            style={{ transitionDuration: `${HERO_CROSSFADE_DURATION_MS}ms` }}
+            style={{
+              transitionDuration: `${slideshow.outgoingIndex == null ? 0 : HERO_CROSSFADE_DURATION_MS}ms`,
+            }}
           />
         );
       })}

@@ -56,6 +56,7 @@ export default function PortfolioMenu({
   const [isNavigating, setIsNavigating] = useState(false);
   const [coverPreloadCount, setCoverPreloadCount] = useState(0);
   const readyCoverKeysRef = useRef(new Set<string>());
+  const settledCoverKeysRef = useRef(new Set<string>());
   const readyProjectIdsRef = useRef(new Set<string>());
   const loadingProjectIdsRef = useRef(new Set<string>());
   const selectedProjectIdRef = useRef<string>();
@@ -79,17 +80,25 @@ export default function PortfolioMenu({
     }
   }, []);
 
-  const markCoverReady = useCallback(
-    (projectId: string, coverOrientation: PortfolioCoverOrientation) => {
-      readyCoverKeysRef.current.add(`${projectId}:${coverOrientation}`);
-      revealSelectedProjectIfReady(projectId);
+  const settleCover = useCallback(
+    (
+      projectId: string,
+      coverOrientation: PortfolioCoverOrientation,
+      ready = true,
+    ) => {
+      const key = `${projectId}:${coverOrientation}`;
+      settledCoverKeysRef.current.add(key);
+      if (ready) {
+        readyCoverKeysRef.current.add(key);
+        revealSelectedProjectIfReady(projectId);
+      }
       if (coverOrientation !== orientationRef.current) return;
       setCoverPreloadCount((count) => {
         let next = count;
         while (
           next > 0 &&
           next < Math.min(projects.length, INITIAL_COVER_PRELOAD_LIMIT) &&
-          readyCoverKeysRef.current.has(
+          settledCoverKeysRef.current.has(
             `${projects[next - 1]?.id}:${coverOrientation}`,
           )
         ) {
@@ -114,11 +123,15 @@ export default function PortfolioMenu({
     if (
       project &&
       orientation &&
-      readyCoverKeysRef.current.has(`${project.id}:${orientation}`)
+      settledCoverKeysRef.current.has(`${project.id}:${orientation}`)
     ) {
-      markCoverReady(project.id, orientation);
+      settleCover(
+        project.id,
+        orientation,
+        readyCoverKeysRef.current.has(`${project.id}:${orientation}`),
+      );
     }
-  }, [coverPreloadCount, covers, markCoverReady, orientation, projects]);
+  }, [coverPreloadCount, covers, settleCover, orientation, projects]);
 
   const prepareProject = useCallback(
     (project: PortfolioProjectSummary) => {
@@ -180,6 +193,7 @@ export default function PortfolioMenu({
       setCovers({});
       setCoverPreloadCount((count) => Math.min(count, 1));
       readyCoverKeysRef.current.clear();
+      settledCoverKeysRef.current.clear();
       const loadedCovers = await Promise.all(
         projects.map(
           async (project) =>
@@ -194,7 +208,7 @@ export default function PortfolioMenu({
       if (!current) return;
       setCovers(Object.fromEntries(loadedCovers));
       loadedCovers.forEach(([projectId, cover]) => {
-        if (!cover) markCoverReady(projectId, nextOrientation);
+        if (!cover) settleCover(projectId, nextOrientation);
       });
     };
 
@@ -205,7 +219,7 @@ export default function PortfolioMenu({
       current = false;
       media.removeEventListener("change", loadCovers);
     };
-  }, [markCoverReady, projects]);
+  }, [settleCover, projects]);
 
   return createPortal(
     <AnimatePresence
@@ -250,8 +264,8 @@ export default function PortfolioMenu({
                   loading="eager"
                   fetchPriority="low"
                   alt=""
-                  onLoad={() => markCoverReady(project.id, orientation)}
-                  onError={() => markCoverReady(project.id, orientation)}
+                  onLoad={() => settleCover(project.id, orientation)}
+                  onError={() => settleCover(project.id, orientation, false)}
                 />
               </div>
             );
@@ -347,10 +361,10 @@ export default function PortfolioMenu({
                       pictureClassName="cover-image-reveal relative block h-full w-full overflow-hidden"
                       className="h-full w-full object-cover"
                       onLoad={() =>
-                        markCoverReady(displayedProjectId, orientation)
+                        settleCover(displayedProjectId, orientation)
                       }
                       onError={() =>
-                        markCoverReady(displayedProjectId, orientation)
+                        settleCover(displayedProjectId, orientation)
                       }
                     />
                     <m.div
