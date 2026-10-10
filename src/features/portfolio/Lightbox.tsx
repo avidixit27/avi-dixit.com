@@ -130,6 +130,8 @@ export default function Lightbox({
         height: currentPhoto.height,
       });
       setIsClosing(false);
+      setLoadedPhotoId(null);
+      setSettledPhotoId(null);
       setFailedPhotoId(null);
       onSelect(nextIndex, nextPhoto.src);
     },

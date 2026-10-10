@@ -592,6 +592,51 @@ describe("Lightbox", () => {
     cy.get('img[alt="Last test photo"]').should("have.class", "opacity-100");
   });
 
+  it("waits for fresh decode when returning through an unloaded photo", () => {
+    holdNavigationImages();
+    mount(
+      <StatefulLightbox navigationIndices={[0, 1, 2]} onSelect={cy.stub()} />,
+    );
+    cy.get<HTMLImageElement>('img[alt="First test photo"]').then(($image) => {
+      cy.stub($image.get(0), "decode").resolves();
+      $image.get(0).dispatchEvent(new Event("load"));
+    });
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+    cy.get('[aria-label="Next image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "2");
+    cy.get('[data-lightbox-loading="true"]').should("be.visible");
+    cy.get('[aria-label="Previous image"]').click();
+    cy.get('[data-lightbox-photo-number="true"]').should("have.text", "1");
+    cy.get('[data-lightbox-stage="true"]').then(($stage) => {
+      expect($stage.find('[data-lightbox-loading="true"]')).to.have.length(1);
+    });
+    cy.get('[data-lightbox-loading="true"]').should(
+      "have.class",
+      "image-skeleton",
+    );
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-0");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "true",
+    );
+    cy.get<HTMLImageElement>('img[alt="First test photo"]').then(($image) => {
+      cy.stub($image.get(0), "decode").resolves();
+      $image.get(0).dispatchEvent(new Event("load"));
+    });
+    cy.get('[data-lightbox-loading="true"]').should("not.exist");
+    cy.get('img[alt="First test photo"]').should("have.class", "opacity-100");
+    cy.get('[data-lightbox-stage="true"]').should(
+      "have.attr",
+      "aria-busy",
+      "false",
+    );
+  });
+
   it("stops shimmer on a failed cold image and still allows navigation", () => {
     mount(
       <StatefulLightbox navigationIndices={[0, 1, 2]} onSelect={cy.stub()} />,
