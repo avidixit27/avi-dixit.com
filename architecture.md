@@ -255,6 +255,8 @@ Refresh uses Meta's unversioned refresh endpoint only while the long-lived token
 
 This narrow decision does not select a platform for publishing, inquiries or commerce. Runtime implementation, paid upgrades and deployment require separate approval. Validate Free-tier resource usage, live renewal/recovery and cache-removal behavior before rollout; fixture tests are not production evidence.
 
+All selected-snapshot writes use one serialized publication owner, including retries. Durable desired/published revisions preserve pending work; a stale completion cannot clear a newer revision. Verify ordering across restart before rollout rather than relying on a post-write generation check. Private pause/resume persists scheduling state, prevents late alarm rearming and requires quiescence before credential replacement. An in-flight successful renewal must persist safely before pause is complete; pause does not claim to cancel remote requests. These recovery controls preserve stored catalog, selection and credentials.
+
 The frontend should be prepared for integration through these principles:
 
 - Agree explicit request, response, and error contracts before implementing a real integration. Decide the contract format and ownership with the backend project.

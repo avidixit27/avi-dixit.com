@@ -83,6 +83,10 @@ The Durable Object owns mutable Meta credentials. Do not use KV for token state 
 
 **Required concurrency invariant:** one object owns mutations, but asynchronous external requests can still interleave. Persist credential/run generations and reject stale completion after owner recovery. Duplicate alarms must not repeat an already completed renewal or replace a newer snapshot. Keep network requests bounded; do not block the entire traversal with a 30-second concurrency callback. Tests must cover renewal races, duplicate delivery, interrupted persistence and reauthorization before release. KV is never a distributed lock.
 
+Publication has one serialized writer across sync, selection and retry paths. Persist the desired revision; allow only one unresolved KV write, then reread and publish the latest desired state. Superseded queued work is skipped, and stale completion never clears a newer pending revision. Restart recovery reconciles durable desired/published revisions. Verify unresolved-write behavior across restart before rollout; post-write generation checks alone cannot prevent an older remote write from overwriting a newer snapshot. Eventual KV propagation remains distinct from write ordering.
+
+Private pause/resume belongs to the same owner. Persist disabled scheduling before removing the alarm; all alarm/retry/rearm paths honor it. Pause reports quiescence separately from the request being accepted. Let an in-flight renewal persist its returned credential before reporting paused; recovery/bootstrap requires quiescence. Preserve stored state, expose scheduling/publication state only in private status, and make resume idempotent. Test paused restarts and late completions so they cannot silently restart the schedule.
+
 ### Full-feed synchronization
 
 - Synchronize every accessible top-level feed media object, including image posts, reels or other video posts, and carousel containers. Stories and transient live media are outside the feed.
