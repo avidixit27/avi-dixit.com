@@ -10,6 +10,12 @@
 | PR base        | `main`                                                                                       |
 | PR             | Not opened                                                                                   |
 
+## Superseded — 2026-10-10
+
+The user approved retiring this original discovery-index proposal. The approved full-screen portfolio selector replaced it during Plan 019 and shipped in [PR #57](https://github.com/avidixit27/avi-dixit.com/pull/57), with delivery refinements in [PR #59](https://github.com/avidixit27/avi-dixit.com/pull/59). This ticket was not implemented as written and is not new implementation authorization.
+
+The remaining sections preserve the original proposal as historical context. In particular, its text-only discovery, route-agnostic footer, and Home-only résumé requirements do not describe the approved current application. Do not build a second discovery index to satisfy this retired ticket.
+
 ## Outcome
 
 Every portfolio ends with a restrained, destination-grouped index that lets visitors continue through the body of work without covering photographs or expanding primary navigation. The index uses Inter typography, clear current-project context, the established underline language, and subtle entrance motion. It contains no thumbnails or eager media and remains part of each portfolio's closing content rather than the global copyright footer.
@@ -134,4 +140,4 @@ After the user approves the output and requests no further visual edits:
 
 ## Implementation record
 
-Not started. On implementation, record the final destination groups and order, current-state wording, Home closing composition, motion values, bundle delta, network evidence, visual approval, checks, limitations, and PR link.
+Superseded by user decision on 2026-10-10. The replacement selector lives in shared navigation, excludes Home from its portfolio list, and previews approved cover photographs. Secondary portfolios have résumé links. The replacement shipped through PRs #57 and #59; their evidence belongs to Plans 019 and 022 rather than this original acceptance checklist.
