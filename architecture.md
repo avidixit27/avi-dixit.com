@@ -245,7 +245,15 @@ Keep media transformation and URL ownership at the build/catalog boundary. Compo
 
 **Open:** backend language, framework, database, authentication, hosting, deployment, and repository location. A separate backend repository is explicitly permitted.
 
-Go, Python/FastAPI, AWS, S3, DynamoDB, PostgreSQL, Lambda, and Cognito were discussed as possibilities. None is a requirement or a settled architecture decision. Instagram import is an optional future investigation, not a dependency of the public portfolio.
+Go, Python/FastAPI, AWS, S3, DynamoDB, PostgreSQL, Lambda, and Cognito were discussed as possibilities. None is a requirement or a settled general backend decision. Instagram is supplemental, not a dependency of the curated portfolio.
+
+### Narrow Instagram integration — agreed direction, not implemented
+
+The owner selected Instagram Login for one owned Professional account with only `instagram_business_basic`. Private profile/media reads verified Graph API v26.0. One SQLite-backed Cloudflare Durable Object will own the renewable credential, complete source catalog, explicit whole-post selection and six-hour alarm. It publishes only approved posts to a public-feed KV snapshot; newly discovered posts stay hidden. A same-origin read-only endpoint reads that snapshot without visitor-triggered Meta calls. Initial selection uses a private local command; a dashboard is a later task using the same operations, with separately approved browser authentication.
+
+Refresh uses Meta's unversioned refresh endpoint only while the long-lived token is unexpired and at least 24 hours old. Renew when fewer than 14 days remain, persist the returned token and expiry derived from `expires_in`, and track data-access expiry separately. No credential belongs in browser code, public responses, KV, command arguments or logs. One object does not serialize external fetch completion automatically: reject stale run/credential generations and make duplicate alarms safe. Retain the last complete snapshot on failure; missing selection never publishes all posts.
+
+This narrow decision does not select a platform for publishing, inquiries or commerce. Runtime implementation, paid upgrades and deployment require separate approval. Validate Free-tier resource usage, live renewal/recovery and cache-removal behavior before rollout; fixture tests are not production evidence.
 
 The frontend should be prepared for integration through these principles:
 

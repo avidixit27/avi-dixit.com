@@ -23,6 +23,7 @@ The ticket is the source of truth for execution. Keep it current when repository
 2. **Start:** confirm authorization and prerequisites, create the planned branch from its recorded base, and change the index status to `In progress`.
 3. **Execute:** follow the ticket, keep acceptance criteria and the implementation record current, and mark the ticket `Blocked` in the index when a recorded dependency prevents progress.
 4. **Complete:** satisfy the definition of done, link the PR and verification evidence, change the status to `Completed`, and move the row to a completed section after merge.
+5. **Supersede:** when the user replaces a ticket's outcome, record the decision and replacement links, mark it `Superseded`, and retain the original scope as history rather than claiming it was completed.
 
 ## Completed
 
@@ -48,22 +49,30 @@ Completed tickets are historical records. Read one only when its outcome or impl
 | [016 — Brand assets and photo delivery](016-brand-and-photo-payload-optimization.md)                   | Completed | `perf/brand-and-photo-payloads`           | [#45](https://github.com/avidixit27/avi-dixit.com/pull/45)                                                                             |
 | [017 — Feature availability controls](017-feature-availability-controls.md)                            | Completed | `feat/feature-availability-controls`      | [#47](https://github.com/avidixit27/avi-dixit.com/pull/47)                                                                             |
 | [018 — Portfolio statement and résumé](018-portfolio-statement-and-resume.md)                          | Completed | `feat/portfolio-statement-resume`         | [#50](https://github.com/avidixit27/avi-dixit.com/pull/50)                                                                             |
+| [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md)           | Completed | `feat/portfolio-collection-routes`        | [#57](https://github.com/avidixit27/avi-dixit.com/pull/57)                                                                             |
+| [022 — Slow-network portfolio performance](022-slow-network-portfolio-performance.md)                  | Completed | `fix/eager-portfolio-covers`              | [#59](https://github.com/avidixit27/avi-dixit.com/pull/59)                                                                             |
 
-| [019 — Portfolio collection models and routes](019-portfolio-collection-model-and-routes.md) | Completed | `feat/portfolio-collection-routes` | [#57](https://github.com/avidixit27/avi-dixit.com/pull/57) |
+## Superseded
+
+| Plan                                                                | Status     | Replacement                                                                                   |
+| ------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------- |
+| [020 — Portfolio discovery index](020-portfolio-discovery-index.md) | Superseded | Approved full-screen selector in Plan 019 / PR #57; delivery refinements in Plan 022 / PR #59 |
 
 ## Current sequence
 
-Plan 019 reached `main` through PR #57. Plan 022 is the approved performance continuation in PR #59; Plans 020–021 remain planned.
+Plans 019 and 022 reached `main` through PRs #57 and #59. Plan 020 is superseded by the approved selector. Plan 021 is in progress for documentation and feasibility only; no backend or infrastructure implementation is authorized.
 
-| Plan                                                                                  | Status      | Planned branch                          | Depends on  |
-| ------------------------------------------------------------------------------------- | ----------- | --------------------------------------- | ----------- |
-| [020 — Portfolio discovery index](020-portfolio-discovery-index.md)                   | Planned     | `feat/portfolio-discovery-index`        | 019         |
-| [021 — Instagram feed sync architecture](021-instagram-feed-sync-architecture.md)     | Planned     | `docs/instagram-feed-sync-architecture` | 017         |
-| [022 — Slow-network portfolio performance](022-slow-network-portfolio-performance.md) | In progress | `fix/eager-portfolio-covers`            | 019; PR #59 |
+| Plan                                                                                          | Status      | Planned branch                          | Depends on                                 |
+| --------------------------------------------------------------------------------------------- | ----------- | --------------------------------------- | ------------------------------------------ |
+| [021 — Instagram feed sync architecture](021-instagram-feed-sync-architecture.md)             | In progress | `docs/instagram-feed-sync-architecture` | 017                                        |
+| [023 — Instagram owner dashboard](023-instagram-owner-dashboard.md)                           | Planned     | `feat/instagram-owner-dashboard`        | 021 and a tested local-command integration |
+| [024 — Private Instagram sync and local curation](024-instagram-local-command-integration.md) | Planned     | `feat/instagram-local-sync`             | 021 approval and merge                     |
+
+Plan 024 is approved and the owner completed the implementation model handoff; execution waits for the prerequisite documentation merge and a clean updated checkout. Plan 023 is the owner-approved dashboard follow-up, not authorization to begin coding; it depends on Plan 024 being implemented and tested. Ticket numbering does not override dependencies. Plan 021 has verified Meta v26.0 reads and least-privilege scope; documentation review/merge remains pending. Live renewal and Cloudflare resource measurements are release gates in Plan 024.
 
 Plans 015–017 are approved. Plan 015 completed CT and related E2E reliability fixes, execution evidence, diagnostics, and a measured container evaluation; required container adoption was deferred. Former plans 015–020 were renumbered to 016–021 at the user's request.
 
-Plan 016 combines the existing brand-asset work with AVIF → WebP → JPEG portfolio delivery, the format order selected by the user. It retains four widths per format, aligns lightbox preloading with display selection, and requires measured quality, transfer, decode, build, and storage evidence. Plan 017 then adds approved feature availability controls, initially hiding Shop while keeping Contact released and both features available in explicit all-features development and tests. Plan 018 adds the Home statement and résumé; Plans 019–020 add collections and discovery. Plan 021 can begin after Plan 017, but authorizes architecture and feasibility evidence only.
+Plan 016 combines the existing brand-asset work with AVIF → WebP → JPEG portfolio delivery, the format order selected by the user. It retains four widths per format, aligns lightbox preloading with display selection, and requires measured quality, transfer, decode, build, and storage evidence. Plan 017 adds approved feature availability controls, initially hiding Shop while keeping Contact released and both features available in explicit all-features development and tests. Plan 018 adds the Home statement and résumé; Plan 019 adds collections and the approved selector, replacing Plan 020's discovery proposal. Plan 021 depends on Plan 017 and authorizes architecture and feasibility evidence only.
 
 ### Stack management
 
@@ -77,7 +86,7 @@ Plan 016 combines the existing brand-asset work with AVIF → WebP → JPEG port
 ## Maintaining plans
 
 - Use stable numeric identifiers and descriptive filenames in this flat directory. A short type field inside each plan is sufficient; do not add feature/chore/fix subdirectories now.
-- Use `Planned`, `In progress`, `Blocked`, or `Completed` in this index. Record a blocker with the affected plan when applicable.
+- Use `Planned`, `In progress`, `Blocked`, `Completed`, or `Superseded` in this index. Record a blocker or replacement decision with the affected plan when applicable.
 - Keep the ticket independently actionable and aligned with the repository. Do not copy enduring architecture rules into every ticket; link the relevant section and state how it applies.
 - When a plan is completed, move its index row into a completed section, retain the file, and link the final PR and verification evidence. Completed plans are historical context, not mandatory reading or new instructions.
 - A routine small fix does not need a plan file. Create plans for work that benefits from explicit scope, dependencies, or acceptance criteria.

@@ -257,3 +257,7 @@ Chrome production-preview verification used cache disabled, 1.6 Mbps download, 1
 ### Approved regression checkpoint
 
 The user approved pushing the queued-intent, hidden slideshow rotation and lazy-wrapper readiness fixes, their regression tests, and the accompanying architecture/execution safeguards to the existing PR #59 branch. The preceding local and visual verification remains the evidence for this checkpoint; publication does not require duplicating the complete CI matrix locally. Plan 022 remains in progress pending PR review and merge.
+
+### Completion
+
+The user approved the final visual result and push. PR #59 received a final review with no actionable findings, and all frontend, security and Workers build checks passed at `1b1409e`. At the user's request, PR #59 was squash-merged into `main` on 2026-10-10 as `18ce7c3`. Plan 022 is completed. Physical-device and other-browser performance measurements remain follow-ups, not claims established by the local Chrome verification.
